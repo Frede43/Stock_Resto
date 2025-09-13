@@ -1,0 +1,253 @@
+{
+  "date": "2025-08-18",
+  "summary": {
+    "total_sales": 5,
+    "total_revenue": 73300.0,
+    "total_cost": 48600.0,
+    "total_profit": 24700.0,
+    "profit_margin": 33.69713506139154
+  },
+  "categories": {
+    "Alcools": {
+      "name": "Alcools",
+      "total_revenue": 35000.0,
+      "total_cost": 25000.0,
+      "total_profit": 10000.0,
+      "total_quantity": 1,
+      "total_initial_stock": 6,
+      "total_final_stock": 5,
+      "profit_margin": 28.571428571428573,
+      "products": [
+        {
+          "name": "Whisky Johnnie Walker",
+          "initial_stock": 6,
+          "incoming": 0,
+          "quantity_sold": 1,
+          "final_stock": 5,
+          "unit_price": 35000.0,
+          "cost_price": 25000.0,
+          "revenue": 35000.0,
+          "total_cost": 25000.0,
+          "profit": 10000.0,
+          "profit_margin": 28.571428571428573
+        }
+      ]
+    },
+    "Entrées": {
+      "name": "Entrées",
+      "total_revenue": 4200.0,
+      "total_cost": 2200.0,
+      "total_profit": 2000.0,
+      "total_quantity": 3,
+      "total_initial_stock": 45,
+      "total_final_stock": 42,
+      "profit_margin": 47.61904761904762,
+      "products": [
+        {
+          "name": "Soupe du jour",
+          "initial_stock": 20,
+          "incoming": 0,
+          "quantity_sold": 1,
+          "final_stock": 19,
+          "unit_price": 1200.0,
+          "cost_price": 600.0,
+          "revenue": 1200.0,
+          "total_cost": 600.0,
+          "profit": 600.0,
+          "profit_margin": 50.0
+        },
+        {
+          "name": "Salade mixte",
+          "initial_stock": 25,
+          "incoming": 0,
+          "quantity_sold": 2,
+          "final_stock": 23,
+          "unit_price": 1500.0,
+          "cost_price": 800.0,
+          "revenue": 3000.0,
+          "total_cost": 1600.0,
+          "profit": 1400.0,
+          "profit_margin": 46.666666666666664
+        }
+      ]
+    },
+    "Plats principaux": {
+      "name": "Plats principaux",
+      "total_revenue": 14800.0,
+      "total_cost": 9500.0,
+      "total_profit": 5300.0,
+      "total_quantity": 4,
+      "total_initial_stock": 65,
+      "total_final_stock": 61,
+      "profit_margin": 35.810810810810814,
+      "products": [
+        {
+          "name": "Poisson grillé",
+          "initial_stock": 15,
+          "incoming": 0,
+          "quantity_sold": 2,
+          "final_stock": 13,
+          "unit_price": 4500.0,
+          "cost_price": 3000.0,
+          "revenue": 9000.0,
+          "total_cost": 6000.0,
+          "profit": 3000.0,
+          "profit_margin": 33.333333333333336
+        },
+        {
+          "name": "Brochettes de bœuf",
+          "initial_stock": 20,
+          "incoming": 0,
+          "quantity_sold": 1,
+          "final_stock": 19,
+          "unit_price": 4000.0,
+          "cost_price": 2500.0,
+          "revenue": 4000.0,
+          "total_cost": 2500.0,
+          "profit": 1500.0,
+          "profit_margin": 37.5
+        },
+        {
+          "name": "Riz pilaf",
+          "initial_stock": 30,
+          "incoming": 0,
+          "quantity_sold": 1,
+          "final_stock": 29,
+          "unit_price": 1800.0,
+          "cost_price": 1000.0,
+          "revenue": 1800.0,
+          "total_cost": 1000.0,
+          "profit": 800.0,
+          "profit_margin": 44.44444444444444
+        }
+      ]
+    },
+    "Sodas": {
+      "name": "Sodas",
+      "total_revenue": 4900.0,
+      "total_cost": 2800.0,
+      "total_profit": 2100.0,
+      "total_quantity": 7,
+      "total_initial_stock": 144,
+      "total_final_stock": 137,
+      "profit_margin": 42.857142857142854,
+      "products": [
+        {
+          "name": "Sprite 33cl",
+          "initial_stock": 36,
+          "incoming": 0,
+          "quantity_sold": 2,
+          "final_stock": 34,
+          "unit_price": 700.0,
+          "cost_price": 400.0,
+          "revenue": 1400.0,
+          "total_cost": 800.0,
+          "profit": 600.0,
+          "profit_margin": 42.857142857142854
+        },
+        {
+          "name": "Fanta Orange 33cl",
+          "initial_stock": 48,
+          "incoming": 0,
+          "quantity_sold": 2,
+          "final_stock": 46,
+          "unit_price": 700.0,
+          "cost_price": 400.0,
+          "revenue": 1400.0,
+          "total_cost": 800.0,
+          "profit": 600.0,
+          "profit_margin": 42.857142857142854
+        },
+        {
+          "name": "Coca-Cola 33cl",
+          "initial_stock": 60,
+          "incoming": 0,
+          "quantity_sold": 3,
+          "final_stock": 57,
+          "unit_price": 700.0,
+          "cost_price": 400.0,
+          "revenue": 2100.0,
+          "total_cost": 1200.0,
+          "profit": 900.0,
+          "profit_margin": 42.857142857142854
+        }
+      ]
+    },
+    "Bières": {
+      "name": "Bières",
+      "total_revenue": 12600.0,
+      "total_cost": 8200.0,
+      "total_profit": 4400.0,
+      "total_quantity": 11,
+      "total_initial_stock": 108,
+      "total_final_stock": 97,
+      "profit_margin": 34.92063492063492,
+      "products": [
+        {
+          "name": "Amstel 33cl",
+          "initial_stock": 24,
+          "incoming": 0,
+          "quantity_sold": 4,
+          "final_stock": 20,
+          "unit_price": 1000.0,
+          "cost_price": 600.0,
+          "revenue": 4000.0,
+          "total_cost": 2400.0,
+          "profit": 1600.0,
+          "profit_margin": 40.0
+        },
+        {
+          "name": "Mutzig 65cl",
+          "initial_stock": 36,
+          "incoming": 0,
+          "quantity_sold": 2,
+          "final_stock": 34,
+          "unit_price": 1300.0,
+          "cost_price": 900.0,
+          "revenue": 2600.0,
+          "total_cost": 1800.0,
+          "profit": 800.0,
+          "profit_margin": 30.76923076923077
+        },
+        {
+          "name": "Primus 65cl",
+          "initial_stock": 48,
+          "incoming": 0,
+          "quantity_sold": 5,
+          "final_stock": 43,
+          "unit_price": 1200.0,
+          "cost_price": 800.0,
+          "revenue": 6000.0,
+          "total_cost": 4000.0,
+          "profit": 2000.0,
+          "profit_margin": 33.333333333333336
+        }
+      ]
+    },
+    "Snacks": {
+      "name": "Snacks",
+      "total_revenue": 1800.0,
+      "total_cost": 900.0,
+      "total_profit": 900.0,
+      "total_quantity": 3,
+      "total_initial_stock": 40,
+      "total_final_stock": 37,
+      "profit_margin": 50.0,
+      "products": [
+        {
+          "name": "Cacahuètes grillées",
+          "initial_stock": 40,
+          "incoming": 0,
+          "quantity_sold": 3,
+          "final_stock": 37,
+          "unit_price": 600.0,
+          "cost_price": 300.0,
+          "revenue": 1800.0,
+          "total_cost": 900.0,
+          "profit": 900.0,
+          "profit_margin": 50.0
+        }
+      ]
+    }
+  }
+}

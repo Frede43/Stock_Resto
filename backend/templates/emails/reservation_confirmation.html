@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de réservation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+            font-size: 28px;
+        }
+        .reservation-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .value {
+            color: #007bff;
+            font-weight: 500;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .contact-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ restaurant_name }}</h1>
+            <p>Confirmation de votre réservation</p>
+        </div>
+
+        <p>Bonjour <strong>{{ reservation.customer_name }}</strong>,</p>
+
+        <p>Nous avons le plaisir de confirmer votre réservation chez {{ restaurant_name }}.</p>
+
+        <div class="reservation-details">
+            <h3 style="margin-top: 0; color: #007bff;">Détails de votre réservation</h3>
+            
+            <div class="detail-row">
+                <span class="label">Date :</span>
+                <span class="value">{{ reservation.reservation_date|date:"l d F Y" }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Heure :</span>
+                <span class="value">{{ reservation.reservation_time|time:"H:i" }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Nombre de personnes :</span>
+                <span class="value">{{ reservation.party_size }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Table :</span>
+                <span class="value">Table {{ reservation.table.number }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Emplacement :</span>
+                <span class="value">{{ reservation.table.location }}</span>
+            </div>
+            
+            {% if reservation.special_requests %}
+            <div class="detail-row">
+                <span class="label">Demandes spéciales :</span>
+                <span class="value">{{ reservation.special_requests }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if restaurant_phone or restaurant_address %}
+        <div class="contact-info">
+            <h4 style="margin-top: 0; color: #007bff;">Informations de contact</h4>
+            {% if restaurant_phone %}
+            <p><strong>Téléphone :</strong> {{ restaurant_phone }}</p>
+            {% endif %}
+            {% if restaurant_address %}
+            <p><strong>Adresse :</strong> {{ restaurant_address }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <p><strong>Important :</strong></p>
+        <ul>
+            <li>Merci d'arriver à l'heure pour profiter pleinement de votre expérience</li>
+            <li>En cas d'empêchement, merci de nous prévenir au moins 2 heures à l'avance</li>
+            <li>Votre table sera libérée après 15 minutes de retard sans préavis</li>
+        </ul>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <p>Nous avons hâte de vous accueillir !</p>
+            <p style="font-size: 18px; color: #007bff;"><strong>L'équipe {{ restaurant_name }}</strong></p>
+        </div>
+
+        <div class="footer">
+            <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+            <p>© {{ "now"|date:"Y" }} {{ restaurant_name }}. Tous droits réservés.</p>
+        </div>
+    </div>
+</body>
+</html>

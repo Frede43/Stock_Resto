@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-08-24T20:44:28.318949",
+  "success": false,
+  "results": [
+    {
+      "test": "Frontend Accessible",
+      "success": false,
+      "message": "Erreur: HTTPConnectionPool(host='localhost', port=5173): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000021326F54AD0>: Failed to establish a new connection: [WinError 10061] Aucune connexion n’a pu être établie car l’ordinateur cible l’a expressément refusée'))",
+      "timestamp": "2025-08-24T20:44:02.810862"
+    },
+    {
+      "test": "API API Root",
+      "success": true,
+      "message": "HTTP 400 (attendu)",
+      "timestamp": "2025-08-24T20:44:05.873103"
+    },
+    {
+      "test": "API Products API",
+      "success": true,
+      "message": "HTTP 200 (attendu)",
+      "timestamp": "2025-08-24T20:44:07.937389"
+    },
+    {
+      "test": "API Sales API",
+      "success": true,
+      "message": "HTTP 401 (attendu)",
+      "timestamp": "2025-08-24T20:44:10.219737"
+    },
+    {
+      "test": "Workflow Création",
+      "success": true,
+      "message": "Workflow complet de création d'utilisateur réussi",
+      "timestamp": "2025-08-24T20:44:28.315157"
+    }
+  ]
+}

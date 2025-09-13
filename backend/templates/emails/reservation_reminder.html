@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rappel de réservation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #ffc107;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #ffc107;
+            margin: 0;
+            font-size: 28px;
+        }
+        .reminder-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid #ffc107;
+        }
+        .reminder-box h2 {
+            color: #856404;
+            margin: 0 0 15px 0;
+            font-size: 24px;
+        }
+        .time-highlight {
+            font-size: 32px;
+            font-weight: bold;
+            color: #dc3545;
+            margin: 15px 0;
+        }
+        .reservation-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .value {
+            color: #ffc107;
+            font-weight: 500;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .contact-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">⏰</div>
+            <h1>{{ restaurant_name }}</h1>
+            <p>Rappel de votre réservation</p>
+        </div>
+
+        <div class="reminder-box">
+            <h2>Votre réservation approche !</h2>
+            <div class="time-highlight">Dans 1 heure</div>
+            <p style="margin: 0; font-size: 18px; color: #856404;">
+                <strong>{{ reservation.reservation_time|time:"H:i" }}</strong>
+            </p>
+        </div>
+
+        <p>Bonjour <strong>{{ reservation.customer_name }}</strong>,</p>
+
+        <p>Nous vous rappelons que votre réservation chez {{ restaurant_name }} est prévue dans <strong>1 heure</strong>.</p>
+
+        <div class="reservation-summary">
+            <h3 style="margin-top: 0; color: #ffc107;">Récapitulatif de votre réservation</h3>
+            
+            <div class="detail-row">
+                <span class="label">Date :</span>
+                <span class="value">{{ reservation.reservation_date|date:"l d F Y" }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Heure :</span>
+                <span class="value">{{ reservation.reservation_time|time:"H:i" }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Nombre de personnes :</span>
+                <span class="value">{{ reservation.party_size }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="label">Table :</span>
+                <span class="value">Table {{ reservation.table.number }} ({{ reservation.table.location }})</span>
+            </div>
+        </div>
+
+        {% if restaurant_phone %}
+        <div class="contact-box">
+            <p style="margin: 0; font-size: 16px;">
+                <strong>Besoin de nous contacter ?</strong><br>
+                📞 {{ restaurant_phone }}
+            </p>
+        </div>
+        {% endif %}
+
+        <div style="background: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+            <p style="margin: 0;"><strong>💡 Conseils :</strong></p>
+            <ul style="margin: 10px 0 0 0;">
+                <li>Prévoyez d'arriver 5-10 minutes en avance</li>
+                <li>N'hésitez pas à nous appeler si vous avez du retard</li>
+                <li>Votre table vous attend !</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="font-size: 18px; color: #28a745;">
+                <strong>À très bientôt chez {{ restaurant_name }} ! 🍽️</strong>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+            <p>© {{ "now"|date:"Y" }} {{ restaurant_name }}. Tous droits réservés.</p>
+        </div>
+    </div>
+</body>
+</html>

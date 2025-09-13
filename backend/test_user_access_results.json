@@ -1,0 +1,72 @@
+{
+  "timestamp": "2025-08-24T20:34:37.263408",
+  "success": true,
+  "results": [
+    {
+      "test": "Création Admin",
+      "success": true,
+      "message": "Utilisateur admin créé: test_admin",
+      "timestamp": "2025-08-24T20:34:15.762623"
+    },
+    {
+      "test": "Connexion Admin",
+      "success": true,
+      "message": "Admin connecté avec succès",
+      "timestamp": "2025-08-24T20:34:18.869201"
+    },
+    {
+      "test": "Création Permissions",
+      "success": true,
+      "message": "5 permissions créées/vérifiées",
+      "timestamp": "2025-08-24T20:34:18.875217"
+    },
+    {
+      "test": "Debug Permissions",
+      "success": true,
+      "message": "Type de données: <class 'dict'>, Contenu: {'role': 'admin', 'permissions': {'products_view': True, 'sales_create': True, 'sales_history_view': True, 'sales_view': True, 'tables_view': True}, 'permissions_by_category': {'products': [{'code': '",
+      "timestamp": "2025-08-24T20:34:20.971416"
+    },
+    {
+      "test": "Création Caissier API",
+      "success": true,
+      "message": "Caissier créé via API: test_cashier",
+      "timestamp": "2025-08-24T20:34:24.038638"
+    },
+    {
+      "test": "Connexion Caissier",
+      "success": true,
+      "message": "Caissier connecté: Caissier Test (Rôle: cashier)",
+      "timestamp": "2025-08-24T20:34:26.952353"
+    },
+    {
+      "test": "Accès Produits",
+      "success": true,
+      "message": "Accès autorisé comme attendu (HTTP 200)",
+      "timestamp": "2025-08-24T20:34:29.024304"
+    },
+    {
+      "test": "Accès Ventes",
+      "success": true,
+      "message": "Accès autorisé comme attendu (HTTP 200)",
+      "timestamp": "2025-08-24T20:34:31.094438"
+    },
+    {
+      "test": "Accès Tables",
+      "success": true,
+      "message": "Accès autorisé comme attendu (HTTP 200)",
+      "timestamp": "2025-08-24T20:34:33.167999"
+    },
+    {
+      "test": "Accès Utilisateurs",
+      "success": true,
+      "message": "Accès refusé comme attendu (HTTP 403)",
+      "timestamp": "2025-08-24T20:34:35.229204"
+    },
+    {
+      "test": "Accès Fournisseurs",
+      "success": true,
+      "message": "Accès refusé comme attendu (HTTP 403)",
+      "timestamp": "2025-08-24T20:34:37.260589"
+    }
+  ]
+}

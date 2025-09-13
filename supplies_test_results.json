@@ -1,0 +1,95 @@
+{
+  "timestamp": "2025-08-27T18:32:02.927167",
+  "summary": {
+    "total": 14,
+    "passed": 11,
+    "failed": 3,
+    "success_rate": 78.57142857142857
+  },
+  "tests": [
+    {
+      "test": "Connectivité Backend",
+      "success": true,
+      "message": "Backend accessible sur http://localhost:8000",
+      "timestamp": "2025-08-27T18:31:55.047742"
+    },
+    {
+      "test": "Authentification Admin",
+      "success": false,
+      "message": "Échec connexion: 400",
+      "timestamp": "2025-08-27T18:31:59.111100"
+    },
+    {
+      "test": "API Liste des approvisionnements",
+      "success": true,
+      "message": "Récupéré 2 éléments",
+      "timestamp": "2025-08-27T18:31:59.148343"
+    },
+    {
+      "test": "API Liste des fournisseurs",
+      "success": true,
+      "message": "Récupéré 1 éléments",
+      "timestamp": "2025-08-27T18:31:59.164196"
+    },
+    {
+      "test": "API Liste des produits",
+      "success": true,
+      "message": "Récupéré 6 éléments",
+      "timestamp": "2025-08-27T18:31:59.243432"
+    },
+    {
+      "test": "Permissions - Non authentifié",
+      "success": false,
+      "message": "Accès autorisé (Status: 200)",
+      "timestamp": "2025-08-27T18:32:01.627571"
+    },
+    {
+      "test": "Permissions - Admin",
+      "success": true,
+      "message": "Accès autorisé pour admin",
+      "timestamp": "2025-08-27T18:32:01.647243"
+    },
+    {
+      "test": "Cohérence Données",
+      "success": true,
+      "message": "Structure correcte pour 2 approvisionnements",
+      "timestamp": "2025-08-27T18:32:01.667310"
+    },
+    {
+      "test": "Hook useSupplies",
+      "success": true,
+      "message": "Données disponibles: 2 éléments",
+      "timestamp": "2025-08-27T18:32:01.692484"
+    },
+    {
+      "test": "Hook useSuppliers",
+      "success": true,
+      "message": "Données disponibles: 1 éléments",
+      "timestamp": "2025-08-27T18:32:01.706049"
+    },
+    {
+      "test": "Hook useProducts",
+      "success": true,
+      "message": "Données disponibles: 6 éléments",
+      "timestamp": "2025-08-27T18:32:01.758974"
+    },
+    {
+      "test": "Création Approvisionnement",
+      "success": true,
+      "message": "ID: 3",
+      "timestamp": "2025-08-27T18:32:01.864296"
+    },
+    {
+      "test": "Validation Approvisionnement",
+      "success": false,
+      "message": "Status: 400",
+      "timestamp": "2025-08-27T18:32:01.881282"
+    },
+    {
+      "test": "Rejet Approvisionnement",
+      "success": true,
+      "message": "Statut mis à jour vers 'rejected'",
+      "timestamp": "2025-08-27T18:32:02.908964"
+    }
+  ]
+}

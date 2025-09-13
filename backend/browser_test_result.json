@@ -1,0 +1,131 @@
+{
+  "date": "2025-08-18",
+  "summary": {
+    "total_sales": 5,
+    "total_revenue": 73300.0,
+    "total_profit": 0,
+    "profit_margin": 0
+  },
+  "categories": {
+    "Alcools": {
+      "name": "Alcools",
+      "total_revenue": 35000.0,
+      "total_quantity": 1,
+      "products": [
+        {
+          "name": "Whisky Johnnie Walker",
+          "quantity_sold": 1,
+          "revenue": 35000.0,
+          "unit_price": 35000.0
+        }
+      ]
+    },
+    "Entrées": {
+      "name": "Entrées",
+      "total_revenue": 4200.0,
+      "total_quantity": 3,
+      "products": [
+        {
+          "name": "Soupe du jour",
+          "quantity_sold": 1,
+          "revenue": 1200.0,
+          "unit_price": 1200.0
+        },
+        {
+          "name": "Salade mixte",
+          "quantity_sold": 2,
+          "revenue": 3000.0,
+          "unit_price": 1500.0
+        }
+      ]
+    },
+    "Plats principaux": {
+      "name": "Plats principaux",
+      "total_revenue": 14800.0,
+      "total_quantity": 4,
+      "products": [
+        {
+          "name": "Poisson grillé",
+          "quantity_sold": 2,
+          "revenue": 9000.0,
+          "unit_price": 4500.0
+        },
+        {
+          "name": "Brochettes de bœuf",
+          "quantity_sold": 1,
+          "revenue": 4000.0,
+          "unit_price": 4000.0
+        },
+        {
+          "name": "Riz pilaf",
+          "quantity_sold": 1,
+          "revenue": 1800.0,
+          "unit_price": 1800.0
+        }
+      ]
+    },
+    "Sodas": {
+      "name": "Sodas",
+      "total_revenue": 4900.0,
+      "total_quantity": 7,
+      "products": [
+        {
+          "name": "Sprite 33cl",
+          "quantity_sold": 2,
+          "revenue": 1400.0,
+          "unit_price": 700.0
+        },
+        {
+          "name": "Fanta Orange 33cl",
+          "quantity_sold": 2,
+          "revenue": 1400.0,
+          "unit_price": 700.0
+        },
+        {
+          "name": "Coca-Cola 33cl",
+          "quantity_sold": 3,
+          "revenue": 2100.0,
+          "unit_price": 700.0
+        }
+      ]
+    },
+    "Bières": {
+      "name": "Bières",
+      "total_revenue": 12600.0,
+      "total_quantity": 11,
+      "products": [
+        {
+          "name": "Amstel 33cl",
+          "quantity_sold": 4,
+          "revenue": 4000.0,
+          "unit_price": 1000.0
+        },
+        {
+          "name": "Mutzig 65cl",
+          "quantity_sold": 2,
+          "revenue": 2600.0,
+          "unit_price": 1300.0
+        },
+        {
+          "name": "Primus 65cl",
+          "quantity_sold": 5,
+          "revenue": 6000.0,
+          "unit_price": 1200.0
+        }
+      ]
+    },
+    "Snacks": {
+      "name": "Snacks",
+      "total_revenue": 1800.0,
+      "total_quantity": 3,
+      "products": [
+        {
+          "name": "Cacahuètes grillées",
+          "quantity_sold": 3,
+          "revenue": 1800.0,
+          "unit_price": 600.0
+        }
+      ]
+    }
+  }
+}
