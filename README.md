@@ -260,4 +260,4 @@ Pour toute question ou problème :
 
 ---
 
-**Développé avec ❤️ pour la communauté des restaurateurs**
+**Développé avec AlainDev pour la communauté des restaurateurs**
