@@ -28,27 +28,11 @@ export default function Login() {
     // Utiliser la fonction login du hook useAuth
     const success = await login(username, password);
     
-    // Redirection manuelle basée sur le rôle après connexion réussie
+    // CORRECTION CROSS-BROWSER: Laisser le hook useAuth gérer la redirection
+    // Ne pas faire de redirection manuelle ici pour éviter les conflits
     if (success) {
-      // Récupérer les données utilisateur les plus récentes
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        console.log('🔑 Login.tsx - Redirection directe pour rôle:', userData.role);
-        
-        // Redirection immédiate basée sur le rôle
-        if (userData.role === 'admin') {
-          navigate('/');
-        } else if (userData.role === 'cashier') {
-          navigate('/');
-        } else if (userData.role === 'manager') {
-          navigate('/');
-        } else if (userData.role === 'server') {
-          navigate('/');
-        } else {
-          navigate('/');
-        }
-      }
+      console.log('🔑 Login.tsx - Connexion réussie, redirection gérée par useAuth');
+      // La redirection est maintenant gérée dans use-auth.tsx avec retry logic
     }
   };
 

@@ -144,11 +144,18 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 @permission_classes([permissions.AllowAny])
 def login_view(request):
     """
-    Vue pour l'authentification
+    Endpoint de connexion pour les utilisateurs
     """
+    # DEBUG: Log de la requête reçue
+    print(f"🔐 LOGIN REQUEST - Method: {request.method}")
+    print(f"🔐 LOGIN REQUEST - Headers: {dict(request.headers)}")
+    print(f"🔐 LOGIN REQUEST - Data: {request.data}")
+    print(f"🔐 LOGIN REQUEST - Content-Type: {request.content_type}")
+    
     serializer = UserLoginSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.validated_data['user']
+        print(f"✅ LOGIN SUCCESS - User: {user.username}, Role: {user.role}")
 
         # Générer les tokens JWT
         refresh = RefreshToken.for_user(user)
@@ -177,8 +184,9 @@ def login_view(request):
                 'refresh': str(refresh)
             }
         }, status=status.HTTP_200_OK)
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        print(f"❌ LOGIN FAILED - Serializer errors: {serializer.errors}")
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['POST'])

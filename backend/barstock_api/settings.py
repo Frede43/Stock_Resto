@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -189,9 +188,9 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-# CORS Configuration - Permissive pour développement
-CORS_ALLOW_ALL_ORIGINS = True  # Permissif pour le développement
-CORS_ALLOW_CREDENTIALS = True
+# CORS settings - Configuration permissive pour le développement
+CORS_ALLOW_ALL_ORIGINS = True  # Autorise toutes les origines en développement
+CORS_ALLOW_CREDENTIALS = True  # Permet l'envoi de cookies et credentials
 
 # Configuration alternative plus restrictive (commentée)
 # CORS_ALLOWED_ORIGINS = [

@@ -4,7 +4,7 @@
  */
 
 // Configuration de base
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 // Types pour l'authentification
 interface LoginCredentials {
@@ -67,7 +67,7 @@ class ApiService {
     localStorage.removeItem('user');
   }
 
-  // Méthode générique pour les requêtes HTTP
+  // Méthode générique pour les requêtes HTTP avec support cross-browser
   private async request<T>(
     endpoint: string,
     options: RequestInit & { params?: any } = {}
@@ -93,8 +93,11 @@ class ApiService {
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
         ...options.headers,
       },
+      credentials: 'include',
       ...options,
     };
 
@@ -181,9 +184,40 @@ class ApiService {
   // Authentification
   async login(credentials: { username: string; password: string }): Promise<AuthResponse> {
     try {
-      console.log('🔐 Tentative de connexion:', { username: credentials.username, api_url: API_BASE_URL });
+      console.log('🔐 Tentative de connexion:', { 
+        username: credentials.username, 
+        api_url: API_BASE_URL,
+        full_url: `${API_BASE_URL}/accounts/login/`,
+        userAgent: navigator.userAgent
+      });
 
-      const response = await this.post<AuthResponse>('/accounts/login/', credentials);
+      // DEBUG: Log des données envoyées
+      console.log('📤 Données envoyées:', credentials);
+
+      // Approche alternative pour Chrome - requête directe avec fetch
+      const url = `${API_BASE_URL}/accounts/login/`;
+      const fetchResponse = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      console.log('📡 Réponse fetch directe:', {
+        status: fetchResponse.status,
+        statusText: fetchResponse.statusText,
+        headers: Object.fromEntries(fetchResponse.headers.entries())
+      });
+
+      if (!fetchResponse.ok) {
+        const errorText = await fetchResponse.text();
+        console.error('❌ Erreur fetch:', errorText);
+        throw new Error(`HTTP ${fetchResponse.status}: ${errorText}`);
+      }
+
+      const response = await fetchResponse.json() as AuthResponse;
 
       console.log('✅ Réponse de connexion reçue:', {
         user: response.user?.username,
@@ -204,11 +238,21 @@ class ApiService {
 
       return response;
     } catch (error: any) {
-      console.error('❌ Erreur de connexion:', error);
+      console.error('❌ Erreur de connexion complète:', {
+        message: error.message,
+        stack: error.stack,
+        url: `${API_BASE_URL}/accounts/login/`,
+        credentials: { username: credentials.username, password: '***' }
+      });
 
       // Améliorer le message d'erreur
       if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
         throw new Error('Impossible de se connecter au serveur. Vérifiez que le backend Django est démarré sur http://127.0.0.1:8000');
+      }
+
+      // Si erreur 401, c'est un problème d'authentification
+      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        throw new Error('Nom d\'utilisateur ou mot de passe incorrect');
       }
 
       throw error;

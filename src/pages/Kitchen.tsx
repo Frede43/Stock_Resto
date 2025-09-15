@@ -1031,7 +1031,9 @@ export default function Kitchen() {
                                   ingredients: newRecipe.ingredients.map(ing => ({
                                     ingredient: ing.ingredient,
                                     quantite_utilisee_par_plat: parseFloat(ing.quantite_utilisee_par_plat),
-                                    unite: ing.unite
+                                    unite: ing.unite,
+                                    is_optional: false,
+                                    notes: ""
                                   }))
                                 };
 
@@ -1066,12 +1068,26 @@ export default function Kitchen() {
                                   });
                                   setShowAddRecipe(false);
 
-                                  // Refresh data
+                                  // Refresh data - recettes ET ingrédients
                                   refetchRecipes();
+                                  refetchIngredients(); // Rafraîchir aussi les ingrédients
 
                                 } else {
                                   const errorData = await response.json().catch(() => ({}));
-                                  console.error("Erreur API:", errorData);
+                                  
+                                  // Logs forcés avec alert pour debug
+                                  const debugInfo = {
+                                    status: response.status,
+                                    errorData: errorData,
+                                    sentData: recipeData
+                                  };
+                                  
+                                  console.log("🚨 DEBUG RECIPE ERROR 🚨");
+                                  console.log("ErrorData:", errorData);
+                                  console.log("SentData:", recipeData);
+                                  
+                                  // Alert pour forcer l'affichage
+                                  alert(`ERREUR 400: ${JSON.stringify(errorData, null, 2)}`);
                                   
                                   // Afficher des messages d'erreur plus détaillés
                                   let errorMessage = "Erreur lors de la création de la recette";

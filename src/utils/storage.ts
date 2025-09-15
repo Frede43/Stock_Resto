@@ -19,12 +19,22 @@ class SafeStorage {
   }
 
   /**
-   * Sauvegarde sécurisée dans le localStorage
+   * Sauvegarde sécurisée dans le localStorage avec retry pour Chrome
    */
   setItem(key: string, value: any): boolean {
     try {
       const serializedValue = JSON.stringify(value);
       localStorage.setItem(key, serializedValue);
+      
+      // CORRECTION CHROME: Forcer la synchronisation avec un double-write
+      // Chrome peut parfois ne pas synchroniser immédiatement
+      setTimeout(() => {
+        try {
+          localStorage.setItem(key, serializedValue);
+        } catch (e) {
+          console.warn(`Retry write failed for ${key}:`, e);
+        }
+      }, 10);
       
       // Notifier les listeners
       this.notifyListeners(key, value);

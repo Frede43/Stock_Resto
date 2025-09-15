@@ -12,8 +12,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('DB_NAME', 'barstock_prod'),
-        'USER': os.environ.get('DB_USER', 'barstock_user'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'votre_mot_de_passe'),
+        'USER': os.environ.get('DB_USER', ''),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'lumenge4242'),
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '5432'),
     }

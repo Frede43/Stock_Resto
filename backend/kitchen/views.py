@@ -491,7 +491,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """Assigner l'utilisateur créateur"""
+        print(f"🔧 CREATE RECIPE - Data received: {self.request.data}")
+        print(f"🔧 CREATE RECIPE - Serializer valid: {serializer.is_valid()}")
+        if not serializer.is_valid():
+            print(f"❌ CREATE RECIPE - Validation errors: {serializer.errors}")
         serializer.save(created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        """Logs pour la modification de recette"""
+        print(f"🔧 UPDATE RECIPE - Data received: {self.request.data}")
+        print(f"🔧 UPDATE RECIPE - Serializer valid: {serializer.is_valid()}")
+        if not serializer.is_valid():
+            print(f"❌ UPDATE RECIPE - Validation errors: {serializer.errors}")
+        serializer.save()
 
     @action(detail=True, methods=['post'])
     def check_availability(self, request, pk=None):

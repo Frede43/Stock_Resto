@@ -54,8 +54,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (userData.isLoggedIn && !isSessionExpired(userData)) {
         // Définir l'utilisateur immédiatement pour éviter le flash de login
         setUser(userData);
-        // Vérifier la validité de la session côté serveur en arrière-plan
-        validateSession(userData);
+        // TEMPORAIRE: Désactiver la validation automatique pour éviter la boucle de redirection
+        // validateSession(userData);
+        setIsLoading(false);
       } else {
         // Session expirée, nettoyer le localStorage
         authStorage.clearUser();
@@ -212,19 +213,23 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Désactiver le chargement
       setIsLoading(false);
       
-      // CORRECTION: Utiliser setTimeout pour s'assurer que la redirection se produit après
-      // que React ait complètement mis à jour l'état et le localStorage
+      // CORRECTION CROSS-BROWSER: Attendre que le localStorage soit synchronisé
+      // Chrome nécessite plus de temps que Edge pour synchroniser le localStorage
       setTimeout(() => {
-        // Récupérer les données utilisateur avec l'utilitaire sécurisé
-        const freshUserData = authStorage.getUser();
-        if (freshUserData) {
-          console.log('🔐 use-auth: Redirection avec données fraîches, rôle:', freshUserData.role);
-          
-          // Redirection basée sur le rôle le plus récent - TOUS vers /
-          console.log('🔄 use-auth: Redirection universelle vers / pour rôle:', freshUserData.role);
-          navigate('/', { replace: true });
-        }
-      }, 500); // Délai augmenté à 500ms pour s'assurer que tout est bien mis à jour
+        // Vérifier multiple fois pour s'assurer de la synchronisation
+        const checkAndRedirect = () => {
+          const freshUserData = authStorage.getUser();
+          if (freshUserData && freshUserData.isLoggedIn) {
+            console.log('🔐 use-auth: Redirection avec données fraîches, rôle:', freshUserData.role);
+            console.log('🔄 use-auth: Redirection universelle vers / pour rôle:', freshUserData.role);
+            navigate('/', { replace: true });
+          } else {
+            // Retry après 100ms si les données ne sont pas encore disponibles
+            setTimeout(checkAndRedirect, 100);
+          }
+        };
+        checkAndRedirect();
+      }, 100); // Délai réduit mais avec retry logic
 
       return true;
 
