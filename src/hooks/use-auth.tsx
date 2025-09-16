@@ -10,6 +10,8 @@ interface User {
   first_name: string;
   last_name: string;
   phone?: string;
+  address?: string;
+  avatar?: string;
   role: 'admin' | 'manager' | 'server' | 'cashier';
   is_active: boolean;
   is_staff: boolean;
@@ -65,6 +67,34 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       setIsLoading(false);
     }
+
+    // Écouter les changements de données utilisateur pour la synchronisation en temps réel
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'user') {
+        if (event.newValue) {
+          try {
+            const updatedUserData = JSON.parse(event.newValue);
+            if (updatedUserData.isLoggedIn && !isSessionExpired(updatedUserData)) {
+              setUser(updatedUserData);
+            } else {
+              setUser(null);
+            }
+          } catch (error) {
+            console.error('Erreur lors de la synchronisation des données utilisateur:', error);
+          }
+        } else {
+          setUser(null);
+        }
+      }
+    };
+
+    // Ajouter l'écouteur d'événements storage
+    window.addEventListener('storage', handleStorageChange);
+
+    // Nettoyer l'écouteur lors du démontage
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Vérification périodique de l'activité et de la session

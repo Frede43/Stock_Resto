@@ -36,6 +36,13 @@ class User(AbstractUser):
         verbose_name='Adresse'
     )
 
+    avatar = models.ImageField(
+        upload_to='avatars/',
+        blank=True,
+        null=True,
+        verbose_name='Photo de profil'
+    )
+
     is_active_session = models.BooleanField(
         default=False,
         verbose_name='Session active'

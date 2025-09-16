@@ -25,7 +25,8 @@ import {
   EyeOff,
   RefreshCw,
   Settings,
-  Bell
+  Bell,
+  X
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserActivities, useUpdateProfile, useChangePassword, useUpdatePreferences, useUserProfile, useUserActivity } from "@/hooks/use-api";
@@ -51,7 +52,7 @@ export default function Profile() {
   });
   
   const [preferences, setPreferences] = useState({
-    language: "fr",
+    language: "en",
     timezone: "Africa/Bujumbura",
     notifications: true,
     theme: "light"
@@ -62,6 +63,10 @@ export default function Profile() {
     new: false,
     confirm: false
   });
+
+  // État pour la gestion de la photo de profil
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   
   // Hooks API
   const { data: userProfileData, isLoading: profileLoading } = useUserProfile();
@@ -73,12 +78,13 @@ export default function Profile() {
   // Charger les données utilisateur
   useEffect(() => {
     if (userProfileData) {
+      const userData = userProfileData as any;
       setProfileData({
-        first_name: userProfileData.first_name || "",
-        last_name: userProfileData.last_name || "",
-        email: userProfileData.email || "",
-        phone: userProfileData.phone || "",
-        address: userProfileData.address || ""
+        first_name: userData.first_name || "",
+        last_name: userData.last_name || "",
+        email: userData.email || "",
+        phone: userData.phone || "",
+        address: userData.address || ""
       });
     }
   }, [userProfileData]);
@@ -161,6 +167,76 @@ export default function Profile() {
   const handleUpdatePreferences = () => {
     updatePreferencesMutation.mutate(preferences);
   };
+
+  // Fonction pour gérer le changement de photo de profil
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Vérifier le type de fichier
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Erreur",
+          description: "Veuillez sélectionner un fichier image valide",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Vérifier la taille du fichier (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Erreur",
+          description: "La taille du fichier ne doit pas dépasser 5MB",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setAvatarFile(file);
+      
+      // Créer un aperçu
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Fonction pour uploader la photo de profil
+  const handleUploadAvatar = () => {
+    if (!avatarFile) return;
+
+    const formData = new FormData();
+    formData.append('avatar', avatarFile);
+
+    updateProfileMutation.mutate(formData, {
+      onSuccess: (updatedUser) => {
+        toast({
+          title: "Succès",
+          description: "Photo de profil mise à jour avec succès",
+          variant: "default"
+        });
+        setAvatarFile(null);
+        setAvatarPreview(null);
+        
+        // Pas besoin de recharger, les données sont déjà mises à jour
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Erreur",
+          description: error?.response?.data?.message || "Erreur lors de la mise à jour de la photo",
+          variant: "destructive"
+        });
+      }
+    });
+  };
+
+  // Fonction pour annuler la sélection d'avatar
+  const handleCancelAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
   
   const getRoleDisplay = (role: string) => {
     const roleMap = {
@@ -197,56 +273,106 @@ export default function Profile() {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-surface flex">
-      <Sidebar />
+    <div className="min-h-screen bg-gradient-surface flex flex-col md:flex-row">
+      <div className="md:hidden">
+        <Sidebar />
+      </div>
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         <Header />
         
-        <main className="flex-1 p-6 space-y-6">
+        <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6 overflow-x-hidden">
           {/* Header avec informations utilisateur */}
-          <div className="flex items-center space-x-6">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={user?.avatar} />
-              <AvatarFallback className="text-2xl">
-                {user?.first_name?.[0]}{user?.last_name?.[0]}
-              </AvatarFallback>
-            </Avatar>
+          <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <div className="relative">
+              <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
+                <AvatarImage src={avatarPreview || user?.avatar} />
+                <AvatarFallback className="text-xl sm:text-2xl">
+                  {user?.first_name?.[0]}{user?.last_name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              {avatarPreview && (
+                <div className="absolute -top-2 -right-2">
+                  <Button
+                    size="sm"
+                    onClick={handleUploadAvatar}
+                    className="h-8 w-8 rounded-full p-0"
+                    disabled={updateProfileMutation.isPending}
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
             
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-foreground">
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                 {user?.first_name} {user?.last_name}
               </h1>
-              <p className="text-muted-foreground mb-2">{user?.email}</p>
-              <Badge className={roleInfo.color}>
-                {roleInfo.icon} {roleInfo.label}
+              <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+                {user?.email}
+              </p>
+              <Badge variant="secondary" className="mt-2">
+                {user?.role}
               </Badge>
             </div>
             
-            <Button variant="outline" className="gap-2">
-              <Camera className="h-4 w-4" />
-              Changer la photo
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+                id="avatar-upload"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById('avatar-upload')?.click()}
+                className="gap-2 w-full sm:w-auto"
+              >
+                <Camera className="h-4 w-4" />
+                Changer la photo
+              </Button>
+              {avatarPreview && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancelAvatar}
+                  className="gap-2 w-full sm:w-auto"
+                >
+                  <X className="h-4 w-4" />
+                  Annuler
+                </Button>
+              )}
+            </div>
           </div>
           
           {/* Onglets */}
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="profile" className="gap-2">
-                <User className="h-4 w-4" />
-                Profil
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+              <TabsTrigger value="profile" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+                <User className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Profil</span>
+                <span className="sm:hidden">Info</span>
               </TabsTrigger>
-              <TabsTrigger value="security" className="gap-2">
-                <Lock className="h-4 w-4" />
-                Sécurité
+              <TabsTrigger value="security" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Lock className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Sécurité</span>
+                <span className="sm:hidden">Sécu</span>
               </TabsTrigger>
-              <TabsTrigger value="preferences" className="gap-2">
-                <Settings className="h-4 w-4" />
-                Préférences
+              <TabsTrigger value="preferences" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Préférences</span>
+                <span className="sm:hidden">Prefs</span>
               </TabsTrigger>
-              <TabsTrigger value="activity" className="gap-2">
-                <Activity className="h-4 w-4" />
-                Activité
+              <TabsTrigger value="activity" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Activité</span>
+                <span className="sm:hidden">Log</span>
               </TabsTrigger>
             </TabsList>
             
@@ -318,7 +444,7 @@ export default function Profile() {
                     <Button 
                       onClick={handleUpdateProfile}
                       disabled={updateProfileMutation.isPending}
-                      className="gap-2"
+                      className="gap-2 w-full sm:w-auto"
                     >
                       {updateProfileMutation.isPending ? (
                         <RefreshCw className="h-4 w-4 animate-spin" />
@@ -553,9 +679,9 @@ export default function Profile() {
                       <RefreshCw className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
                       <p>Chargement de l'activité...</p>
                     </div>
-                  ) : activitiesData?.results && activitiesData.results.length > 0 ? (
+                  ) : (activitiesData as any)?.results && (activitiesData as any).results.length > 0 ? (
                     <div className="space-y-4">
-                      {activitiesData.results.slice(0, 10).map((activity: any, index: number) => (
+                      {(activitiesData as any).results.slice(0, 10).map((activity: any, index: number) => (
                         <div key={index} className="flex items-start space-x-4 p-4 border rounded-lg">
                           <div className="flex-shrink-0">
                             <div className={`p-2 rounded-full ${

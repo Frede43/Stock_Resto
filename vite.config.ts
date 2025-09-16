@@ -9,6 +9,16 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: '192.168.0.193',
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://192.168.0.193:8000',
+        changeOrigin: true,
+      }
+    }
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -23,19 +33,11 @@ export default defineConfig({
       }
     }
   },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8000',
-        changeOrigin: true,
-      }
-    }
-  },
   preview: {
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://192.168.0.193:8000',
         changeOrigin: true,
       }
     }

@@ -69,6 +69,7 @@ urlpatterns = [
     path('api/help/', include('help.urls')),  # Ajout du système d'aide
 ]
 
-# Servir les fichiers media en développement
+# Servir les fichiers media et static en développement
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

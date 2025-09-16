@@ -218,13 +218,17 @@ def profile_view(request):
     Vue pour récupérer et mettre à jour le profil de l'utilisateur connecté
     """
     if request.method == 'GET':
-        serializer = UserProfileSerializer(request.user)
+        serializer = UserProfileSerializer(request.user, context={'request': request})
         return Response(serializer.data)
     
     elif request.method == 'PATCH':
-        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        print(f"🔍 Profile update request: {request.data}")
+        print(f"🔍 Files: {request.FILES}")
+        
+        serializer = UserProfileSerializer(request.user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
+            user = serializer.save()
+            print(f"✅ Profile updated successfully. Avatar: {user.avatar}")
             
             # Enregistrer l'activité
             UserActivity.objects.create(
@@ -233,8 +237,12 @@ def profile_view(request):
                 description='Mise à jour du profil'
             )
             
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Retourner les données avec le contexte pour les URLs complètes
+            response_serializer = UserProfileSerializer(user, context={'request': request})
+            return Response(response_serializer.data)
+        else:
+            print(f"❌ Serializer errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PATCH'])

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -205,7 +205,8 @@ export function Sidebar({ className }: SidebarProps = {}) {
     <TooltipProvider>
       <div className={cn(
         "flex flex-col bg-gradient-to-b from-primary to-primary-glow text-primary-foreground transition-all duration-300 sticky top-0 h-screen",
-        isCollapsed ? "w-16" : "w-64",
+        isCollapsed ? "w-16" : "w-64 md:w-64",
+        "w-full md:w-auto", // Mobile: pleine largeur, Desktop: largeur fixe
         className
       )}>
       {/* Header */}

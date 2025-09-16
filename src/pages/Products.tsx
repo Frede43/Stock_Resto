@@ -18,9 +18,10 @@ import {
   Package,
   DollarSign,
   BarChart3,
-  Loader2
+  Loader2,
+  FolderPlus
 } from "lucide-react";
-import { useProducts, useCreateProduct, useUpdateProduct, useCategories } from "@/hooks/use-api";
+import { useProducts, useCreateProduct, useUpdateProduct, useCategories, useCreateCategory } from "@/hooks/use-api";
 import { Product } from "@/types/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -96,6 +97,7 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showNewProductDialog, setShowNewProductDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showNewCategoryDialog, setShowNewCategoryDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductDisplay | null>(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -106,6 +108,11 @@ export default function Products() {
     minimum_stock: "",
     unit: "piece",
     description: ""
+  });
+  const [newCategory, setNewCategory] = useState({
+    name: "",
+    description: "",
+    category_type: "boissons"
   });
   const { toast } = useToast();
 
@@ -121,9 +128,10 @@ export default function Products() {
   });
 
   // Récupérer les catégories depuis l'API
-  const { data: categoriesData } = useCategories();
+  const { data: categoriesData, refetch: refetchCategories } = useCategories();
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
+  const createCategoryMutation = useCreateCategory();
 
   // Mapper les données de l'API
   const products: ProductDisplay[] = productsData && typeof productsData === 'object' && productsData !== null && 'results' in productsData && Array.isArray(productsData.results)
@@ -232,6 +240,34 @@ export default function Products() {
     }
   };
 
+  const handleCreateCategory = async () => {
+    try {
+      await createCategoryMutation.mutateAsync({
+        name: newCategory.name,
+        description: newCategory.description,
+        category_type: newCategory.category_type
+      });
+      
+      // Reset form
+      setNewCategory({
+        name: "",
+        description: "",
+        category_type: "boissons"
+      });
+      
+      setShowNewCategoryDialog(false);
+      refetchCategories();
+      
+      toast({
+        title: "Succès",
+        description: "Catégorie créée avec succès",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error('Erreur création catégorie:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-surface flex">
       <Sidebar />
@@ -275,7 +311,63 @@ export default function Products() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Catégorie</Label>
+                      <div className="flex items-center justify-between">
+                        <Label>Catégorie</Label>
+                        <Dialog open={showNewCategoryDialog} onOpenChange={setShowNewCategoryDialog}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="gap-1">
+                              <FolderPlus className="h-3 w-3" />
+                              Nouvelle catégorie
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>Nouvelle catégorie</DialogTitle>
+                              <DialogDescription>
+                                Créer une nouvelle catégorie de produit
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Nom de la catégorie</Label>
+                                <Input
+                                  placeholder="Ex: Boissons chaudes"
+                                  value={newCategory.name}
+                                  onChange={(e) => setNewCategory(prev => ({...prev, name: e.target.value}))}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Type de catégorie</Label>
+                                <Select value={newCategory.category_type} onValueChange={(value) => setNewCategory(prev => ({...prev, category_type: value}))}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="boissons">Boissons</SelectItem>
+                                    <SelectItem value="plats">Plats</SelectItem>
+                                    <SelectItem value="snacks">Snacks</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Description (optionnel)</Label>
+                                <Textarea
+                                  placeholder="Description de la catégorie..."
+                                  value={newCategory.description}
+                                  onChange={(e) => setNewCategory(prev => ({...prev, description: e.target.value}))}
+                                />
+                              </div>
+                              <Button 
+                                onClick={handleCreateCategory} 
+                                className="w-full"
+                                disabled={createCategoryMutation.isPending || !newCategory.name}
+                              >
+                                {createCategoryMutation.isPending ? "Création..." : "Créer la catégorie"}
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                       <Select value={newProduct.category} onValueChange={(value) => setNewProduct(prev => ({...prev, category: value}))}>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner une catégorie" />

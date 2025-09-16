@@ -69,6 +69,19 @@ export function useCategories() {
     queryKey: ['categories'],
     queryFn: () => apiService.get('/products/categories/'),
     staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+  });
+}
+
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (categoryData: { name: string; description?: string; category_type: string }) => 
+      apiService.post('/products/categories/', categoryData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
   });
 }
 
@@ -1374,8 +1387,7 @@ export function useServers(params?: { is_active?: boolean }) {
         }
       }) as any;
       return response.results || response;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    }
   });
 }
 
@@ -1385,8 +1397,31 @@ export function useUpdateProfile() {
   
   return useMutation({
     mutationFn: (data: any) => apiService.patch('/accounts/profile/', data),
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
+      // Invalider les requêtes de profil
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      
+      // Mettre à jour les données utilisateur dans le localStorage et le contexte auth
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      if (currentUser && currentUser.isLoggedIn) {
+        const updatedUserData = {
+          ...currentUser,
+          ...(updatedUser && typeof updatedUser === 'object' ? updatedUser : {}),
+          // Préserver les données d'authentification
+          isLoggedIn: currentUser.isLoggedIn,
+          sessionExpiry: currentUser.sessionExpiry,
+          lastActivity: currentUser.lastActivity
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUserData));
+        
+        // Déclencher un événement pour notifier les autres composants
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'user',
+          newValue: JSON.stringify(updatedUserData),
+          oldValue: JSON.stringify(currentUser)
+        }));
+      }
+      
       toast({
         title: "Profil mis à jour",
         description: "Votre profil a été mis à jour avec succès."

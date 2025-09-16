@@ -26,8 +26,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
-    '127.0.0.1',
-    'testserver',  # Pour les tests
+    '192.168.0.193',
+    '*',
 ]
 
 
@@ -112,8 +112,9 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+       'NAME': BASE_DIR / 'db.sqlite3',
+   }
+
 }
 
 # Custom User Model
@@ -154,7 +155,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -329,3 +331,12 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Bujumbura'
+
+"""'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'stock_bar',
+        'USER': 'postgres',
+        'PASSWORD': 'lumenge4242',
+        'HOST': 'localhost',  # ou l'adresse de votre serveur PostgreSQL
+        'PORT': '5432',       # Port par défaut de PostgreSQL
+}"""

@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
-            'role', 'phone', 'address', 'is_active', 'is_active_session',
+            'role', 'phone', 'address', 'avatar', 'is_active', 'is_active_session',
             'last_activity', 'created_at', 'date_joined', 'last_login', 
             'is_staff', 'is_superuser', 'password'
         ]
@@ -117,19 +117,43 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """
-    Serializer pour le profil utilisateur (lecture seule pour certains champs)
+    Serializer pour le profil utilisateur (lecture et mise à jour)
     """
-    
+    avatar = serializers.SerializerMethodField()
     role_display = serializers.CharField(source='get_role_display', read_only=True)
     
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
-            'role', 'role_display', 'phone', 'address', 'is_active_session',
+            'role', 'role_display', 'phone', 'address', 'avatar', 'is_active_session',
             'last_activity', 'created_at'
         ]
         read_only_fields = ['username', 'role', 'last_activity', 'created_at']
+    
+    def get_avatar(self, obj):
+        """Retourne l'URL complète de l'avatar"""
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return None
+    
+    def update(self, instance, validated_data):
+        # Gérer l'upload d'avatar séparément
+        avatar = validated_data.pop('avatar', None)
+        
+        # Mise à jour des autres champs
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Mise à jour de l'avatar si fourni
+        if avatar is not None:
+            instance.avatar = avatar
+        
+        instance.save()
+        return instance
 
 
 class PermissionSerializer(serializers.ModelSerializer):
@@ -175,7 +199,7 @@ class UserWithPermissionsSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
-            'role', 'role_display', 'phone', 'address', 'is_active',
+            'role', 'role_display', 'phone', 'address', 'avatar', 'is_active',
             'is_active_session', 'last_activity', 'created_at',
             'date_joined', 'last_login', 'is_staff', 'is_superuser',
             'password', 'permissions', 'permissions_by_category'
@@ -237,7 +261,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
-            'role', 'phone', 'address', 'is_active', 'password', 'permissions'
+            'role', 'phone', 'address', 'avatar', 'is_active', 'password', 'permissions'
         ]
         read_only_fields = ['id']
 
