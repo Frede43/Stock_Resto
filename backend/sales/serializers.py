@@ -349,8 +349,23 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         sale.subtotal = total_amount
         sale.tax_amount = Decimal('0.00')  # Pas de TVA
         sale.total_amount = total_amount  # Total = Sous-total (pas de TVA)
-        sale.status = 'pending'  # Marquer comme en attente (pas encore payée)
+        sale.status = 'paid'  # Marquer directement comme payée
+        from django.utils import timezone
+        sale.paid_at = timezone.now()
         sale.save()
+        
+        # Mettre à jour le stock immédiatement
+        for item_data in items_data:
+            product = item_data['product']
+            quantity = item_data['quantity']
+            
+            # Décompter le stock
+            if product.current_stock >= quantity:
+                product.current_stock -= quantity
+                product.save()
+                print(f"✅ Stock mis à jour pour {product.name}: -{quantity} (nouveau stock: {product.current_stock})")
+            else:
+                print(f"⚠️ Stock insuffisant pour {product.name}: demandé {quantity}, disponible {product.current_stock}")
 
         # Générer automatiquement la facture
         try:

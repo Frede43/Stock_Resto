@@ -21,7 +21,7 @@ class User(AbstractUser):
         default='server',
         verbose_name='Rôle'
     )
-
+# 
     phone = models.CharField(
         max_length=15,
         validators=[RegexValidator(r'^\+?1?\d{9,15}$')],

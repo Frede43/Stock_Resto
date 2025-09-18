@@ -12,7 +12,7 @@ from datetime import timedelta
 from .models import Ingredient, IngredientMovement, Recipe, RecipeIngredient
 from .serializers import (
     IngredientSerializer, IngredientListSerializer, IngredientMovementSerializer,
-    RecipeSerializer, RecipeListSerializer, RecipeCreateSerializer,
+    RecipeSerializer, RecipeListSerializer, RecipeCreateSerializer, RecipeUpdateSerializer,
     IngredientStockUpdateSerializer
 )
 
@@ -470,6 +470,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Utiliser différents serializers selon l'action"""
         if self.action == 'create':
             return RecipeCreateSerializer
+        elif self.action in ['update', 'partial_update']:
+            return RecipeUpdateSerializer
         elif self.action == 'list':
             return RecipeListSerializer
         return RecipeSerializer

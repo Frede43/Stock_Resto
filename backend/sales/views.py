@@ -121,9 +121,38 @@ class SaleListCreateView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         """Override create pour retourner les données complètes"""
+        print(f"🔍 Données reçues pour création de vente: {request.data}")
+        print(f"🔍 User authentifié: {request.user}")
+        print(f"🔍 Headers: {dict(request.headers)}")
+        
+        # Validation manuelle des données requises
+        required_fields = ['table', 'customer_name', 'server', 'payment_method', 'items']
+        missing_fields = [field for field in required_fields if field not in request.data or not request.data[field]]
+        
+        if missing_fields:
+            error_msg = f"Champs manquants: {', '.join(missing_fields)}"
+            print(f"❌ {error_msg}")
+            return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Vérifier que les items ne sont pas vides
+        if not request.data.get('items') or len(request.data.get('items', [])) == 0:
+            error_msg = "Aucun article dans la vente"
+            print(f"❌ {error_msg}")
+            return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        sale = serializer.save()
+        if not serializer.is_valid():
+            print(f"❌ Erreurs de validation: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            sale = serializer.save()
+            print(f"✅ Vente créée avec succès: {sale.reference}")
+        except Exception as e:
+            print(f"❌ Erreur lors de la création: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Générer automatiquement la facture après la création de la vente
         try:
@@ -761,13 +790,34 @@ def mark_sale_as_paid(request, sale_id):
             {'error': 'Vente non trouvée'},
             status=status.HTTP_404_NOT_FOUND
         )
-    except ValueError as e:
-        return Response(
-            {'error': str(e)},
-            status=status.HTTP_400_BAD_REQUEST
-        )
     except Exception as e:
         return Response(
             {'error': f'Erreur lors du paiement: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@api_view(['GET', 'POST'])
+@permission_classes([permissions.AllowAny])  # Temporaire pour test 
+def test_sales_endpoint(request):
+    """
+    Endpoint de test pour diagnostiquer les problèmes de création de vente
+    """
+    print(f"🧪 TEST ENDPOINT - Méthode: {request.method}")
+    print(f"🧪 Données reçues: {request.data}")
+    print(f"🧪 User: {request.user}")
+    print(f"🧪 Headers: {dict(request.headers)}")
+    
+    if request.method == 'GET':
+        return Response({
+            'message': 'Endpoint de test fonctionnel',
+            'user': str(request.user),
+            'authenticated': request.user.is_authenticated
+        })
+    
+    elif request.method == 'POST':
+        return Response({
+            'message': 'POST reçu avec succès',
+            'data_received': request.data,
+            'user': str(request.user),
+            'authenticated': request.user.is_authenticated
+        })

@@ -52,16 +52,22 @@ class UserListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = User.objects.all()
         
+        # Debug logs
+        print(f"👤 UserListCreateView - User: {self.request.user} (role: {self.request.user.role})")
+        print(f"👤 Query params: {dict(self.request.query_params)}")
+        
         # Filtrer par statut actif si demandé
         is_active = self.request.query_params.get('is_active')
         if is_active is not None:
             is_active_bool = is_active.lower() in ['true', '1', 'yes']
             queryset = queryset.filter(is_active=is_active_bool)
+            print(f"👤 Filtré par is_active={is_active_bool}")
         
         # Filtrer par rôle si demandé
         role = self.request.query_params.get('role')
         if role:
             queryset = queryset.filter(role=role)
+            print(f"👤 Filtré par role={role}")
         
         # Permissions d'accès selon le rôle de l'utilisateur connecté
         if self.request.user.is_admin:
@@ -82,7 +88,10 @@ class UserListCreateView(generics.ListCreateAPIView):
         else:
             # Autres rôles ne voient que leur propre profil
             queryset = queryset.filter(id=self.request.user.id)
-            
+        
+        print(f"👤 Queryset final: {queryset.count()} utilisateurs")
+        [print(f"  - {u.username} ({u.role})") for u in queryset[:5]]
+        
         return queryset
 
     def perform_create(self, serializer):

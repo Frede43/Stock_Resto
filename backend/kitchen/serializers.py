@@ -209,18 +209,134 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
+        
+        print(f"🔧 CREATE RECIPE - Recipe data: {validated_data}")
+        print(f"🔧 CREATE RECIPE - Ingredients data: {ingredients_data}")
 
         # Créer la recette (created_by sera ajouté par perform_create)
         recipe = Recipe.objects.create(**validated_data)
+        print(f"🔧 CREATE RECIPE - Recipe created: {recipe.id} - {recipe.nom_recette}")
         
         # Créer les ingrédients de la recette
+        created_ingredients = []
         for ingredient_data in ingredients_data:
-            RecipeIngredient.objects.create(
+            print(f"🔧 CREATE RECIPE - Creating ingredient: {ingredient_data}")
+            recipe_ingredient = RecipeIngredient.objects.create(
                 recipe=recipe,
                 **ingredient_data
             )
+            created_ingredients.append(recipe_ingredient)
+            print(f"🔧 CREATE RECIPE - Ingredient created: {recipe_ingredient}")
+        
+        print(f"🔧 CREATE RECIPE - Total ingredients created: {len(created_ingredients)}")
+        
+        # Optionnel : Consommer les ingrédients si demandé
+        consume_ingredients = self.context.get('request') and self.context['request'].data.get('consume_ingredients', False)
+        if consume_ingredients:
+            try:
+                print(f"🔧 CREATE RECIPE - Consuming ingredients for recipe preparation")
+                user = self.context['request'].user if self.context.get('request') else None
+                recipe.consume_ingredients(quantity=1, user=user)
+                print(f"🔧 CREATE RECIPE - Ingredients consumed successfully")
+            except Exception as e:
+                print(f"❌ CREATE RECIPE - Error consuming ingredients: {e}")
+                # Ne pas bloquer la création de la recette si la consommation échoue
         
         return recipe
+
+
+class RecipeUpdateSerializer(serializers.ModelSerializer):
+    """Serializer pour mettre à jour des recettes avec ingrédients"""
+    
+    ingredients = RecipeIngredientCreateSerializer(many=True, required=False)
+    
+    class Meta:
+        model = Recipe
+        fields = [
+            'nom_recette', 'description', 'instructions',
+            'temps_preparation', 'portions', 'is_active', 'ingredients'
+        ]
+    
+    def update(self, instance, validated_data):
+        from django.db import transaction
+        
+        print(f"🔧 UPDATE RECIPE - Starting update for recipe {instance.id}: {instance.nom_recette}")
+        print(f"🔧 UPDATE RECIPE - Validated data: {validated_data}")
+        
+        ingredients_data = validated_data.pop('ingredients', [])
+        print(f"🔧 UPDATE RECIPE - Ingredients data: {ingredients_data}")
+        
+        try:
+            with transaction.atomic():
+                # Mettre à jour les champs de la recette
+                for attr, value in validated_data.items():
+                    print(f"🔧 UPDATE RECIPE - Setting {attr} = {value}")
+                    setattr(instance, attr, value)
+                instance.save()
+                print(f"🔧 UPDATE RECIPE - Recipe fields updated successfully")
+                
+                # Si des ingrédients sont fournis, les mettre à jour
+                if ingredients_data:
+                    # Supprimer tous les anciens ingrédients
+                    old_ingredients_count = instance.ingredients.count()
+                    print(f"🔧 UPDATE RECIPE - Found {old_ingredients_count} existing ingredients")
+                    
+                    # Méthode alternative : utiliser bulk_delete pour éviter les problèmes de contraintes
+                    try:
+                        instance.ingredients.all().delete()
+                        print(f"🔧 UPDATE RECIPE - All old ingredients deleted with bulk_delete")
+                    except Exception as delete_error:
+                        print(f"❌ UPDATE RECIPE - Bulk delete failed: {delete_error}")
+                        # Fallback: supprimer un par un
+                        for old_ingredient in instance.ingredients.all():
+                            print(f"🔧 UPDATE RECIPE - Deleting ingredient individually: {old_ingredient}")
+                            old_ingredient.delete()
+                        print(f"🔧 UPDATE RECIPE - All old ingredients deleted individually")
+                    
+                    # Créer les nouveaux ingrédients
+                    created_ingredients = []
+                    for i, ingredient_data in enumerate(ingredients_data):
+                        print(f"🔧 UPDATE RECIPE - Creating ingredient {i+1}/{len(ingredients_data)}: {ingredient_data}")
+                        
+                        # Validation des données avant création
+                        if not ingredient_data.get('ingredient'):
+                            raise ValueError(f"Ingredient ID manquant pour l'ingrédient {i+1}")
+                        if not ingredient_data.get('quantite_utilisee_par_plat'):
+                            raise ValueError(f"Quantité manquante pour l'ingrédient {i+1}")
+                        if not ingredient_data.get('unite'):
+                            raise ValueError(f"Unité manquante pour l'ingrédient {i+1}")
+                        
+                        # Vérifier que l'ingrédient existe
+                        try:
+                            from .models import Ingredient
+                            ingredient_obj = Ingredient.objects.get(id=ingredient_data['ingredient'])
+                            print(f"🔧 UPDATE RECIPE - Ingredient found: {ingredient_obj}")
+                        except Ingredient.DoesNotExist:
+                            raise ValueError(f"Ingrédient avec ID {ingredient_data['ingredient']} n'existe pas")
+                        
+                        recipe_ingredient = RecipeIngredient.objects.create(
+                            recipe=instance,
+                            ingredient=ingredient_obj,
+                            quantite_utilisee_par_plat=ingredient_data['quantite_utilisee_par_plat'],
+                            unite=ingredient_data['unite'],
+                            is_optional=ingredient_data.get('is_optional', False),
+                            notes=ingredient_data.get('notes', '')
+                        )
+                        created_ingredients.append(recipe_ingredient)
+                        print(f"🔧 UPDATE RECIPE - Ingredient created: {recipe_ingredient}")
+                    
+                    print(f"🔧 UPDATE RECIPE - Total new ingredients created: {len(created_ingredients)}")
+                
+                print(f"🔧 UPDATE RECIPE - Recipe update completed successfully")
+            
+        except Exception as e:
+            print(f"❌ UPDATE RECIPE - Error during update: {e}")
+            print(f"❌ UPDATE RECIPE - Error type: {type(e).__name__}")
+            import traceback
+            print(f"❌ UPDATE RECIPE - Traceback: {traceback.format_exc()}")
+            raise e
+        
+        return instance
 
 
 class RecipeListSerializer(serializers.ModelSerializer):

@@ -4,7 +4,7 @@
  */
 
 // Configuration de base
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.0.193:8000/api';
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 // Types pour l'authentification
 interface LoginCredentials {
@@ -68,27 +68,15 @@ class ApiService {
   }
 
   // Méthode générique pour les requêtes HTTP avec support cross-browser
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit & { params?: any } = {}
-  ): Promise<T> {
-    let url = `${this.baseURL}${endpoint}`;
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    let url = `${API_BASE_URL}${endpoint}`;
     
-    // Ajouter les paramètres de requête si fournis
-    if (options.params) {
-      const searchParams = new URLSearchParams();
-      Object.keys(options.params).forEach(key => {
-        if (options.params[key] !== undefined && options.params[key] !== null) {
-          searchParams.append(key, options.params[key].toString());
-        }
-      });
-      if (searchParams.toString()) {
-        url += `?${searchParams.toString()}`;
-      }
-      // Supprimer params des options pour éviter de les passer à fetch
-      const { params, ...fetchOptions } = options;
-      options = fetchOptions;
-    }
+    // Log des requêtes pour le débogage
+    console.log('🚀 Requête API:', {
+      method: options.method || 'GET',
+      url: url,
+      body: options.body ? JSON.parse(options.body as string) : null
+    });
     
     const config: RequestInit = {
       headers: {
@@ -154,7 +142,19 @@ class ApiService {
         this.handleAuthError();
       }
 
-      throw new Error(errorData.message || errorData.error || `HTTP Error: ${response.status}`);
+      console.error('🔍 Détails de l\'erreur API:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData: errorData,
+        url: response.url
+      });
+      
+      // Log détaillé de l'errorData pour le débogage
+      console.error('📋 Contenu errorData:', JSON.stringify(errorData, null, 2));
+      
+      const error = new Error(errorData.message || errorData.error || `HTTP Error: ${response.status}`);
+      (error as any).response = { data: errorData, status: response.status };
+      throw error;
     }
 
     const contentType = response.headers.get('content-type');

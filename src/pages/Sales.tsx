@@ -61,8 +61,9 @@ export default function Sales() {
   const [customerName, setCustomerName] = useState<string>('');
   const [selectedTable, setSelectedTable] = useState<string>('');
   const [selectedServer, setSelectedServer] = useState<string>('');
-  const [showInvoice, setShowInvoice] = useState<boolean>(false);
+  const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState<any>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
@@ -366,6 +367,16 @@ export default function Sales() {
       const selectedServerData = serversData?.find((server: any) => server.id.toString() === selectedServer);
       const serverName = selectedServerData ? `${selectedServerData.first_name} ${selectedServerData.last_name}` : 'Serveur inconnu';
 
+      // Validation des données avant envoi
+      if (!selectedTable || !customerName.trim() || !selectedServer || cart.length === 0) {
+        toast({
+          title: "Erreur de validation",
+          description: "Veuillez remplir tous les champs requis et ajouter au moins un article",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Utiliser l'API de ventes standard avec client, table et serveur
       const saleData = {
         table: parseInt(selectedTable),
@@ -376,14 +387,17 @@ export default function Sales() {
         items: cart.map(item => ({
           product: item.menu_item_id,
           quantity: item.quantity,
-          unit_price: item.price,
           notes: `${item.name}`
         }))
       };
 
+      console.log('🔍 Données de vente à envoyer:', saleData);
+
       // Utiliser le hook de création de vente
       createSaleMutation.mutate(saleData, {
         onSuccess: async (result) => {
+          setShowConfirmation(false); // Fermer le modal de confirmation
+          
           toast({
             title: "Vente réussie !",
             description: `Vente créée pour ${customerName} - Table ${selectedTable}`,
@@ -400,39 +414,33 @@ export default function Sales() {
                 setShowInvoice(true);
               }
             } catch (error) {
-              console.error('Erreur récupération facture:', error);
-              // Fallback: ouvrir dans un nouvel onglet
-              window.open(`http://127.0.0.1:8000${(result as any).invoice_url}?format=html`, '_blank');
+              console.error('Erreur lors de la récupération de la facture:', error);
             }
           }
 
-          // Vider le panier et réinitialiser les champs
+          // Réinitialiser le formulaire
           setCart([]);
           setCustomerName('');
           setSelectedTable('');
           setSelectedServer('');
-          setOrderData(null);
-          refreshProducts();
+          setProcessing(false);
 
-          // Supprimer les paramètres de l'URL
-          window.history.replaceState({}, '', '/sales');
+          // Actualiser les produits pour mettre à jour les stocks
+          refreshProducts();
         },
-        onError: (error: any) => {
-          toast({
-            title: "Erreur de vente",
-            description: error.message || "Erreur lors de la création de la vente",
-            variant: "destructive",
-          });
+        onError: (error) => {
+          console.error('Erreur lors de la création de la vente:', error);
+          setShowConfirmation(false); // Fermer le modal même en cas d'erreur
+          setProcessing(false);
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Erreur",
         description: "Erreur lors du traitement de la vente",
         variant: "destructive",
       });
-    } finally {
       setProcessing(false);
     }
   };
@@ -769,17 +777,12 @@ export default function Sales() {
                         </div>
                         
                         <Button
-                          onClick={processSale}
-                          disabled={processing}
-                          className="w-full"
-                          size="lg"
+                          onClick={() => setShowConfirmation(true)}
+                          disabled={processing || cart.length === 0}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                         >
-                          {processing ? (
-                            <Clock className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                          )}
-                          {processing ? 'Traitement...' : 'Valider la vente'}
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Finaliser la commande ({totalAmount.toLocaleString()} BIF)
                         </Button>
                       </div>
                     </>
@@ -803,6 +806,62 @@ export default function Sales() {
           });
         }}
       />
+
+      {/* Modal de confirmation de vente */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">Confirmer la vente</h2>
+            
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between">
+                <span>Client:</span>
+                <span className="font-medium">{customerName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Table:</span>
+                <span className="font-medium">
+                  {tablesData?.results?.find((t: any) => t.id.toString() === selectedTable)?.number || selectedTable}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Serveur:</span>
+                <span className="font-medium">
+                  {serversData?.find((s: any) => s.id.toString() === selectedServer)?.first_name} {serversData?.find((s: any) => s.id.toString() === selectedServer)?.last_name}
+                </span>
+              </div>
+              <div className="border-t pt-2">
+                <div className="flex justify-between">
+                  <span>Articles:</span>
+                  <span className="font-medium">{cart.length}</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total:</span>
+                  <span>{totalAmount.toLocaleString()} BIF</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowConfirmation(false)}
+                className="flex-1"
+                disabled={processing}
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={processSale}
+                disabled={processing}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                {processing ? "Traitement..." : "Confirmer la vente"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

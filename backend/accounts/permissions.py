@@ -116,12 +116,17 @@ class CanViewSales(permissions.BasePermission):
     Permission pour voir les ventes
     """
     def has_permission(self, request, view):
-        return (
-            request.user and
-            request.user.is_authenticated and
-            (request.user.role in ['admin', 'manager', 'cashier', 'server'] or
-             request.user.has_permission('sales_view'))
+        if not request.user or not request.user.is_authenticated:
+            print(f"❌ CanViewSales: User not authenticated")
+            return False
+        
+        has_perm = (
+            request.user.role in ['admin', 'manager', 'cashier', 'server'] or
+            hasattr(request.user, 'has_permission') and request.user.has_permission('sales_view')
         )
+        
+        print(f"🔐 CanViewSales: User {request.user.username}, Role: {request.user.role}, Has permission: {has_perm}")
+        return has_perm
 
 
 class CanCreateSales(permissions.BasePermission):
@@ -129,12 +134,17 @@ class CanCreateSales(permissions.BasePermission):
     Permission pour créer des ventes
     """
     def has_permission(self, request, view):
-        return (
-            request.user and
-            request.user.is_authenticated and
-            (request.user.role in ['admin', 'manager', 'cashier', 'server'] or
-             request.user.has_permission('sales_create'))
+        if not request.user or not request.user.is_authenticated:
+            print(f"❌ CanCreateSales: User not authenticated")
+            return False
+        
+        has_perm = (
+            request.user.role in ['admin', 'manager', 'cashier', 'server'] or
+            hasattr(request.user, 'has_permission') and request.user.has_permission('sales_create')
         )
+        
+        print(f"🔐 CanCreateSales: User {request.user.username}, Role: {request.user.role}, Has permission: {has_perm}")
+        return has_perm
 
 
 # Décorateurs pour les vues basées sur les fonctions

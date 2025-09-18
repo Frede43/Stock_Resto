@@ -24,9 +24,46 @@ import {
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell } from "recharts";
 
-import { useDailyReport, useDashboardStats } from "@/hooks/use-api";
+import { useDailyReport, useDashboardStats, useSalesReport, useInventoryReport, useFinancialReport } from "@/hooks/use-api";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+
+// Types pour les données de rapports
+interface SalesReportData {
+  stats: {
+    total_sales: number;
+    total_revenue: number;
+    paid_sales: number;
+  };
+  sales_by_hour: Array<{
+    hour: string;
+    sales: number;
+    revenue: number;
+  }>;
+  top_products: Array<{
+    product__name: string;
+    total_quantity: number;
+    total_revenue: number;
+  }>;
+}
+
+interface InventoryReportData {
+  products: Array<{
+    name: string;
+    current_stock: number;
+    stock_initial: number;
+    entries: number;
+    exits: number;
+  }>;
+}
+
+interface FinancialReportData {
+  summary: {
+    total_sales: number;
+    total_revenue: number;
+    average_sale: number;
+  };
+}
 
 // Fonction pour formater la date au format YYYY-MM-DD
 const formatDateForAPI = (date: Date): string => {
@@ -112,33 +149,81 @@ export default function Reports() {
     error: reportError,
     refetch: refetchReport
   } = useDailyReport(startDate);
+
+  // Récupérer les données selon le type de rapport sélectionné
+  const {
+    data: salesReport,
+    isLoading: salesReportLoading,
+    error: salesReportError
+  } = useSalesReport({ 
+    start_date: startDate, 
+    end_date: getEndDate(),
+    period: dateRange 
+  }) as { data: SalesReportData | undefined, isLoading: boolean, error: any };
+
+  const {
+    data: inventoryReport,
+    isLoading: inventoryReportLoading,
+    error: inventoryReportError
+  } = useInventoryReport({ date: startDate }) as { data: InventoryReportData | undefined, isLoading: boolean, error: any };
+
+  const {
+    data: financialReport,
+    isLoading: financialReportLoading,
+    error: financialReportError
+  } = useFinancialReport({ 
+    start_date: startDate, 
+    end_date: getEndDate() 
+  }) as { data: FinancialReportData | undefined, isLoading: boolean, error: any };
   
-  // Préparer les données pour les graphiques avec les vraies données
-  const salesData = dashboardStats?.sales_trend || [];
-
-  // Créer des données de catégories basées sur les produits vendus
-  const categoryData = dashboardStats?.today?.products_sold?.reduce((acc, product) => {
-    const categoryName = product.product__category === 1 ? 'Bières' :
-                        product.product__category === 2 ? 'Boissons' :
-                        product.product__category === 3 ? 'Spiritueux' :
-                        product.product__category === 4 ? 'Plats' :
-                        product.product__category === 5 ? 'Accompagnements' :
-                        product.product__category === 6 ? 'Snacks' : 'Autres';
-
-    const existing = acc.find(item => item.name === categoryName);
-    if (existing) {
-      existing.value += product.revenue;
-    } else {
-      acc.push({
-        name: categoryName,
-        value: product.revenue,
-        color: `#${Math.floor(Math.random()*16777215).toString(16)}`
-      });
+  // Préparer les données pour les graphiques selon le type de rapport
+  const getReportData = () => {
+    switch(reportType) {
+      case 'sales':
+        return salesReport?.stats || (dailyReport as any)?.stats || {};
+      case 'inventory':
+        return inventoryReport?.products || [];
+      case 'financial':
+        return financialReport?.summary || {};
+      default:
+        return dashboardStats || {};
     }
-    return acc;
-  }, []) || [];
+  };
 
-  const expenseData = dashboardStats?.expense_breakdown || [];
+  const reportData = getReportData();
+  
+  // Données pour les graphiques de ventes
+  const salesChartData = salesReport?.sales_by_hour || (dailyReport as any)?.sales_by_hour || [];
+  
+  // Créer des données de catégories dynamiques
+  const categoryData = reportType === 'sales' && salesReport?.top_products ? 
+    salesReport.top_products.map((product: any) => ({
+      name: product.product__name || 'Produit',
+      value: product.total_revenue || 0,
+      color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+    })) : 
+    dashboardStats?.today?.products_sold?.reduce((acc: any[], product: any) => {
+      const categoryName = product.product__category === 1 ? 'Bières' :
+                          product.product__category === 2 ? 'Boissons' :
+                          product.product__category === 3 ? 'Spiritueux' :
+                          product.product__category === 4 ? 'Plats' :
+                          product.product__category === 5 ? 'Accompagnements' :
+                          product.product__category === 6 ? 'Snacks' : 'Autres';
+
+      const existing = acc.find(item => item.name === categoryName);
+      if (existing) {
+        existing.value += product.revenue;
+      } else {
+        acc.push({
+          name: categoryName,
+          value: product.revenue,
+          color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+        });
+      }
+      return acc;
+    }, []) || [];
+
+  const expenseData = (dashboardStats as any)?.expense_breakdown || [];
 
   const handleExport = () => {
     toast({
@@ -376,7 +461,7 @@ export default function Reports() {
                       </CardHeader>
                       <CardContent>
                         <ResponsiveContainer width="100%" height={300}>
-                          <LineChart data={salesData}>
+                          <LineChart data={salesChartData}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="date" />
                             <YAxis />

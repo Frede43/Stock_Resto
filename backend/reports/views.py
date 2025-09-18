@@ -20,6 +20,7 @@ from .excel_generator import ExcelReportGenerator
 from products.models import Product
 from sales.models import Sale, SaleItem
 from expenses.models import Expense
+from inventory.models import StockMovement
 from accounts.permissions import IsAdminOrGerant, IsAuthenticated
 
 class DailyReportListCreateView(generics.ListCreateAPIView):
@@ -527,15 +528,48 @@ def daily_detailed_report(request, date):
             cost = (product.purchase_price or Decimal('0')) * quantity_sold
             profit = revenue - cost
 
-            # Calculer le stock initial approximatif
-            initial_stock = product.current_stock + quantity_sold
+            # Calculer le stock initial réel en utilisant les mouvements de stock
+            # Stock au début de la journée = stock actuel + sorties du jour - entrées du jour
+            movements_today = StockMovement.objects.filter(
+                product=product,
+                created_at__date=report_date
+            )
+            
+            entries_today = movements_today.filter(movement_type='in').aggregate(
+                total=Sum('quantity')
+            )['total'] or 0
+            
+            exits_today = movements_today.filter(movement_type='out').aggregate(
+                total=Sum('quantity')
+            )['total'] or 0
+            
+            adjustments_today = movements_today.filter(movement_type='adjustment').aggregate(
+                total=Sum('quantity')
+            )['total'] or 0
+            
+            # Stock initial = stock actuel - entrées + sorties - ajustements
+            initial_stock = product.current_stock - entries_today + exits_today - adjustments_today
+            
+            # Si pas de mouvements enregistrés, utiliser l'ancienne méthode comme fallback
+            if movements_today.count() == 0:
+                initial_stock = product.current_stock + quantity_sold
+            
+            # Debug logs pour diagnostiquer les problèmes de stock
+            print(f"📦 STOCK DEBUG - {product.name}:")
+            print(f"  - Stock actuel: {product.current_stock}")
+            print(f"  - Entrées aujourd'hui: {entries_today}")
+            print(f"  - Sorties aujourd'hui: {exits_today}")
+            print(f"  - Ajustements aujourd'hui: {adjustments_today}")
+            print(f"  - Quantité vendue aujourd'hui: {quantity_sold}")
+            print(f"  - Stock initial calculé: {initial_stock}")
+            print(f"  - Mouvements trouvés: {movements_today.count()}")
 
             product_data = {
                 'name': product.name,
                 'prix_unitaire': float(product.selling_price or 0),
                 'stock_initial': initial_stock,
-                'stock_entree': 0,  # À calculer avec les approvisionnements
-                'stock_total': initial_stock,
+                'stock_entree': entries_today,  # Utiliser les vraies entrées du jour
+                'stock_total': initial_stock + entries_today,
                 'consommation': quantity_sold,
                 'stock_restant': product.current_stock,
                 'prix_achat': float(product.purchase_price or 0),

@@ -10,11 +10,11 @@ export default defineConfig({
     },
   },
   server: {
-    host: '192.168.0.193',
+    host: 'localhost',
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://192.168.0.193:8000',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
       }
     }
@@ -37,7 +37,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://192.168.0.193:8000',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
       }
     }

@@ -11,4 +11,5 @@ urlpatterns = [
 
     # Vues spécifiques existantes
     path('sales-chart/', views.sales_chart, name='sales-chart'),
+    path('analytics/', views.analytics_data, name='analytics-data'),
 ]

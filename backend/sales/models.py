@@ -1,9 +1,11 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
-from decimal import Decimal
 from django.conf import settings
+from decimal import Decimal
 from datetime import timedelta
+from django.contrib.auth import get_user_model
+from products.models import Product
 
 class Table(models.Model):
     """
@@ -495,8 +497,7 @@ class Sale(models.Model):
             if hasattr(item.product, 'recipe') and item.product.recipe:
                 # Pour les plats avec recette, décompter les ingrédients
                 try:
-                    recipe = item.product.recipe
-                    recipe.consume_ingredients(quantity=item.quantity, user=user)
+                    item.product.recipe.prepare_dish(item.quantity)
                 except Exception as e:
                     raise ValueError(f"Impossible de préparer {item.product.name}: {str(e)}")
             else:
@@ -506,6 +507,29 @@ class Sale(models.Model):
                     item.product.save()
                 else:
                     raise ValueError(f"Stock insuffisant pour {item.product.name}")
+            
+            # Créer un mouvement de stock pour tracer la sortie
+            try:
+                from inventory.models import StockMovement
+                stock_before = item.product.current_stock + item.quantity  # Stock avant la sortie
+                stock_after = item.product.current_stock  # Stock après la sortie
+                
+                StockMovement.objects.create(
+                    product=item.product,
+                    movement_type='out',
+                    reason='sale',
+                    quantity=item.quantity,
+                    stock_before=stock_before,
+                    stock_after=stock_after,
+                    unit_price=item.unit_price,
+                    reference=f"SALE-{self.id}",
+                    notes=f"Vente #{self.id} - {item.product.name}",
+                    user=user if user else self.created_by
+                )
+                print(f" Mouvement de stock créé: {item.product.name} - {item.quantity} sortie(s)")
+            except Exception as e:
+                print(f" Erreur création mouvement de stock: {e}")
+                # Ne pas bloquer la vente si le mouvement échoue
 
         # Marquer comme payé
         self.status = 'paid'

@@ -26,7 +26,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
-    '192.168.0.193',
+    '127.0.0.1',
     '*',
 ]
 
@@ -193,6 +193,12 @@ SIMPLE_JWT = {
 # CORS settings - Configuration permissive pour le développement
 CORS_ALLOW_ALL_ORIGINS = True  # Autorise toutes les origines en développement
 CORS_ALLOW_CREDENTIALS = True  # Permet l'envoi de cookies et credentials
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173", 
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 
 # Configuration alternative plus restrictive (commentée)
 # CORS_ALLOWED_ORIGINS = [
@@ -201,7 +207,7 @@ CORS_ALLOW_CREDENTIALS = True  # Permet l'envoi de cookies et credentials
 #     "http://192.168.43.253:5173",  # Network access
 # ]
 
-# Headers CORS autorisés
+# Headers CORS autorisés - Configuration complète
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -212,6 +218,24 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'cache-control',
+    'pragma',
+    'expires',
+    'if-modified-since',
+    'if-none-match',
+    'x-forwarded-for',
+    'x-forwarded-proto',
+    'x-real-ip',
+]
+
+# Configuration CORS complète
+CORS_PREFLIGHT_MAX_AGE = 86400
+CORS_EXPOSE_HEADERS = [
+    'content-length',
+    'content-type',
+    'cache-control',
+    'expires',
+    'last-modified',
 ]
 
 # Méthodes CORS autorisées

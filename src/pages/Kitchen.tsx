@@ -386,24 +386,78 @@ export default function Kitchen() {
 
   const handleUpdateRecipe = async () => {
     try {
+      // Validation des données avant envoi
+      if (!editRecipeData.nom_recette?.trim()) {
+        toast({
+          title: "Erreur de validation",
+          description: "Le nom de la recette est obligatoire",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!editRecipeData.ingredients || editRecipeData.ingredients.length === 0) {
+        toast({
+          title: "Erreur de validation", 
+          description: "Au moins un ingrédient est requis",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validation des ingrédients
+      for (let i = 0; i < editRecipeData.ingredients.length; i++) {
+        const ing = editRecipeData.ingredients[i];
+        if (!ing.ingredient) {
+          toast({
+            title: "Erreur de validation",
+            description: `Ingrédient ${i + 1}: Sélectionnez un ingrédient`,
+            variant: "destructive",
+          });
+          return;
+        }
+        if (!ing.quantite_utilisee_par_plat || parseFloat(ing.quantite_utilisee_par_plat) <= 0) {
+          toast({
+            title: "Erreur de validation",
+            description: `Ingrédient ${i + 1}: Quantité invalide`,
+            variant: "destructive",
+          });
+          return;
+        }
+        if (!ing.unite) {
+          toast({
+            title: "Erreur de validation",
+            description: `Ingrédient ${i + 1}: Unité manquante`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      const updateData = {
+        nom_recette: editRecipeData.nom_recette.trim(),
+        description: editRecipeData.description || "",
+        instructions: editRecipeData.instructions || "",
+        temps_preparation: parseInt(editRecipeData.temps_preparation) || 0,
+        portions: parseInt(editRecipeData.portions) || 1,
+        ingredients: editRecipeData.ingredients.map(ing => ({
+          ingredient: parseInt(ing.ingredient),
+          quantite_utilisee_par_plat: parseFloat(ing.quantite_utilisee_par_plat),
+          unite: ing.unite,
+          is_optional: false,
+          notes: ""
+        }))
+      };
+
+      console.log("🔧 UPDATE RECIPE - Données envoyées:", JSON.stringify(updateData, null, 2));
+
       const response = await fetch(`http://127.0.0.1:8000/api/kitchen/recipes/${editingRecipe.id}/`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          nom_recette: editRecipeData.nom_recette,
-          description: editRecipeData.description,
-          instructions: editRecipeData.instructions,
-          temps_preparation: parseInt(editRecipeData.temps_preparation) || 0,
-          portions: parseInt(editRecipeData.portions) || 1,
-          ingredients: editRecipeData.ingredients.map(ing => ({
-            ingredient: ing.ingredient,
-            quantite_utilisee_par_plat: ing.quantite_utilisee_par_plat,
-            unite: ing.unite
-          }))
-        })
+        body: JSON.stringify(updateData)
       });
 
       if (response.ok) {
@@ -417,12 +471,19 @@ export default function Kitchen() {
         refetchRecipes();
         refetchKitchen();
       } else {
-        throw new Error('Erreur lors de la modification');
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ UPDATE RECIPE - Error response:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
+        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
+      console.error("❌ UPDATE RECIPE - Exception:", error);
       toast({
         title: "Erreur",
-        description: "Erreur lors de la modification de la recette",
+        description: `Erreur lors de la modification de la recette: ${error.message}`,
         variant: "destructive",
       });
     }
@@ -1028,6 +1089,7 @@ export default function Kitchen() {
                                   instructions: newRecipe.instructions || "",
                                   temps_preparation: parseInt(newRecipe.temps_preparation) || 30,
                                   portions: parseInt(newRecipe.portions) || 1,
+                                  consume_ingredients: true, // ✅ Consommer les ingrédients lors de la création
                                   ingredients: newRecipe.ingredients.map(ing => ({
                                     ingredient: ing.ingredient,
                                     quantite_utilisee_par_plat: parseFloat(ing.quantite_utilisee_par_plat),

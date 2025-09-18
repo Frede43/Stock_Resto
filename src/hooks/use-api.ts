@@ -217,9 +217,27 @@ export function useCreateSale() {
       });
     },
     onError: (error: any) => {
+      console.error('❌ Erreur détaillée de création de vente:', error);
+      
+      let errorMessage = "Erreur lors de l'enregistrement de la vente";
+      
+      if (error.response?.data) {
+        // Erreur de validation Django
+        if (typeof error.response.data === 'object') {
+          const errors = Object.entries(error.response.data)
+            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+            .join('\n');
+          errorMessage = errors;
+        } else if (typeof error.response.data === 'string') {
+          errorMessage = error.response.data;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: "Erreur",
-        description: error.message || "Erreur lors de l'enregistrement de la vente",
+        title: "Erreur de la vente",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -1380,12 +1398,11 @@ export function useServers(params?: { is_active?: boolean }) {
     queryKey: ['servers', params],
     queryFn: async () => {
       // Utiliser l'endpoint des utilisateurs avec filtre sur le rôle server
-      const response = await apiService.get('/accounts/users/', {
-        params: {
-          role: 'server',
-          is_active: params?.is_active ?? true
-        }
-      }) as any;
+      const queryParams = new URLSearchParams({
+        role: 'server',
+        is_active: (params?.is_active ?? true).toString()
+      });
+      const response = await apiService.get(`/accounts/users/?${queryParams}`) as any;
       return response.results || response;
     }
   });
@@ -1486,7 +1503,69 @@ export function useUpdatePreferences() {
 export function useAnalytics(params?: { period?: string }) {
   return useQuery({
     queryKey: ['analytics', params],
-    queryFn: () => apiService.get('/analytics/analytics/', { params }),
+    queryFn: () => {
+      const queryParams = new URLSearchParams();
+      if (params?.period) {
+        queryParams.append('period', params.period);
+      }
+      const url = queryParams.toString() ? `/analytics/analytics/?${queryParams}` : '/analytics/analytics/';
+      return apiService.get(url);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+// Hook pour les rapports de ventes avec période
+export function useSalesReport(params?: { 
+  start_date?: string; 
+  end_date?: string; 
+  period?: string;
+}) {
+  return useQuery({
+    queryKey: ['reports', 'sales', params],
+    queryFn: () => {
+      const queryParams = new URLSearchParams();
+      if (params?.start_date) queryParams.append('start_date', params.start_date);
+      if (params?.end_date) queryParams.append('end_date', params.end_date);
+      if (params?.period) queryParams.append('period', params.period);
+      
+      const url = queryParams.toString() ? `/sales/daily-report/?${queryParams}` : '/sales/daily-report/';
+      return apiService.get(url);
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+}
+
+// Hook pour les rapports d'inventaire
+export function useInventoryReport(params?: { date?: string }) {
+  return useQuery({
+    queryKey: ['reports', 'inventory', params],
+    queryFn: () => {
+      const queryParams = new URLSearchParams();
+      if (params?.date) queryParams.append('date', params.date);
+      
+      const url = queryParams.toString() ? `/reports/daily-detailed-report/${params?.date || 'today'}/?${queryParams}` : '/reports/daily-detailed-report/today/';
+      return apiService.get(url);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+// Hook pour les statistiques financières
+export function useFinancialReport(params?: { 
+  start_date?: string; 
+  end_date?: string;
+}) {
+  return useQuery({
+    queryKey: ['reports', 'financial', params],
+    queryFn: () => {
+      const queryParams = new URLSearchParams();
+      if (params?.start_date) queryParams.append('start_date', params.start_date);
+      if (params?.end_date) queryParams.append('end_date', params.end_date);
+      
+      const url = queryParams.toString() ? `/analytics/analytics/?${queryParams}` : '/analytics/analytics/';
+      return apiService.get(url);
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }

@@ -32,8 +32,10 @@ urlpatterns = [
     path('<int:sale_id>/mark-paid/', views.mark_sale_as_paid, name='mark_sale_as_paid'),
     path('<int:pk>/invoice/', views.generate_invoice, name='generate_invoice'),
 
+    # Test endpoint pour débogage
+    path('test/', views.test_sales_endpoint, name='test_sales'),
+
     # Statistiques et rapports
-    path('statistics/', views.sales_statistics, name='statistics'),
     path('stats/', views.sales_stats, name='sales_stats'),
     path('daily-report/', views.daily_sales_report, name='daily_report'),
 ]
