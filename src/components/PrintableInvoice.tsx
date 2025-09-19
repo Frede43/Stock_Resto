@@ -53,8 +53,54 @@ interface PrintableInvoiceProps {
 export function PrintableInvoice({ isOpen, onClose, invoiceData, onPrint }: PrintableInvoiceProps) {
   if (!invoiceData) return null;
 
+  // Impression automatique dès l'ouverture du modal (optionnel)
+  React.useEffect(() => {
+    if (isOpen && invoiceData) {
+      // Vérifier les paramètres d'impression automatique
+      const autoPrint = localStorage.getItem('auto_print_receipts') === 'true';
+      if (autoPrint) {
+        // Délai pour laisser le modal s'afficher
+        setTimeout(() => {
+          handlePrint();
+        }, 500);
+      }
+    }
+  }, [isOpen, invoiceData]);
+
   const handlePrint = () => {
+    console.log("🖨️ Impression de la facture...");
+    
+    // Vérifier la configuration d'impression
+    const printerName = localStorage.getItem('receipt_printer_name') || 'Imprimante par défaut';
+    const thermalFormat = localStorage.getItem('thermal_format') === 'true';
+    const copies = parseInt(localStorage.getItem('print_copies') || '1');
+    
+    console.log(`🖨️ Configuration d'impression:`, {
+      imprimante: printerName,
+      format: thermalFormat ? 'Thermique 80mm' : 'Standard',
+      copies: copies
+    });
+
+    // Appliquer le style d'impression selon la configuration
+    const printStyle = document.createElement('style');
+    printStyle.textContent = `
+      @media print {
+        .printable-invoice {
+          width: ${thermalFormat ? '80mm' : 'auto'} !important;
+          font-size: ${thermalFormat ? '11px' : '12px'} !important;
+        }
+      }
+    `;
+    document.head.appendChild(printStyle);
+
+    // Lancer l'impression
     window.print();
+    
+    // Nettoyer le style après impression
+    setTimeout(() => {
+      document.head.removeChild(printStyle);
+    }, 1000);
+    
     onPrint();
   };
 

@@ -8,6 +8,8 @@ import {
   Activity, AlertCircle, CheckCircle, Clock, RefreshCw
 } from 'lucide-react';
 import { useMonitoringDashboard, useSystemInfoNew } from '@/hooks/use-api';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { Header } from '@/components/layout/Header';
 
 const getStatusColor = (status: string) => {
   switch (status?.toLowerCase()) {
@@ -38,12 +40,20 @@ export default function Monitoring() {
 
   if (monitoringLoading || systemLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground">Chargement des données de monitoring...</p>
-          </div>
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-y-auto">
+            <div className="container mx-auto p-6">
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+                  <p className="text-muted-foreground">Chargement des données de monitoring...</p>
+                </div>
+              </div>
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -51,37 +61,51 @@ export default function Monitoring() {
 
   if (monitoringError) {
     return (
-      <div className="container mx-auto p-6">
-        <Card className="border-red-200">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Erreur de monitoring</h3>
-            <p className="text-muted-foreground text-center">
-              Impossible de récupérer les données de monitoring
-            </p>
-          </CardContent>
-        </Card>
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-y-auto">
+            <div className="container mx-auto p-6">
+              <Card className="border-red-200">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Erreur de monitoring</h3>
+                  <p className="text-muted-foreground text-center">
+                    Impossible de récupérer les données de monitoring
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
 
-  const monitoring = monitoringData || {};
-  const system = systemInfo || {};
+  // Cast pour éviter les erreurs TypeScript
+  const monitoring = (monitoringData as any) || {};
+  const system = (systemInfo as any) || {};
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Monitoring Système</h1>
-          <p className="text-muted-foreground">
-            Surveillance en temps réel des performances et de la santé du système
-          </p>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Clock className="h-4 w-4" />
-          Dernière mise à jour: {new Date().toLocaleTimeString('fr-FR')}
-        </div>
-      </div>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold">Monitoring Système</h1>
+                <p className="text-muted-foreground">
+                  Surveillance en temps réel des performances et de la santé du système
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                Dernière mise à jour: {new Date().toLocaleTimeString('fr-FR')}
+              </div>
+            </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
@@ -320,6 +344,9 @@ export default function Monitoring() {
           </Card>
         </TabsContent>
       </Tabs>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

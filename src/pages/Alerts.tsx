@@ -9,6 +9,8 @@ import { AlertTriangle, CheckCircle, Archive, Search, Plus } from 'lucide-react'
 import { useAlertsNew, useResolveAlertNew, useArchiveAlertNew, useCreateAlert } from '@/hooks/use-api';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { Header } from '@/components/layout/Header';
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
@@ -78,31 +80,44 @@ export default function Alerts() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Chargement des alertes...</p>
-          </div>
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-y-auto">
+            <div className="container mx-auto p-6">
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Chargement des alertes...</p>
+                </div>
+              </div>
+            </div>
+          </main>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Alertes Système</h1>
-          <p className="text-muted-foreground">
-            Gestion des alertes et notifications en temps réel
-          </p>
-        </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle alerte
-        </Button>
-      </div>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold">Alertes Système</h1>
+                <p className="text-muted-foreground">
+                  Gestion des alertes et notifications en temps réel
+                </p>
+              </div>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Nouvelle alerte
+              </Button>
+            </div>
 
       {/* Filtres */}
       <Card>
@@ -245,6 +260,9 @@ export default function Alerts() {
           )}
         </TabsContent>
       </Tabs>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
