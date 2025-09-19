@@ -38,7 +38,7 @@ export default function Settings() {
   useEffect(() => {
     if (systemSettings) {
       // Cast systemSettings pour éviter les erreurs TypeScript 
-      const settings = systemSettings as any;
+      const settings = systemSettings as any; 
       
       // Initialiser avec les paramètres système et localStorage
       const printingSettings = {
