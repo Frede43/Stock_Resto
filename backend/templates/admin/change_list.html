@@ -1,0 +1,214 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+/* Amélioration des listes de changements */
+.results {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.results table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.results thead th {
+    background: var(--gray-50);
+    color: var(--gray-900);
+    font-weight: 600;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 2px solid var(--gray-200);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.results tbody tr {
+    border-bottom: 1px solid var(--gray-100);
+    transition: background 0.2s ease;
+}
+
+.results tbody tr:hover {
+    background: var(--gray-50);
+}
+
+.results tbody tr:last-child {
+    border-bottom: none;
+}
+
+.results tbody td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+}
+
+.results tbody td a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.results tbody td a:hover {
+    text-decoration: underline;
+}
+
+/* Actions */
+.actions {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+}
+
+.actions select {
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.actions button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.actions button:hover {
+    background: #2563eb;
+}
+
+/* Filtres */
+#changelist-filter {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    padding: 1.5rem;
+}
+
+#changelist-filter h2 {
+    color: var(--gray-900);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+#changelist-filter h3 {
+    color: var(--gray-700);
+    font-weight: 500;
+    margin: 1rem 0 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+#changelist-filter ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#changelist-filter li {
+    margin-bottom: 0.25rem;
+}
+
+#changelist-filter a {
+    color: var(--gray-600);
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: block;
+    transition: all 0.2s ease;
+}
+
+#changelist-filter a:hover {
+    background: var(--gray-100);
+    color: var(--primary-color);
+}
+
+#changelist-filter a.selected {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 500;
+}
+
+/* Recherche */
+#changelist-search {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+}
+
+#changelist-search input[type="text"] {
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
+    width: 300px;
+    margin-right: 0.5rem;
+}
+
+#changelist-search input[type="text"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+#changelist-search input[type="submit"] {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* Pagination */
+.paginator {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-top: 1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    text-align: center;
+}
+
+.paginator a {
+    color: var(--primary-color);
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.25rem;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.paginator a:hover {
+    background: var(--gray-100);
+}
+
+.paginator .this-page {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.25rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+/* Amélioration des formulaires */
+.form-row {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    transition: box-shadow 0.2s ease;
+}
+
+.form-row:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.form-row label {
+    color: var(--gray-700);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.9rem;
+}
+
+.form-row .help {
+    color: var(--gray-600);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+.form-row .errorlist {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    list-style: none;
+    font-size: 0.85rem;
+}
+
+.form-row .errorlist li {
+    margin: 0;
+}
+
+/* Champs de formulaire */
+input[type="text"], input[type="email"], input[type="password"], 
+input[type="number"], input[type="url"], input[type="tel"],
+textarea, select {
+    width: 100%;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus,
+input[type="number"]:focus, input[type="url"]:focus, input[type="tel"]:focus,
+textarea:focus, select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Checkboxes et radio buttons */
+input[type="checkbox"], input[type="radio"] {
+    width: auto;
+    margin-right: 0.5rem;
+    transform: scale(1.2);
+}
+
+/* Fieldsets */
+fieldset {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+fieldset legend {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+/* Inline forms */
+.inline-group {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.inline-group h2 {
+    background: var(--gray-50);
+    color: var(--gray-900);
+    padding: 0.75rem 1rem;
+    margin: -1.5rem -1.5rem 1rem -1.5rem;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    font-size: 1rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.inline-related {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.inline-related h3 {
+    color: var(--gray-700);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Submit row */
+.submit-row {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    text-align: right;
+}
+
+.submit-row input[type="submit"] {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 0.5rem;
+}
+
+.submit-row input[type="submit"]:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.submit-row .default {
+    background: var(--success-color);
+}
+
+.submit-row .default:hover {
+    background: #059669;
+}
+
+.submit-row .deletelink {
+    background: var(--danger-color);
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-block;
+    margin-right: 1rem;
+}
+
+.submit-row .deletelink:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+/* Date et time widgets */
+.datetime input {
+    width: auto;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.calendarbox, .clockbox {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 1rem;
+}
+
+/* File uploads */
+.file-upload {
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--radius);
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.file-upload:hover {
+    border-color: var(--primary-color);
+    background: var(--gray-50);
+}
+
+/* Messages */
+.messagelist {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.messagelist li {
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+}
+
+.messagelist .success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.messagelist .error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.messagelist .warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.messagelist .info {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-row {
+        padding: 1rem;
+    }
+    
+    fieldset {
+        padding: 1rem;
+    }
+    
+    .submit-row {
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .submit-row input[type="submit"],
+    .submit-row .deletelink {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+}
+</style>
+{% endblock %}

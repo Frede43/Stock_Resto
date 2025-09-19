@@ -1,0 +1,478 @@
+{% extends "admin/base_site.html" %}
+{% load static admin_extras %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="{% static 'admin/js/dashboard.js' %}"></script>
+{% endblock %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    
+    <!-- En-tête du dashboard -->
+    <div class="dashboard-header">
+        <h1>📊 Tableau de bord avancé</h1>
+        <p>Vue d'ensemble détaillée de votre activité BarStockWise</p>
+    </div>
+    
+    <!-- Graphiques et métriques avancées -->
+    <div class="advanced-stats">
+        
+        <!-- Ventes récentes -->
+        {% if recent_sales %}
+        <div class="chart-container">
+            <h2>📈 Ventes des 7 derniers jours</h2>
+            <div class="sales-chart">
+                {% for sale in recent_sales %}
+                <div class="chart-bar">
+                    <div class="bar-value" data-value="{{ sale.count }}">
+                        {{ sale.count }}
+                    </div>
+                    <div class="bar-label">{{ sale.created_at__date|date:"d/m" }}</div>
+                    <div class="bar-amount">{{ sale.total|floatformat:2 }}€</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Produits populaires -->
+        {% if top_products %}
+        <div class="popular-products">
+            <h2>🏆 Produits les plus vendus</h2>
+            <div class="products-list">
+                {% for product in top_products %}
+                <div class="product-item">
+                    <div class="product-info">
+                        <h3>{{ product.name }}</h3>
+                        <p>{{ product.sales_count }} vente{{ product.sales_count|pluralize }}</p>
+                    </div>
+                    <div class="product-stats">
+                        <span class="badge">{{ product.current_stock }} en stock</span>
+                        <span class="price">{{ product.price }}€</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Métriques temps réel -->
+        <div class="realtime-metrics">
+            <h2>⚡ Métriques temps réel</h2>
+            <div class="metrics-grid">
+                
+                <div class="metric-card revenue-card">
+                    <div class="metric-icon">💰</div>
+                    <div class="metric-content">
+                        <h3 id="daily-revenue">Calcul...</h3>
+                        <p>Chiffre d'affaires du jour</p>
+                    </div>
+                </div>
+                
+                <div class="metric-card orders-card">
+                    <div class="metric-icon">📦</div>
+                    <div class="metric-content">
+                        <h3 id="pending-orders">Calcul...</h3>
+                        <p>Commandes en attente</p>
+                    </div>
+                </div>
+                
+                <div class="metric-card stock-card">
+                    <div class="metric-icon">⚠️</div>
+                    <div class="metric-content">
+                        <h3 id="low-stock">Calcul...</h3>
+                        <p>Produits en rupture</p>
+                    </div>
+                </div>
+                
+                <div class="metric-card users-card">
+                    <div class="metric-icon">👥</div>
+                    <div class="metric-content">
+                        <h3 id="active-users">Calcul...</h3>
+                        <p>Utilisateurs actifs</p>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- Actions rapides avancées -->
+        <div class="advanced-actions">
+            <h2>🚀 Actions rapides avancées</h2>
+            <div class="actions-grid">
+                
+                <a href="{% url 'admin:sales_sale_changelist' %}" class="action-card advanced-sales">
+                    <div class="action-icon">📊</div>
+                    <div class="action-content">
+                        <h3>Analyse des ventes</h3>
+                        <p>Rapports détaillés et tendances</p>
+                    </div>
+                </a>
+                
+                <a href="{% url 'admin:inventory_stockmovement_changelist' %}" class="action-card advanced-inventory">
+                    <div class="action-icon">📋</div>
+                    <div class="action-content">
+                        <h3>Gestion d'inventaire</h3>
+                        <p>Mouvements et ajustements</p>
+                    </div>
+                </a>
+                
+                <a href="{% url 'admin:reports_dailyreport_changelist' %}" class="action-card advanced-reports">
+                    <div class="action-icon">📈</div>
+                    <div class="action-content">
+                        <h3>Rapports avancés</h3>
+                        <p>Analytics et insights</p>
+                    </div>
+                </a>
+                
+                <a href="{% url 'admin:alerts_alert_changelist' %}" class="action-card advanced-alerts">
+                    <div class="action-icon">🔔</div>
+                    <div class="action-content">
+                        <h3>Centre d'alertes</h3>
+                        <p>Notifications et monitoring</p>
+                    </div>
+                </a>
+                
+            </div>
+        </div>
+        
+    </div>
+    
+</div>
+
+<style>
+/* Styles pour le dashboard avancé */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.dashboard-header p {
+    margin: 0.5rem 0 0 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.advanced-stats {
+    display: grid;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Graphique des ventes */
+.chart-container {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+}
+
+.chart-container h2 {
+    margin: 0 0 1.5rem 0;
+    color: var(--gray-900);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.sales-chart {
+    display: flex;
+    align-items: end;
+    gap: 1rem;
+    height: 200px;
+    padding: 1rem 0;
+}
+
+.chart-bar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bar-value {
+    background: linear-gradient(to top, var(--primary-color), var(--secondary-color));
+    border-radius: 4px 4px 0 0;
+    min-height: 20px;
+    height: 20px;
+    width: 100%;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 0.25rem;
+    transition: height 0.8s ease;
+}
+
+.bar-label {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+.bar-amount {
+    font-size: 0.75rem;
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+/* Produits populaires */
+.popular-products {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+}
+
+.popular-products h2 {
+    margin: 0 0 1.5rem 0;
+    color: var(--gray-900);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.products-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s ease;
+}
+
+.product-item:hover {
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.product-info h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.product-info p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+
+.product-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.badge {
+    background: var(--info-color);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.price {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--success-color);
+}
+
+/* Métriques temps réel */
+.realtime-metrics {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+}
+
+.realtime-metrics h2 {
+    margin: 0 0 1.5rem 0;
+    color: var(--gray-900);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.metric-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.metric-icon {
+    font-size: 2rem;
+}
+
+.metric-content h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-900);
+}
+
+.metric-content p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+
+.revenue-card { background: linear-gradient(135deg, #fef3c7, #fbbf24); }
+.orders-card { background: linear-gradient(135deg, #dbeafe, #3b82f6); }
+.stock-card { background: linear-gradient(135deg, #fee2e2, #ef4444); }
+.users-card { background: linear-gradient(135deg, #f3e8ff, #8b5cf6); }
+
+/* Actions avancées */
+.advanced-actions {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+}
+
+.advanced-actions h2 {
+    margin: 0 0 1.5rem 0;
+    color: var(--gray-900);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.action-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--gray-900);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary-color);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.action-card:hover {
+    background: white;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.action-card:hover::before {
+    transform: scaleY(1);
+}
+
+.action-icon {
+    font-size: 2rem;
+    background: white;
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.action-content h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.action-content p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+    
+    .sales-chart {
+        height: 150px;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+// Mise à jour des métriques temps réel
+document.addEventListener('DOMContentLoaded', function() {
+    // Simuler des données temps réel (à remplacer par des vraies API calls)
+    setTimeout(() => {
+        document.getElementById('daily-revenue').textContent = '1,247.50€';
+        document.getElementById('pending-orders').textContent = '8';
+        document.getElementById('low-stock').textContent = '3';
+        document.getElementById('active-users').textContent = '12';
+    }, 1000);
+});
+</script>
+{% endblock %}

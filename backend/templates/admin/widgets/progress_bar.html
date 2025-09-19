@@ -1,0 +1,51 @@
+<div class="progress-bar-container">
+    <div class="progress-bar {{ color }}-progress">
+        <div class="progress-fill" data-percentage="{{ percentage|floatformat:1 }}"></div>
+    </div>
+    {% if show_percentage %}
+    <span class="progress-text">{{ percentage|floatformat:1 }}%</span>
+    {% endif %}
+    <span class="progress-values">{{ value }}/{{ max_value }}</span>
+</div>
+
+<style>
+.progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--primary-color);
+    transition: width 1s ease;
+}
+
+.primary-progress .progress-fill { background: var(--primary-color); }
+.success-progress .progress-fill { background: var(--success-color); }
+.warning-progress .progress-fill { background: var(--warning-color); }
+.danger-progress .progress-fill { background: var(--danger-color); }
+
+.progress-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    min-width: 40px;
+}
+
+.progress-values {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    min-width: 60px;
+}
+</style>

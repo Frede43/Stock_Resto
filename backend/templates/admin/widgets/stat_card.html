@@ -1,0 +1,12 @@
+<div class="stat-card {{ color }}-card">
+    <div class="stat-icon">
+        {{ icon|safe }}
+    </div>
+    <div class="stat-content">
+        <h3>{{ value }}</h3>
+        <p>{{ title }}</p>
+        {% if description %}
+        <small>{{ description }}</small>
+        {% endif %}
+    </div>
+</div>

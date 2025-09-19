@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | BarStockWise Administration{% endblock %}
+
+{% block branding %}
+<div id="site-name" class="modern-branding">
+    <a href="{% url 'admin:index' %}" class="brand-link">
+        <div class="brand-container">
+            <div class="brand-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3h18v18H3V3z" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M9 9h6v6H9V9z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <h1>BarStockWise</h1>
+                <span>Administration</span>
+            </div>
+        </div>
+    </a>
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom-admin.css' %}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% endblock %}
+
+{% block footer %}
+<div id="footer" style="background: #f8f9fa; padding: 1rem; text-align: center; color: #6c757d; font-size: 0.875rem; margin-top: 2rem;">
+    <p>© 2025 Harry's Grill Bar - Système de gestion de bar et restaurant</p>
+    <p>Version 2.1.0 | Développé avec ❤️ pour votre busines</p>
+</div>
+{% endblock %}
