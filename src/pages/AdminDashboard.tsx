@@ -77,7 +77,7 @@ const AdminDashboard = () => {
                 </h1>
               </div>
               <p className="text-xl text-slate-600 mb-4">
-                Bienvenue dans le centre de contrôle de Bar Stock Wise
+                Bienvenue dans le centre de contrôle de Harry's Grill Bar-Resto
               </p>
               <div className="flex items-center justify-center gap-6 text-sm text-slate-500">
                 <div className="flex items-center gap-2">

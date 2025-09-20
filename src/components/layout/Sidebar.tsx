@@ -213,7 +213,7 @@ export function Sidebar({ className }: SidebarProps = {}) {
       <div className="flex items-center justify-between p-4 border-b border-primary-foreground/20">
         {!isCollapsed && (
           <h1 className="text-xl font-bold bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-transparent">
-            Bar Stock Wise
+            Harry's Grill Bar-Resto
           </h1>
         )}
         <Button
@@ -286,7 +286,7 @@ export function Sidebar({ className }: SidebarProps = {}) {
       {/* Footer */}
       <div className="p-4 border-t border-primary-foreground/20">
         <div className={cn("text-xs text-primary-foreground/70", isCollapsed && "text-center")}>
-          {!isCollapsed ? "© 2024 Bar Stock Wise" : "BSW"}
+          {!isCollapsed ? "© 2025 Harry's Grill Bar-Resto" : "BSW"}
         </div>
       </div>
     </div>

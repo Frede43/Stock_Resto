@@ -181,7 +181,7 @@ export default function Settings() {
       const testContent = `
         <html>
           <head>
-            <title>Test d'impression - Bar Stock Wise</title>
+            <title>Test d'impression - Harry's Grill Bar-Resto</title>
             <style>
               @media print {
                 body { 
@@ -196,7 +196,7 @@ export default function Settings() {
           </head>
           <body>
             <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
-              <h3>BAR STOCK WISE</h3>
+              <h3>Harry's Grill Bar-Resto</h3>
               <p>Test d'impression</p>
             </div>
             

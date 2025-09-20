@@ -52,16 +52,12 @@ export function Header({ className }: HeaderProps = {}) {
       "/monitoring": "Monitoring",
       "/help": "Aide",
       "/profile": "Profil",
+      "/new-route": "Nouvelle Route",
     };
     
     setPageTitle(titles[path] || "Tableau de bord");
   }, [location]);
 
-  const notifications = [
-    { id: 1, title: "Stock faible", message: "Bière Mutzig en stock faible", time: "Il y a 10 min" },
-    { id: 2, title: "Nouvelle commande", message: "Commande #1234 créée", time: "Il y a 30 min" },
-    { id: 3, title: "Alerte système", message: "Mise à jour disponible", time: "Il y a 1h" },
-  ];
 
   return (
     <header className={cn("bg-card border-b shadow-sm h-16 flex items-center justify-between px-6 sticky top-0 z-10", className)}>
