@@ -121,7 +121,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
         obj = super().get_object()
         # Les utilisateurs ne peuvent modifier que leur propre profil, sauf les admins
         if not self.request.user.is_admin and obj != self.request.user:
-            raise permissions.PermissionDenied("Vous ne pouvez modifier que votre propre profil.")
+            raise PermissionDenied("Vous ne pouvez modifier que votre propre profil.")
         return obj
 
     def perform_update(self, serializer):
@@ -137,7 +137,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         # Seuls les admins peuvent supprimer des utilisateurs
         if not self.request.user.is_admin:
-            raise permissions.PermissionDenied("Seuls les admins peuvent supprimer des utilisateurs.")
+            raise PermissionDenied("Seuls les admins peuvent supprimer des utilisateurs.")
 
         # Enregistrer l'activité avant suppression
         UserActivity.objects.create(

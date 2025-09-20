@@ -210,7 +210,7 @@ const Index = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold mb-2">
-                  Bienvenue dans Bar Stock Wise
+                  Bienvenue dans Harry's Grill Bar-Testaurant
                 </h1>
                 <p className="text-primary-foreground/90 text-lg">
                   Gérez votre établissement avec efficacité et simplicité

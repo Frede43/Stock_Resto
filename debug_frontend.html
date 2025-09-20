@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Frontend - Bar Stock Wise</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-title {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .debug-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Frontend - Bar Stock Wise</h1>
+    
+    <div class="debug-section">
+        <h2 class="debug-title">1. Informations localStorage</h2>
+        <div id="localStorage-info"></div>
+        <button onclick="checkLocalStorage()">Actualiser localStorage</button>
+    </div>
+
+    <div class="debug-section">
+        <h2 class="debug-title">2. Test API Settings</h2>
+        <div id="api-test-results"></div>
+        <button onclick="testSettingsAPI()">Tester API Settings</button>
+        <button onclick="testAuthAPI()">Tester Authentification</button>
+    </div>
+
+    <div class="debug-section">
+        <h2 class="debug-title">3. Test de Sauvegarde</h2>
+        <div id="save-test-results"></div>
+        <button onclick="testSaveSettings()">Tester Sauvegarde</button>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const info = document.getElementById('localStorage-info');
+            const items = [
+                'access_token',
+                'refresh_token', 
+                'user',
+                'receipt_printer_name',
+                'auto_print_receipts'
+            ];
+            
+            let html = '';
+            items.forEach(item => {
+                const value = localStorage.getItem(item);
+                const className = value ? 'success' : 'error';
+                html += `<div class="debug-item ${className}">
+                    <strong>${item}:</strong> ${value ? '✅ Présent' : '❌ Absent'}
+                    ${value && item === 'user' ? `<pre>${JSON.stringify(JSON.parse(value), null, 2)}</pre>` : ''}
+                    ${value && item === 'access_token' ? `<br><small>Token: ${value.substring(0, 50)}...</small>` : ''}
+                </div>`;
+            });
+            
+            info.innerHTML = html;
+        }
+
+        async function testSettingsAPI() {
+            const results = document.getElementById('api-test-results');
+            results.innerHTML = '<div class="debug-item">🔄 Test en cours...</div>';
+            
+            try {
+                // Test GET
+                const response = await fetch('http://127.0.0.1:8000/api/settings/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                let html = `<div class="debug-item ${response.ok ? 'success' : 'error'}">
+                    <strong>GET /api/settings/</strong><br>
+                    Status: ${response.status}<br>
+                    ${response.ok ? '✅ Succès' : '❌ Échec'}
+                </div>`;
+                
+                if (response.ok) {
+                    html += `<div class="debug-item success">
+                        <strong>Données reçues:</strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>`;
+                }
+                
+                results.innerHTML = html;
+                
+            } catch (error) {
+                results.innerHTML = `<div class="debug-item error">
+                    <strong>Erreur:</strong> ${error.message}
+                </div>`;
+            }
+        }
+
+        async function testAuthAPI() {
+            const results = document.getElementById('api-test-results');
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/accounts/me/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                let html = `<div class="debug-item ${response.ok ? 'success' : 'error'}">
+                    <strong>GET /api/accounts/me/</strong><br>
+                    Status: ${response.status}<br>
+                    ${response.ok ? '✅ Authentification OK' : '❌ Authentification échouée'}
+                </div>`;
+                
+                if (response.ok) {
+                    html += `<div class="debug-item success">
+                        <strong>Utilisateur connecté:</strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>`;
+                }
+                
+                results.innerHTML += html;
+                
+            } catch (error) {
+                results.innerHTML += `<div class="debug-item error">
+                    <strong>Erreur Auth:</strong> ${error.message}
+                </div>`;
+            }
+        }
+
+        async function testSaveSettings() {
+            const results = document.getElementById('save-test-results');
+            results.innerHTML = '<div class="debug-item">🔄 Test de sauvegarde en cours...</div>';
+            
+            const testData = {
+                restaurant: {
+                    name: "Test Restaurant Debug"
+                },
+                notifications: {
+                    email_enabled: true
+                }
+            };
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/settings/system/', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const data = await response.json();
+                
+                let html = `<div class="debug-item ${response.ok ? 'success' : 'error'}">
+                    <strong>PATCH /api/settings/system/</strong><br>
+                    Status: ${response.status}<br>
+                    ${response.ok ? '✅ Sauvegarde réussie' : '❌ Sauvegarde échouée'}
+                </div>`;
+                
+                html += `<div class="debug-item">
+                    <strong>Réponse:</strong>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>`;
+                
+                results.innerHTML = html;
+                
+            } catch (error) {
+                results.innerHTML = `<div class="debug-item error">
+                    <strong>Erreur de sauvegarde:</strong> ${error.message}
+                </div>`;
+            }
+        }
+
+        // Initialisation
+        window.onload = function() {
+            checkLocalStorage();
+        };
+    </script>
+</body>
+</html>

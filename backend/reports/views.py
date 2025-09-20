@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -49,7 +50,7 @@ class DailyReportListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         # Temporaire pour les tests - désactiver la vérification des permissions
         if hasattr(self.request.user, 'can_generate_reports') and not self.request.user.can_generate_reports():
-            raise permissions.PermissionDenied("Permission insuffisante pour créer des rapports.")
+            raise PermissionDenied("Permission insuffisante pour créer des rapports.")
         serializer.save()
 
 class DailyReportDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -67,12 +68,12 @@ class DailyReportDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         if not self.request.user.can_generate_reports():
-            raise permissions.PermissionDenied("Permission insuffisante pour modifier des rapports.")
+            raise PermissionDenied("Permission insuffisante pour modifier des rapports.")
         serializer.save()
 
     def perform_destroy(self, instance):
         if not self.request.user.can_delete_records():
-            raise permissions.PermissionDenied("Permission insuffisante pour supprimer des rapports.")
+            raise PermissionDenied("Permission insuffisante pour supprimer des rapports.")
         instance.delete()
 
 class StockAlertListCreateView(generics.ListCreateAPIView):
@@ -99,7 +100,7 @@ class StockAlertListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         if not self.request.user.can_manage_inventory():
-            raise permissions.PermissionDenied("Permission insuffisante pour créer des alertes.")
+            raise PermissionDenied("Permission insuffisante pour créer des alertes.")
         serializer.save()
 
 class StockAlertDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -117,12 +118,12 @@ class StockAlertDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         if not self.request.user.can_manage_inventory():
-            raise permissions.PermissionDenied("Permission insuffisante pour modifier des alertes.")
+            raise PermissionDenied("Permission insuffisante pour modifier des alertes.")
         serializer.save()
 
     def perform_destroy(self, instance):
         if not self.request.user.can_delete_records():
-            raise permissions.PermissionDenied("Permission insuffisante pour supprimer des alertes.")
+            raise PermissionDenied("Permission insuffisante pour supprimer des alertes.")
         instance.delete()
 
 @api_view(['POST'])

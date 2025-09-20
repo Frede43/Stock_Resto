@@ -96,8 +96,12 @@ class User(AbstractUser):
         return self.role in ['admin', 'manager']
 
     def can_manage_products(self):
-        """Peut ajouter/modifier des produits"""
+        """Peut ajouter/modifier des produits (création/suppression)"""
         return self.role in ['admin', 'manager']
+    
+    def can_edit_products(self):
+        """Peut modifier des produits existants (prix, stock, disponibilité)"""
+        return self.role in ['admin', 'manager', 'cashier']
 
     def can_make_sales(self):
         """Peut effectuer des ventes"""

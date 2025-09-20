@@ -1,6 +1,7 @@
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.db import models
@@ -27,7 +28,7 @@ class CategoryListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         # Seuls les admins et gérants peuvent créer des catégories
         if not self.request.user.can_manage_products():
-            raise permissions.PermissionDenied("Permission insuffisante pour créer des catégories.")
+            raise PermissionDenied("Permission insuffisante pour créer des catégories.")
         serializer.save()
 
 
@@ -41,12 +42,12 @@ class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         if not self.request.user.can_manage_products():
-            raise permissions.PermissionDenied("Permission insuffisante pour modifier des catégories.")
+            raise PermissionDenied("Permission insuffisante pour modifier des catégories.")
         serializer.save()
 
     def perform_destroy(self, instance):
         if not self.request.user.can_delete_records():
-            raise permissions.PermissionDenied("Permission insuffisante pour supprimer des catégories.")
+            raise PermissionDenied("Permission insuffisante pour supprimer des catégories.")
         instance.delete()
 
 
@@ -84,7 +85,7 @@ class ProductListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         if not self.request.user.can_manage_products():
-            raise permissions.PermissionDenied("Permission insuffisante pour créer des produits.")
+            raise PermissionDenied("Permission insuffisante pour créer des produits.")
 
         # Log des données reçues pour débogage
         import logging
@@ -103,13 +104,13 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.AllowAny]  # Temporairement public pour tests
 
     def perform_update(self, serializer):
-        if not self.request.user.can_manage_products():
-            raise permissions.PermissionDenied("Permission insuffisante pour modifier des produits.")
+        if not self.request.user.can_edit_products():
+            raise PermissionDenied("Permission insuffisante pour modifier des produits.")
         serializer.save()
 
     def perform_destroy(self, instance):
         if not self.request.user.can_delete_records():
-            raise permissions.PermissionDenied("Permission insuffisante pour supprimer des produits.")
+            raise PermissionDenied("Permission insuffisante pour supprimer des produits.")
         instance.delete()
 
 
