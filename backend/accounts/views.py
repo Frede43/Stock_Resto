@@ -546,3 +546,4 @@ def reset_password_view(request, pk):
         'instructions': 'Communiquez ce mot de passe temporaire à l\'utilisateur. Il devra le changer lors de sa prochaine connexion.',
         'format': 'Format simple: Mot + 4 chiffres (facile à retenir et communiquer oralement)'
     })
+

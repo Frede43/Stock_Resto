@@ -2,6 +2,7 @@ from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework import viewsets
+from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.db.models import Sum, Count, Q, Avg
@@ -31,8 +32,8 @@ class TableListCreateView(generics.ListCreateAPIView):
     ordering = ['number']
 
     def perform_create(self, serializer):
-        if not self.request.user.can_manage_products():
-            raise permissions.PermissionDenied("Permission insuffisante pour créer des tables.")
+        if not self.request.user.can_manage_tables():
+            raise PermissionDenied("Permission insuffisante pour créer des tables.")
         serializer.save()
 
 class TableDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -44,17 +45,17 @@ class TableDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_update(self, serializer):
-        if not self.request.user.can_manage_products():
-            raise permissions.PermissionDenied("Permission insuffisante pour modifier des tables.")
+        if not self.request.user.can_manage_tables():
+            raise PermissionDenied("Permission insuffisante pour modifier des tables.")
         serializer.save()
 
     def perform_destroy(self, instance):
-        if not self.request.user.can_delete_records():
-            raise permissions.PermissionDenied("Permission insuffisante pour supprimer des tables.")
+        if not self.request.user.can_delete_tables():
+            raise PermissionDenied("Permission insuffisante pour supprimer des tables.")
 
         # Vérifier qu'il n'y a pas de vente en cours
         if instance.is_occupied:
-            raise permissions.PermissionDenied("Impossible de supprimer une table occupée.")
+            raise PermissionDenied("Impossible de supprimer une table occupée.")
 
         instance.delete()
 
@@ -113,7 +114,7 @@ class SaleListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         # Temporairement désactivé pour le débogage
         # if not self.request.user.can_make_sales():
-        #     raise permissions.PermissionDenied("Permission insuffisante pour créer des ventes.")
+        #     raise PermissionDenied("Permission insuffisante pour créer des ventes.")
         sale = serializer.save()
 
         # Retourner les données complètes de la vente créée
@@ -201,18 +202,18 @@ class SaleDetailView(generics.RetrieveUpdateDestroyAPIView):
         if (self.request.user.is_authenticated and 
             hasattr(self.request.user, 'can_manage_products') and 
             not self.request.user.can_manage_products()):
-            raise permissions.PermissionDenied("Permission insuffisante pour modifier des ventes.")
+            raise PermissionDenied("Permission insuffisante pour modifier des ventes.")
         serializer.save()
 
     def perform_destroy(self, instance):
         if (self.request.user.is_authenticated and 
             hasattr(self.request.user, 'can_delete_records') and 
             not self.request.user.can_delete_records()):
-            raise permissions.PermissionDenied("Permission insuffisante pour supprimer des ventes.")
+            raise PermissionDenied("Permission insuffisante pour supprimer des ventes.")
 
         # Vérifier que la vente n'est pas payée
         if instance.status == 'paid':
-            raise permissions.PermissionDenied("Impossible de supprimer une vente payée.")
+            raise PermissionDenied("Impossible de supprimer une vente payée.")
 
         # Restaurer le stock des produits
         for item in instance.items.all():

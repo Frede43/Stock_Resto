@@ -97,7 +97,7 @@ class User(AbstractUser):
 
     def can_manage_products(self):
         """Peut ajouter/modifier des produits"""
-        return self.role in ['admin', 'gerant']
+        return self.role in ['admin', 'manager']
 
     def can_make_sales(self):
         """Peut effectuer des ventes"""
@@ -109,19 +109,19 @@ class User(AbstractUser):
 
     def can_manage_inventory(self):
         """Peut gérer les approvisionnements"""
-        return self.role in ['admin', 'gerant']
+        return self.role in ['admin', 'manager']
 
     def can_view_stock_alerts(self):
         """Peut voir les stocks et alertes"""
-        return self.role in ['admin', 'gerant']
+        return self.role in ['admin', 'manager']
 
     def can_generate_reports(self):
         """Peut générer des rapports"""
-        return self.role in ['admin', 'gerant']
+        return self.role in ['admin', 'manager']
 
     def can_manage_expenses(self):
         """Peut enregistrer des dépenses"""
-        return self.role in ['admin', 'gerant']
+        return self.role in ['admin', 'manager']
 
     def can_delete_records(self):
         """Peut supprimer des enregistrements"""
@@ -130,6 +130,14 @@ class User(AbstractUser):
     def can_manage_database(self):
         """Peut gérer la base de données"""
         return self.role == 'admin'
+
+    def can_manage_tables(self):
+        """Peut gérer les tables (créer, modifier)"""
+        return self.role in ['admin', 'manager', 'server', 'cashier']
+
+    def can_delete_tables(self):
+        """Peut supprimer des tables"""
+        return self.role in ['admin', 'manager']
 
     def has_permission(self, permission_code):
         """

@@ -19,6 +19,22 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
+
+def home_view(request):
+    """Vue pour la page d'accueil"""
+    # Si l'utilisateur est connecté, le rediriger vers l'admin
+    if request.user.is_authenticated:
+        return redirect('/admin/')
+    
+    # Sinon, afficher une page d'accueil simple
+    context = {
+        'title': 'BarStock Wise',
+        'version': '1.0.0',
+        'description': 'Système de gestion de stock pour bars et restaurants'
+    }
+    return TemplateResponse(request, 'home.html', context)
 
 def api_root(request):
     """Vue racine de l'API"""
@@ -45,6 +61,10 @@ def api_root(request):
     })
 
 urlpatterns = [
+    # Page d'accueil
+    path('', home_view, name='home'),
+    
+    # Administration
     path('admin/', admin.site.urls),
 
     # API root

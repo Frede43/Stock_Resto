@@ -37,12 +37,21 @@ def system_settings_view(request):
             return Response(serializer.data)
         
         elif request.method in ['PUT', 'PATCH']:
-            # Vérifier les permissions (admin ou gérant)
+            # Debug: Afficher les informations de l'utilisateur
+            print(f"🔍 Settings PATCH - User: {request.user}")
+            print(f"🔍 Settings PATCH - Is authenticated: {request.user.is_authenticated}")
+            print(f"🔍 Settings PATCH - Is superuser: {request.user.is_superuser}")
+            if hasattr(request.user, 'role'):
+                print(f"🔍 Settings PATCH - Role: {request.user.role}")
+            else:
+                print(f"🔍 Settings PATCH - No role attribute")
+            
+            # Vérifier les permissions (admin ou manager)
             if not (request.user.is_superuser or 
-                   hasattr(request.user, 'profile') and 
-                   request.user.profile.role in ['admin', 'gerant']):
+                   (hasattr(request.user, 'role') and 
+                    request.user.role in ['admin', 'manager'])):
                 return Response(
-                    {'error': 'Permission refusée. Seuls les administrateurs et gérants peuvent modifier les paramètres.'},
+                    {'error': f'Permission refusée. User: {request.user}, Role: {getattr(request.user, "role", "N/A")}, Superuser: {request.user.is_superuser}'},
                     status=status.HTTP_403_FORBIDDEN
                 )
             

@@ -18,6 +18,7 @@ import { useSystemSettingsNew, useUpdateSystemSettingsNew } from '@/hooks/use-ap
 import { useToast } from '@/hooks/use-toast';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('general');
@@ -34,6 +35,7 @@ export default function Settings() {
   const { data: systemSettings, isLoading, refetch } = useSystemSettingsNew();
   const updateSettings = useUpdateSystemSettingsNew();
   const [isTestingPrinter, setIsTestingPrinter] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (systemSettings) {
@@ -90,6 +92,9 @@ export default function Settings() {
   const handleSaveSettings = async () => {
     try {
       console.log('🔧 Sauvegarde des paramètres:', localSettings);
+      console.log('🔍 Utilisateur connecté:', user);
+      console.log('🔍 Token dans localStorage:', localStorage.getItem('access_token'));
+      
       await updateSettings.mutateAsync(localSettings);
       setHasUnsavedChanges(false);
       toast({
@@ -271,6 +276,29 @@ export default function Settings() {
         <Header />
         
         <main className="flex-1 p-6 space-y-6">
+          {/* Debug Panel */}
+          <Card className="border-yellow-200 bg-yellow-50">
+            <CardHeader>
+              <CardTitle className="text-sm text-yellow-800">🔍 Debug Info</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-yellow-700">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <strong>Utilisateur:</strong> {user?.username || 'Non connecté'}
+                </div>
+                <div>
+                  <strong>Rôle:</strong> {user?.role || 'N/A'}
+                </div>
+                <div>
+                  <strong>Is Superuser:</strong> {user?.is_superuser ? 'Oui' : 'Non'}
+                </div>
+                <div>
+                  <strong>Token présent:</strong> {localStorage.getItem('access_token') ? 'Oui' : 'Non'}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-3">
