@@ -9,7 +9,6 @@ import {
   Menu,
   X,
   DollarSign,
-  Package,
   ShoppingCart,
   Table,
   ClipboardList,
@@ -26,7 +25,7 @@ interface CashierMenuItem {
   description: string;
 }
 
-// Menus spécifiques pour caissier
+// Menus spécifiques pour caissier - PRODUITS SUPPRIMÉ
 const cashierMenuItems: CashierMenuItem[] = [
   { 
     href: "/sales", 
@@ -34,13 +33,6 @@ const cashierMenuItems: CashierMenuItem[] = [
     label: "Point de Vente", 
     color: "text-green-600",
     description: "Gérer les ventes et encaissements"
-  },
-  { 
-    href: "/products", 
-    icon: Package, 
-    label: "Produits", 
-    color: "text-blue-600",
-    description: "Consulter le catalogue"
   },
   { 
     href: "/tables", 
