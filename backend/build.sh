@@ -15,4 +15,7 @@ python manage.py collectstatic --no-input --clear
 echo "🗄️ Exécution des migrations..."
 python manage.py migrate --no-input
 
+echo "👤 Création du superutilisateur..."
+python create_superuser.py
+
 echo "✅ Build terminé !"
