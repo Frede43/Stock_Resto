@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useNotificationHelpers } from './use-notifications';
+import { useNotifications } from './use-notifications';
 
 interface WebSocketNotification {
   type: 'stock_alert' | 'sale_notification' | 'system_notification' | 'pong';
@@ -13,12 +13,23 @@ interface WebSocketNotification {
  * Hook pour gérer les notifications WebSocket en temps réel
  */
 export function useWebSocketNotifications() {
-  const { addNotification } = useNotificationHelpers();
+  const { addNotification } = useNotifications();
   const websocketRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // ⚠️ WebSocket désactivé temporairement
+    // Le backend Django n'a pas Django Channels configuré
+    // TODO: Implémenter Django Channels pour les notifications en temps réel
+    
+    console.log('ℹ️ WebSocket notifications désactivées (backend non configuré)');
+    console.log('ℹ️ Utilisez le polling API pour les notifications');
+    
     const connectWebSocket = () => {
+      // WebSocket désactivé
+      return;
+      
+      /* Code WebSocket commenté pour référence future
       try {
         // Récupérer l'utilisateur connecté
         const user = localStorage.getItem('user');
@@ -60,6 +71,7 @@ export function useWebSocketNotifications() {
         console.error('❌ Erreur connexion WebSocket:', error);
         scheduleReconnect();
       }
+      */
     };
 
     const handleWebSocketMessage = (data: WebSocketNotification) => {

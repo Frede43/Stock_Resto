@@ -539,13 +539,14 @@ export default function Products() {
                     />
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 overflow-x-auto pb-2">
                   {categories.map((category) => (
                     <Button
                       key={category}
                       variant={selectedCategory === category ? "default" : "outline"}
                       onClick={() => setSelectedCategory(category)}
-                      className="whitespace-nowrap"
+                      className="whitespace-nowrap flex-shrink-0"
+                      size="sm"
                     >
                       {category === "all" ? "Toutes" : category}
                     </Button>
@@ -591,16 +592,17 @@ export default function Products() {
                     filteredProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="flex flex-col md:flex-row md:items-center md:justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-4"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 bg-gradient-to-br from-secondary to-secondary/80 rounded-lg flex items-center justify-center">
+                    {/* Section gauche : Icône et infos produit */}
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="h-12 w-12 flex-shrink-0 bg-gradient-to-br from-secondary to-secondary/80 rounded-lg flex items-center justify-center">
                         <span className="text-2xl">{getProductIcon(product.categoryType)}</span>
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">{product.name}</h3>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground truncate">{product.name}</h3>
                         <p className="text-sm text-muted-foreground">{product.category}</p>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
                           <Badge variant={getStatusVariant(product.status)} className="text-xs">
                             {getStatusLabel(product.status)}
                           </Badge>
@@ -611,21 +613,23 @@ export default function Products() {
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <div className="flex items-center gap-4 mb-2">
+                    {/* Section droite : Prix et actions */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4">
+                      {/* Prix */}
+                      <div className="flex flex-col gap-1">
                         {product.categoryType === 'boissons' ? (
                           // Pour les boissons, afficher prix d'achat, vente et marge
                           <>
-                            <div className="text-sm">
-                              <span className="text-muted-foreground">Achat: </span>
+                            <div className="text-sm flex justify-between sm:justify-start gap-2">
+                              <span className="text-muted-foreground">Achat:</span>
                               <span className="font-medium">{product.buyPrice ? product.buyPrice.toLocaleString() : '0'} FBu</span>
                             </div>
-                            <div className="text-sm">
-                              <span className="text-muted-foreground">Vente: </span>
+                            <div className="text-sm flex justify-between sm:justify-start gap-2">
+                              <span className="text-muted-foreground">Vente:</span>
                               <span className="font-medium">{product.sellPrice ? product.sellPrice.toLocaleString() : '0'} FBu</span>
                             </div>
-                            <div className="text-sm">
-                              <span className="text-muted-foreground">Marge: </span>
+                            <div className="text-sm flex justify-between sm:justify-start gap-2">
+                              <span className="text-muted-foreground">Marge:</span>
                               <span className="font-medium text-success">
                                 {product.buyPrice && product.sellPrice ? calculateMargin(product.buyPrice, product.sellPrice) : 0}%
                               </span>
@@ -633,13 +637,15 @@ export default function Products() {
                           </>
                         ) : (
                           // Pour les plats, afficher seulement le prix de vente
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Prix: </span>
+                          <div className="text-sm flex justify-between sm:justify-start gap-2">
+                            <span className="text-muted-foreground">Prix:</span>
                             <span className="font-medium text-lg">{product.sellPrice ? product.sellPrice.toLocaleString() : '0'} FBu</span>
                           </div>
                         )}
                       </div>
-                      <div className="flex gap-2">
+                      
+                      {/* Actions */}
+                      <div className="flex gap-2 justify-end sm:justify-start">
                         <Button 
                           variant="outline" 
                           size="icon"

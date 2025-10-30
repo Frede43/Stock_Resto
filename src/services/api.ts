@@ -181,7 +181,19 @@ class ApiService {
 
   // Méthode pour définir les tokens
   setTokens(accessToken: string, refreshToken: string) {
+    console.log('✅ setTokens appelé:', {
+      hasAccess: !!accessToken,
+      hasRefresh: !!refreshToken,
+      accessPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'null',
+      refreshPreview: refreshToken ? refreshToken.substring(0, 20) + '...' : 'null'
+    });
     this.saveTokensToStorage({ access: accessToken, refresh: refreshToken });
+    // Recharger les tokens pour s'assurer qu'ils sont disponibles
+    this.loadTokensFromStorage();
+    console.log('✅ Tokens après rechargement:', {
+      hasAccess: !!this.accessToken,
+      hasRefresh: !!this.refreshToken
+    });
   }
 
   // Authentification
