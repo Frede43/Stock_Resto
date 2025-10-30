@@ -27,6 +27,25 @@ services:
           name: barstock-db
           property: connectionString
 
+  # Frontend React/Vite
+  - type: web
+    name: barstock-web
+    runtime: node
+    region: frankfurt
+    plan: free
+    branch: main
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: VITE_API_URL
+        value: https://barstock-api.onrender.com
+
   # Base de données PostgreSQL
 databases:
   - name: barstock-db
