@@ -214,7 +214,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://barstock-web.onrender.com",  # Production frontend
-    "https://barstock-web-v2.onrender.com",  # Production frontend (nouveau)
+    
 ]
 
 # Configuration alternative plus restrictive (commentée)
