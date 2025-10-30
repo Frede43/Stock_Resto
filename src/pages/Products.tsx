@@ -110,7 +110,7 @@ export default function Products() {
   const [newCategory, setNewCategory] = useState({
     name: "",
     description: "",
-    category_type: "boissons"
+    type: "boissons"
   });
   const { toast } = useToast();
 
@@ -243,14 +243,14 @@ export default function Products() {
       await createCategoryMutation.mutateAsync({
         name: newCategory.name,
         description: newCategory.description,
-        category_type: newCategory.category_type
+        type: newCategory.type
       });
       
       // Reset form
       setNewCategory({
         name: "",
         description: "",
-        category_type: "boissons"
+        type: "boissons"
       });
       
       setShowNewCategoryDialog(false);
@@ -330,7 +330,7 @@ export default function Products() {
                               </div>
                               <div className="space-y-2">
                                 <Label>Type de catégorie</Label>
-                                <Select value={newCategory.category_type} onValueChange={(value) => setNewCategory(prev => ({...prev, category_type: value}))}>
+                                <Select value={newCategory.type} onValueChange={(value) => setNewCategory(prev => ({...prev, type: value}))}>
                                   <SelectTrigger>
                                     <SelectValue />
                                   </SelectTrigger>

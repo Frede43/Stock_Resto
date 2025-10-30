@@ -33,6 +33,7 @@ export default defineConfig({
       }
     }
   },
+  publicDir: 'public',
   preview: {
     port: 3000,
     proxy: {
