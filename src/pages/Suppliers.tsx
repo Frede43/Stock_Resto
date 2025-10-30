@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -165,10 +163,6 @@ export default function Suppliers() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-6">
           <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -451,7 +445,5 @@ export default function Suppliers() {
             </Card>
           </div>
         </main>
-      </div>
-    </div>
   );
 }

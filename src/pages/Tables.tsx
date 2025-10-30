@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -193,29 +191,17 @@ export default function Tables() {
 
   if (tablesLoading) {
     return (
-      <div className="min-h-screen bg-gradient-surface flex">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 p-6 flex items-center justify-center">
+      <main className="flex-1 p-6 flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
               <p>Chargement des tables...</p>
             </div>
           </main>
-        </div>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-surface flex">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
-        <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-6 space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -545,7 +531,5 @@ export default function Tables() {
             ))}
           </div>
         </main>
-      </div>
-    </div>
   );
 }

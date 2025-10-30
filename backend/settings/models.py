@@ -26,7 +26,11 @@ class SystemSettings(models.Model):
     
     # Paramètres d'impression
     auto_print_receipts = models.BooleanField(default=True)
+    auto_print_daily_reports = models.BooleanField(default=False)
+    thermal_format = models.BooleanField(default=False)
     receipt_copies = models.IntegerField(default=1)
+    receipt_printer = models.CharField(max_length=200, default="", blank=True)
+    report_printer = models.CharField(max_length=200, default="", blank=True)
     printer_name = models.CharField(max_length=200, default="Imprimante par défaut")
     
     # Paramètres système
@@ -34,6 +38,13 @@ class SystemSettings(models.Model):
     timezone = models.CharField(max_length=50, default="Africa/Bujumbura")
     date_format = models.CharField(max_length=20, default="DD/MM/YYYY")
     backup_frequency = models.CharField(max_length=20, default="daily")
+    
+    # Paramètres de sécurité
+    two_factor_auth = models.BooleanField(default=False)
+    auto_logout = models.BooleanField(default=True)
+    audit_logs = models.BooleanField(default=True)
+    session_timeout = models.IntegerField(default=30)  # en minutes
+    max_login_attempts = models.IntegerField(default=5)
     
     # Métadonnées
     created_at = models.DateTimeField(auto_now_add=True)
@@ -72,14 +83,23 @@ class SystemSettings(models.Model):
             },
             'printing': {
                 'auto_print_receipts': self.auto_print_receipts,
-                'receipt_copies': self.receipt_copies,
+                'auto_print_daily_reports': self.auto_print_daily_reports,
+                'thermal_format': self.thermal_format,
+                'copies': self.receipt_copies,
+                'receipt_printer': self.receipt_printer,
+                'report_printer': self.report_printer,
                 'printer_name': self.printer_name
             },
             'system': {
                 'language': self.language,
                 'timezone': self.timezone,
                 'date_format': self.date_format,
-                'backup_frequency': self.backup_frequency
+                'backup_frequency': self.backup_frequency,
+                'two_factor_auth': self.two_factor_auth,
+                'auto_logout': self.auto_logout,
+                'audit_logs': self.audit_logs,
+                'session_timeout': self.session_timeout,
+                'max_login_attempts': self.max_login_attempts
             }
         }
     
@@ -104,7 +124,11 @@ class SystemSettings(models.Model):
         if 'printing' in data:
             printing = data['printing']
             self.auto_print_receipts = printing.get('auto_print_receipts', self.auto_print_receipts)
-            self.receipt_copies = printing.get('receipt_copies', self.receipt_copies)
+            self.auto_print_daily_reports = printing.get('auto_print_daily_reports', self.auto_print_daily_reports)
+            self.thermal_format = printing.get('thermal_format', self.thermal_format)
+            self.receipt_copies = printing.get('copies', printing.get('receipt_copies', self.receipt_copies))
+            self.receipt_printer = printing.get('receipt_printer', self.receipt_printer)
+            self.report_printer = printing.get('report_printer', self.report_printer)
             self.printer_name = printing.get('printer_name', self.printer_name)
         
         if 'system' in data:
@@ -113,6 +137,11 @@ class SystemSettings(models.Model):
             self.timezone = system.get('timezone', self.timezone)
             self.date_format = system.get('date_format', self.date_format)
             self.backup_frequency = system.get('backup_frequency', self.backup_frequency)
+            self.two_factor_auth = system.get('two_factor_auth', self.two_factor_auth)
+            self.auto_logout = system.get('auto_logout', self.auto_logout)
+            self.audit_logs = system.get('audit_logs', self.audit_logs)
+            self.session_timeout = system.get('session_timeout', self.session_timeout)
+            self.max_login_attempts = system.get('max_login_attempts', self.max_login_attempts)
 
 
 class UserPreferences(models.Model):

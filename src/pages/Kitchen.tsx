@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -491,16 +489,10 @@ export default function Kitchen() {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-background">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 p-6 flex items-center justify-center">
-            <div className="text-center">
-              <Clock className="h-12 w-12 animate-spin mx-auto mb-4" />
-              <p>Chargement des données de cuisine...</p>
-            </div>
-          </main>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Clock className="h-12 w-12 animate-spin mx-auto mb-4" />
+          <p>Chargement des données de cuisine...</p>
         </div>
       </div>
     );
@@ -508,34 +500,24 @@ export default function Kitchen() {
 
   if (!kitchenData) {
     return (
-      <div className="flex h-screen bg-background">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 p-6 flex items-center justify-center">
-            <div className="text-center">
-              <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
-              <p>Erreur de chargement des données</p>
-              <Button onClick={() => {
-                refetchKitchen();
-                refetchIngredients();
-              }} className="mt-4">
-                Réessayer
-              </Button>
-            </div>
-          </main>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <p>Erreur de chargement des données</p>
+          <Button onClick={() => {
+            refetchKitchen();
+            refetchIngredients();
+          }} className="mt-4">
+            Réessayer
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="space-y-6">
+    <>
+      <div className="space-y-6">
             
             {/* En-tête */}
             <div className="flex items-center justify-between">
@@ -1456,11 +1438,9 @@ export default function Kitchen() {
               </TabsContent>
             </Tabs>
           </div>
-        </main>
-      </div>
 
-      {/* Dialog de modification de recette */}
-      <Dialog open={showEditRecipe} onOpenChange={setShowEditRecipe}>
+        {/* Dialog de modification de recette */}
+        <Dialog open={showEditRecipe} onOpenChange={setShowEditRecipe}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Modifier la Recette</DialogTitle>
@@ -1655,6 +1635,6 @@ export default function Kitchen() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

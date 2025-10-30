@@ -1,6 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { useStockNotifications } from "@/hooks/use-stock-notifications";
 import { useOrderNotifications } from "@/hooks/use-order-notifications";
 import { StatsCard } from "@/components/dashboard/StatsCard";
@@ -198,13 +196,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-surface flex">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
-        <main className="flex-1 p-6 space-y-6">
+    <div className="space-y-6">
           {/* Welcome Section */}
           <div className="bg-gradient-to-r from-primary to-primary-glow rounded-xl p-6 text-primary-foreground">
             <div className="flex items-center justify-between">
@@ -364,10 +356,7 @@ const Index = () => {
               </Card>
               </ErrorBoundary>
             </div>
-
           </div>
-        </main>
-      </div>
     </div>
   );
 };

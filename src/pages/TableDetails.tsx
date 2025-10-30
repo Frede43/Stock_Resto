@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -175,28 +173,18 @@ export default function TableDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-surface flex">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 p-6 flex items-center justify-center">
+      <main className="flex-1 p-6 flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
               <p>Chargement des détails...</p>
             </div>
           </main>
-        </div>
-      </div>
     );
   }
 
   if (!table) {
     return (
-      <div className="min-h-screen bg-gradient-surface flex">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 p-6 flex items-center justify-center">
+      <main className="flex-1 p-6 flex items-center justify-center">
             <div className="text-center">
               <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">Table non trouvée</h2>
@@ -207,19 +195,11 @@ export default function TableDetails() {
               </Button>
             </div>
           </main>
-        </div>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-surface flex">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
-        <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-6 space-y-6">
           {/* Header avec navigation */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -423,7 +403,5 @@ export default function TableDetails() {
             </CardContent>
           </Card>
         </main>
-      </div>
-    </div>
   );
 }

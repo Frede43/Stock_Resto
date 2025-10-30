@@ -8,8 +8,6 @@ import {
   Activity, AlertCircle, CheckCircle, Clock, RefreshCw
 } from 'lucide-react';
 import { useMonitoringDashboard, useSystemInfoNew } from '@/hooks/use-api';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
 
 const getStatusColor = (status: string) => {
   switch (status?.toLowerCase()) {
@@ -40,11 +38,7 @@ export default function Monitoring() {
 
   if (monitoringLoading || systemLoading) {
     return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto">
             <div className="container mx-auto p-6">
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
@@ -54,18 +48,12 @@ export default function Monitoring() {
               </div>
             </div>
           </main>
-        </div>
-      </div>
     );
   }
 
   if (monitoringError) {
     return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto">
             <div className="container mx-auto p-6">
               <Card className="border-red-200">
                 <CardContent className="flex flex-col items-center justify-center py-12">
@@ -78,8 +66,6 @@ export default function Monitoring() {
               </Card>
             </div>
           </main>
-        </div>
-      </div>
     );
   }
 
@@ -88,11 +74,7 @@ export default function Monitoring() {
   const system = (systemInfo as any) || {};
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto">
+    <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto p-6 space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -346,7 +328,5 @@ export default function Monitoring() {
       </Tabs>
           </div>
         </main>
-      </div>
-    </div>
   );
 }

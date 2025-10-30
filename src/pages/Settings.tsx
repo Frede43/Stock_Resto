@@ -11,25 +11,16 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
   Settings as SettingsIcon, Save, RotateCcw, Bell,
-  Printer, Shield, Database, Palette, CheckCircle, AlertCircle,
-  Wifi, Monitor, HardDrive, Users, Clock, Globe, TestTube
+  Printer, Shield, Database, Palette, AlertCircle, TestTube
 } from 'lucide-react';
 import { useSystemSettingsNew, useUpdateSystemSettingsNew } from '@/hooks/use-api';
 import { useToast } from '@/hooks/use-toast';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('general');
   const [localSettings, setLocalSettings] = useState<Record<string, any>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [systemInfo, setSystemInfo] = useState({
-    version: '2.1.0',
-    uptime: '2 jours, 14 heures',
-    lastBackup: new Date().toLocaleDateString(),
-    activeUsers: 3
-  });
   const { toast } = useToast();
 
   const { data: systemSettings, isLoading, refetch } = useSystemSettingsNew();
@@ -269,36 +260,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-surface flex">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
-        <main className="flex-1 p-6 space-y-6">
-          {/* Debug Panel */}
-          <Card className="border-yellow-200 bg-yellow-50">
-            <CardHeader>
-              <CardTitle className="text-sm text-yellow-800">🔍 Debug Info</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-yellow-700">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <strong>Utilisateur:</strong> {user?.username || 'Non connecté'}
-                </div>
-                <div>
-                  <strong>Rôle:</strong> {user?.role || 'N/A'}
-                </div>
-                <div>
-                  <strong>Is Superuser:</strong> {user?.is_superuser ? 'Oui' : 'Non'}
-                </div>
-                <div>
-                  <strong>Token présent:</strong> {localStorage.getItem('access_token') ? 'Oui' : 'Non'}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
+    <main className="flex-1 p-6 space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -312,19 +274,8 @@ export default function Settings() {
                 )}
               </h1>
               <p className="text-muted-foreground mt-2">
-                Configuration et personnalisation de l'application Bar Stock Wise
+                Configuration et personnalisation de l'application
               </p>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="gap-1">
-                <CheckCircle className="h-3 w-3" />
-                v{systemInfo.version}
-              </Badge>
-              <Badge variant="secondary" className="gap-1">
-                <Users className="h-3 w-3" />
-                {systemInfo.activeUsers} utilisateurs
-              </Badge>
             </div>
           </div>
 
@@ -686,54 +637,6 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Informations système */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Monitor className="h-5 w-5" />
-                Informations Système
-              </CardTitle>
-              <CardDescription>
-                État et statistiques du système
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Globe className="h-5 w-5 text-blue-500" />
-                  <div>
-                    <p className="text-sm font-medium">Version</p>
-                    <p className="text-xs text-muted-foreground">{systemInfo.version}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Clock className="h-5 w-5 text-green-500" />
-                  <div>
-                    <p className="text-sm font-medium">Uptime</p>
-                    <p className="text-xs text-muted-foreground">{systemInfo.uptime}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <HardDrive className="h-5 w-5 text-orange-500" />
-                  <div>
-                    <p className="text-sm font-medium">Dernière sauvegarde</p>
-                    <p className="text-xs text-muted-foreground">{systemInfo.lastBackup}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Users className="h-5 w-5 text-purple-500" />
-                  <div>
-                    <p className="text-sm font-medium">Utilisateurs actifs</p>
-                    <p className="text-xs text-muted-foreground">{systemInfo.activeUsers}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
 
@@ -780,7 +683,5 @@ export default function Settings() {
             </div>
           </div>
         </main>
-      </div>
-    </div>
   );
 }

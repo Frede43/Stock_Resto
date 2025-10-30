@@ -22,17 +22,27 @@ class NotificationSettingsSerializer(serializers.Serializer):
 
 class PrintingSettingsSerializer(serializers.Serializer):
     """Serializer pour les paramètres d'impression"""
-    auto_print_receipts = serializers.BooleanField()
-    receipt_copies = serializers.IntegerField(min_value=1, max_value=10)
-    printer_name = serializers.CharField(max_length=200)
+    auto_print_receipts = serializers.BooleanField(required=False)
+    auto_print_daily_reports = serializers.BooleanField(required=False)
+    thermal_format = serializers.BooleanField(required=False)
+    copies = serializers.IntegerField(min_value=1, max_value=10, required=False)
+    receipt_printer = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    report_printer = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    printer_name = serializers.CharField(max_length=200, required=False)
+    receipt_copies = serializers.IntegerField(min_value=1, max_value=10, required=False)  # Pour compatibilité
 
 
 class SystemSettingsNestedSerializer(serializers.Serializer):
     """Serializer pour les paramètres système"""
-    language = serializers.CharField(max_length=10)
-    timezone = serializers.CharField(max_length=50)
-    date_format = serializers.CharField(max_length=20)
-    backup_frequency = serializers.CharField(max_length=20)
+    language = serializers.CharField(max_length=10, required=False)
+    timezone = serializers.CharField(max_length=50, required=False)
+    date_format = serializers.CharField(max_length=20, required=False)
+    backup_frequency = serializers.CharField(max_length=20, required=False)
+    two_factor_auth = serializers.BooleanField(required=False)
+    auto_logout = serializers.BooleanField(required=False)
+    audit_logs = serializers.BooleanField(required=False)
+    session_timeout = serializers.IntegerField(min_value=5, max_value=480, required=False)
+    max_login_attempts = serializers.IntegerField(min_value=3, max_value=10, required=False)
 
 
 class SystemSettingsSerializer(serializers.Serializer):

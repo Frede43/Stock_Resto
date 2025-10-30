@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -257,34 +255,19 @@ export default function Profile() {
   
   if (profileLoading) {
     return (
-      <div className="min-h-screen bg-gradient-surface flex">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 p-6 flex items-center justify-center">
+    <>
+      <main className="flex-1 p-6 flex items-center justify-center">
             <div className="text-center">
               <RefreshCw className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
               <p>Chargement du profil...</p>
             </div>
           </main>
-        </div>
-      </div>
-    );
+    </>
+  );
   }
   
   return (
-    <div className="min-h-screen bg-gradient-surface flex flex-col md:flex-row">
-      <div className="md:hidden">
-        <Sidebar />
-      </div>
-      <div className="hidden md:block">
-        <Sidebar />
-      </div>
-      
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header />
-        
-        <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6 overflow-x-hidden">
+    <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6 overflow-x-hidden">
           {/* Header avec informations utilisateur */}
           <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <div className="relative">
@@ -717,7 +700,5 @@ export default function Profile() {
             </TabsContent>
           </Tabs>
         </main>
-      </div>
-    </div>
   );
 }

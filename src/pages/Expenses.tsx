@@ -1,6 +1,4 @@
 import { useState, useMemo } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -273,12 +271,6 @@ export default function Expenses() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-surface flex">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
         <main className="flex-1 p-6 space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -695,7 +687,5 @@ export default function Expenses() {
             </CardContent>
           </Card>
         </main>
-      </div>
-    </div>
   );
 }

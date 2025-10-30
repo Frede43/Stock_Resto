@@ -9,8 +9,6 @@ import { AlertTriangle, CheckCircle, Archive, Search, Plus } from 'lucide-react'
 import { useAlertsNew, useResolveAlertNew, useArchiveAlertNew, useCreateAlert } from '@/hooks/use-api';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
@@ -80,11 +78,7 @@ export default function Alerts() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto">
             <div className="container mx-auto p-6">
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
@@ -94,17 +88,11 @@ export default function Alerts() {
               </div>
             </div>
           </main>
-        </div>
-      </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto">
+    <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto p-6 space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -262,7 +250,5 @@ export default function Alerts() {
       </Tabs>
           </div>
         </main>
-      </div>
-    </div>
   );
 }

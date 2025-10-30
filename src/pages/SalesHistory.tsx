@@ -1,6 +1,4 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/stable-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -336,13 +334,8 @@ export default function SalesHistory() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-surface flex">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
-        <main className="flex-1 p-6 space-y-6">
+    <>
+      <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -601,26 +594,25 @@ export default function SalesHistory() {
             </CardContent>
           </Card>
           </ErrorBoundary>
-        </main>
-      </div>
 
-      {/* Modal d'ajout d'articles */}
-      {selectedSaleForAddItems && (
-        <AddItemsModal
-          sale={selectedSaleForAddItems}
-          open={showAddItemsModal}
-          onClose={handleCloseAddItemsModal}
-          onSuccess={handleAddItemsSuccess}
+        {/* Modal d'ajout d'articles */}
+        {selectedSaleForAddItems && (
+          <AddItemsModal
+            sale={selectedSaleForAddItems}
+            open={showAddItemsModal}
+            onClose={handleCloseAddItemsModal}
+            onSuccess={handleAddItemsSuccess}
+          />
+        )}
+
+        {/* Modal de facture */}
+        <PrintableInvoice
+          isOpen={showInvoiceModal}
+          onClose={handleCloseInvoice}
+          invoiceData={invoiceData}
+          onPrint={handlePrintInvoice}
         />
-      )}
-
-      {/* Modal de facture */}
-      <PrintableInvoice
-        isOpen={showInvoiceModal}
-        onClose={handleCloseInvoice}
-        invoiceData={invoiceData}
-        onPrint={handlePrintInvoice}
-      />
-    </div>
+      </div>
+    </>
   );
 }

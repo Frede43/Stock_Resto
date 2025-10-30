@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -449,28 +447,18 @@ export default function Sales() {
 
   if (loading || productsLoading) {
     return (
-      <div className="flex h-screen bg-background">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 p-6 flex items-center justify-center">
-            <div className="text-center">
-              <Clock className="h-12 w-12 animate-spin mx-auto mb-4" />
-              <p>Chargement du menu...</p>
-            </div>
-          </main>
-        </div>
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="text-center">
+        <Clock className="h-12 w-12 animate-spin mx-auto mb-4" />
+        <p>Chargement du menu...</p>
       </div>
-    );
+    </div>
+  );
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
             
             {/* Menu - 2/3 de l'écran */}
             <div className="lg:col-span-2 space-y-6">
@@ -791,77 +779,75 @@ export default function Sales() {
               </Card>
             </div>
           </div>
-        </main>
-      </div>
 
-      {/* Facture imprimable */}
-      <PrintableInvoice
-        isOpen={showInvoice}
-        onClose={() => setShowInvoice(false)}
-        invoiceData={invoiceData}
-        onPrint={() => {
-          toast({
-            title: "Facture imprimée",
-            description: "La facture a été envoyée à l'imprimante",
-          });
-        }}
-      />
+        {/* Facture imprimable */}
+        <PrintableInvoice
+          isOpen={showInvoice}
+          onClose={() => setShowInvoice(false)}
+          invoiceData={invoiceData}
+          onPrint={() => {
+            toast({
+              title: "Facture imprimée",
+              description: "La facture a été envoyée à l'imprimante",
+            });
+          }}
+        />
 
-      {/* Modal de confirmation de vente */}
-      {showConfirmation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-xl font-bold mb-4">Confirmer la vente</h2>
-            
-            <div className="space-y-3 mb-6">
-              <div className="flex justify-between">
-                <span>Client:</span>
-                <span className="font-medium">{customerName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Table:</span>
-                <span className="font-medium">
-                  {tablesData?.results?.find((t: any) => t.id.toString() === selectedTable)?.number || selectedTable}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Serveur:</span>
-                <span className="font-medium">
-                  {serversData?.find((s: any) => s.id.toString() === selectedServer)?.first_name} {serversData?.find((s: any) => s.id.toString() === selectedServer)?.last_name}
-                </span>
-              </div>
-              <div className="border-t pt-2">
+        {/* Modal de confirmation de vente */}
+        {showConfirmation && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <h2 className="text-xl font-bold mb-4">Confirmer la vente</h2>
+              
+              <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
-                  <span>Articles:</span>
-                  <span className="font-medium">{cart.length}</span>
+                  <span>Client:</span>
+                  <span className="font-medium">{customerName}</span>
                 </div>
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total:</span>
-                  <span>{totalAmount.toLocaleString()} BIF</span>
+                <div className="flex justify-between">
+                  <span>Table:</span>
+                  <span className="font-medium">
+                    {tablesData?.results?.find((t: any) => t.id.toString() === selectedTable)?.number || selectedTable}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Serveur:</span>
+                  <span className="font-medium">
+                    {serversData?.find((s: any) => s.id.toString() === selectedServer)?.first_name} {serversData?.find((s: any) => s.id.toString() === selectedServer)?.last_name}
+                  </span>
+                </div>
+                <div className="border-t pt-2">
+                  <div className="flex justify-between">
+                    <span>Articles:</span>
+                    <span className="font-medium">{cart.length}</span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Total:</span>
+                    <span>{totalAmount.toLocaleString()} BIF</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowConfirmation(false)}
-                className="flex-1"
-                disabled={processing}
-              >
-                Annuler
-              </Button>
-              <Button
-                onClick={processSale}
-                disabled={processing}
-                className="flex-1 bg-green-600 hover:bg-green-700"
-              >
-                {processing ? "Traitement..." : "Confirmer la vente"}
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowConfirmation(false)}
+                  className="flex-1"
+                  disabled={processing}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={processSale}
+                  disabled={processing}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  {processing ? "Traitement..." : "Confirmer la vente"}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+    </>
   );
 }

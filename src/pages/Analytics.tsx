@@ -1,6 +1,4 @@
 import { useState, useMemo } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -182,13 +180,7 @@ export default function Analytics() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-surface flex">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
-        <main className="flex-1 p-6 overflow-y-auto">
+    <main className="flex-1 p-6 overflow-y-auto">
           {/* Debug Panel - Afficher les erreurs */}
           {(dashboardError || salesError || productsError || ordersError || analyticsError) && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -521,7 +513,5 @@ export default function Analytics() {
             </TabsContent>
           </Tabs>
         </main>
-      </div>
-    </div>
   );
 }

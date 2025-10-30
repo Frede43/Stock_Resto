@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/use-auth";
 import { NotificationProvider } from "./hooks/use-notifications";
 import { WebSocketProvider } from "./components/WebSocketProvider";
+import { SidebarProvider } from "./context/SidebarContext";
+import { Layout } from "./components/layout/ModernLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Lock } from "lucide-react";
 import Index from "./pages/Index";
@@ -88,88 +90,101 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <NotificationProvider>
-          <Routes>
-          <Route path="/login" element={<Login />} />
-          
-          {/* Protected Routes */}
-          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <SidebarProvider>
+            <NotificationProvider>
+            <Routes>
+            <Route path="/login" element={<Login />} />
+            
+            {/* Protected Routes with Layout */}
+            <Route path="/" element={<ProtectedRoute><Layout><Index /></Layout></ProtectedRoute>} />
           {/* Dashboard supprimé - Admin utilise Index */}
 
           {/* Role-specific Dashboards */}
           {/* Caissier utilise maintenant la route / (Index.tsx) */}
-          <Route path="/manager-dashboard" element={<ProtectedRoute><ManagerDashboard /></ProtectedRoute>} />
-          <Route path="/server-dashboard" element={<ProtectedRoute><ServerDashboard /></ProtectedRoute>} />
+          <Route path="/manager-dashboard" element={<ProtectedRoute><Layout><ManagerDashboard /></Layout></ProtectedRoute>} />
+          <Route path="/server-dashboard" element={<ProtectedRoute><Layout><ServerDashboard /></Layout></ProtectedRoute>} />
 
           {/* Authentication & Profile */}
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
           <Route path="/products" element={
             <ProtectedRoute>
-              <RestrictedForCashier>
-                <Products />
-              </RestrictedForCashier>
+              <Layout>
+                <RestrictedForCashier>
+                  <Products />
+                </RestrictedForCashier>
+              </Layout>
             </ProtectedRoute>
           } />
-          <Route path="/sales" element={<ProtectedRoute><Sales /></ProtectedRoute>} />
+          <Route path="/sales" element={<ProtectedRoute><Layout><Sales /></Layout></ProtectedRoute>} />
 
           {/* Stock Management - Restreint pour caissiers */}
           <Route path="/stocks" element={
             <ProtectedRoute>
-              <RestrictedForCashier>
-                <Stocks />
-              </RestrictedForCashier>
+              <Layout>
+                <RestrictedForCashier>
+                  <Stocks />
+                </RestrictedForCashier>
+              </Layout>
             </ProtectedRoute>
           } />
           <Route path="/stock-sync" element={
             <ProtectedRoute>
-              <RestrictedForCashier>
-                <StockSync />
-              </RestrictedForCashier>
+              <Layout>
+                <RestrictedForCashier>
+                  <StockSync />
+                </RestrictedForCashier>
+              </Layout>
             </ProtectedRoute>
           } />
           <Route path="/supplies" element={
             <ProtectedRoute>
-              <RestrictedForCashier>
-                <Supplies />
-              </RestrictedForCashier>
+              <Layout>
+                <RestrictedForCashier>
+                  <Supplies />
+                </RestrictedForCashier>
+              </Layout>
             </ProtectedRoute>
           } />
           <Route path="/kitchen" element={
             <ProtectedRoute>
-              <RestrictedForCashier>
-                <Kitchen />
-              </RestrictedForCashier>
+              <Layout>
+                <RestrictedForCashier>
+                  <Kitchen />
+                </RestrictedForCashier>
+              </Layout>
             </ProtectedRoute>
           } />
 
           {/* Financial & Reports */}
-          <Route path="/sales-history" element={<ProtectedRoute><SalesHistory /></ProtectedRoute>} />
-          <Route path="/daily-report" element={<ProtectedRoute><DailyReport /></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+          <Route path="/sales-history" element={<ProtectedRoute><Layout><SalesHistory /></Layout></ProtectedRoute>} />
+          <Route path="/daily-report" element={<ProtectedRoute><Layout><DailyReport /></Layout></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><Layout><Reports /></Layout></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute><Layout><Analytics /></Layout></ProtectedRoute>} />
 
           {/* Operational Pages */}
-          <Route path="/tables" element={<ProtectedRoute><Tables /></ProtectedRoute>} />
-          <Route path="/tables/:id" element={<ProtectedRoute><TableDetails /></ProtectedRoute>} />
-          <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+          <Route path="/tables" element={<ProtectedRoute><Layout><Tables /></Layout></ProtectedRoute>} />
+          <Route path="/tables/:id" element={<ProtectedRoute><Layout><TableDetails /></Layout></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute><Layout><Orders /></Layout></ProtectedRoute>} />
 
           {/* Administration */}
-          <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
-          <Route path="/suppliers" element={<ProtectedRoute><Suppliers /></ProtectedRoute>} />
-          <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute><Layout><Users /></Layout></ProtectedRoute>} />
+          <Route path="/suppliers" element={<ProtectedRoute><Layout><Suppliers /></Layout></ProtectedRoute>} />
+          <Route path="/expenses" element={<ProtectedRoute><Layout><Expenses /></Layout></ProtectedRoute>} />
 
           {/* System & Support */}
-          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
-          <Route path="/monitoring" element={<ProtectedRoute><Monitoring /></ProtectedRoute>} />
-          <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
+          <Route path="/alerts" element={<ProtectedRoute><Layout><Alerts /></Layout></ProtectedRoute>} />
+          <Route path="/monitoring" element={<ProtectedRoute><Layout><Monitoring /></Layout></ProtectedRoute>} />
+          <Route path="/help" element={<ProtectedRoute><Layout><Help /></Layout></ProtectedRoute>} />
 
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
           <WebSocketProvider>
+            <></>
           </WebSocketProvider>
           </NotificationProvider>
+          </SidebarProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

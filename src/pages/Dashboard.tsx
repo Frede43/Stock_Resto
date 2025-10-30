@@ -1,5 +1,3 @@
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { AlertsWidget } from "@/components/dashboard/AlertsWidget";
@@ -98,11 +96,7 @@ export default function Dashboard() {
   // Gestion des erreurs
   if (statsError) {
     return (
-      <div className="min-h-screen bg-gradient-surface flex">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 p-6 flex items-center justify-center">
+      <main className="flex-1 p-6 flex items-center justify-center">
             <div className="text-center">
               <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">Erreur de chargement</h2>
@@ -115,19 +109,11 @@ export default function Dashboard() {
               </Button>
             </div>
           </main>
-        </div>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-surface flex">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
-        <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-6 space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -406,7 +392,5 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </main>
-      </div>
-    </div>
   );
 }

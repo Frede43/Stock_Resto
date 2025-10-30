@@ -1,6 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/stable-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,11 +57,7 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6 space-y-8">
+    <div className="space-y-8">
           {/* En-tête Admin Amélioré */}
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-2xl opacity-10"></div>
@@ -188,8 +182,6 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
     </div>
   );
 };
