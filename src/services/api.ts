@@ -72,12 +72,14 @@ class ApiService {
 
   // Méthode générique pour les requêtes HTTP avec support cross-browser
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    let url = `${API_BASE_URL}${endpoint}`;
+    let url = `${this.baseURL}${endpoint}`;
     
     // Log des requêtes pour le débogage
     console.log('🚀 Requête API:', {
       method: options.method || 'GET',
       url: url,
+      baseURL: this.baseURL,
+      hasToken: !!this.accessToken,
       body: options.body ? JSON.parse(options.body as string) : null
     });
     
@@ -181,19 +183,7 @@ class ApiService {
 
   // Méthode pour définir les tokens
   setTokens(accessToken: string, refreshToken: string) {
-    console.log('✅ setTokens appelé:', {
-      hasAccess: !!accessToken,
-      hasRefresh: !!refreshToken,
-      accessPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'null',
-      refreshPreview: refreshToken ? refreshToken.substring(0, 20) + '...' : 'null'
-    });
     this.saveTokensToStorage({ access: accessToken, refresh: refreshToken });
-    // Recharger les tokens pour s'assurer qu'ils sont disponibles
-    this.loadTokensFromStorage();
-    console.log('✅ Tokens après rechargement:', {
-      hasAccess: !!this.accessToken,
-      hasRefresh: !!this.refreshToken
-    });
   }
 
   // Authentification
@@ -201,8 +191,8 @@ class ApiService {
     try {
       console.log('🔐 Tentative de connexion:', { 
         username: credentials.username, 
-        api_url: API_BASE_URL,
-        full_url: `${API_BASE_URL}/accounts/login/`,
+        api_url: this.baseURL,
+        full_url: `${this.baseURL}/accounts/login/`,
         userAgent: navigator.userAgent
       });
 
@@ -210,7 +200,7 @@ class ApiService {
       console.log('📤 Données envoyées:', credentials);
 
       // Approche alternative pour Chrome - requête directe avec fetch
-      const url = `${API_BASE_URL}/accounts/login/`;
+      const url = `${this.baseURL}/accounts/login/`;
       const fetchResponse = await fetch(url, {
         method: 'POST',
         headers: {
@@ -256,7 +246,7 @@ class ApiService {
       console.error('❌ Erreur de connexion complète:', {
         message: error.message,
         stack: error.stack,
-        url: `${API_BASE_URL}/accounts/login/`,
+        url: `${this.baseURL}/accounts/login/`,
         credentials: { username: credentials.username, password: '***' }
       });
 
