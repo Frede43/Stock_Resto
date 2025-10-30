@@ -199,14 +199,22 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-# CORS settings - Configuration permissive pour le développement
-CORS_ALLOW_ALL_ORIGINS = True  # Autorise toutes les origines en développement
+# CORS settings - Configuration pour développement et production
 CORS_ALLOW_CREDENTIALS = True  # Permet l'envoi de cookies et credentials
+
+# En production, utiliser la liste spécifique
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True  # Autorise toutes les origines en développement
+else:
+    CORS_ALLOW_ALL_ORIGINS = False
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173", 
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://barstock-web.onrender.com",  # Production frontend
+    "https://barstock-web-v2.onrender.com",  # Production frontend (nouveau)
 ]
 
 # Configuration alternative plus restrictive (commentée)
