@@ -19,6 +19,11 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+// Configuration API dynamique
+const API_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : 'http://127.0.0.1:8000/api';
+
 interface TableDetail {
   id: number;
   number: string;
@@ -64,7 +69,7 @@ export default function TableDetails() {
 
   const fetchTableDetails = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/sales/tables/${id}/`, {
+      const response = await fetch(`${API_URL}/sales/tables/${id}/`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
         },
@@ -94,7 +99,7 @@ export default function TableDetails() {
   const fetchTableSales = async () => {
     setSalesLoading(true);
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/sales/?table=${id}`, {
+      const response = await fetch(`${API_URL}/sales/?table=${id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
         },
@@ -115,7 +120,7 @@ export default function TableDetails() {
     if (!table) return;
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/sales/tables/${table.id}/`, {
+      const response = await fetch(`${API_URL}/sales/tables/${table.id}/`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,

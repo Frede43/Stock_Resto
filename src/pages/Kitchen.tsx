@@ -28,6 +28,11 @@ import {
   X
 } from "lucide-react";
 import { useKitchenDashboard, useIngredients, useCreateIngredient, useSuppliers, useRecipes, useProducts } from "@/hooks/use-api";
+
+// Configuration API dynamique
+const API_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : 'http://127.0.0.1:8000/api';
 import { formatNumber, formatQuantity, formatUnitPrice } from "@/utils/formatters";
 import type { PaginatedResponse } from "@/types/api";
 
@@ -252,7 +257,7 @@ export default function Kitchen() {
   // Fonction pour recalculer automatiquement les prix d'achat
   const handleRecalculatePrices = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/kitchen/recalculate-purchase-prices/', {
+      const response = await fetch(`${API_URL}/kitchen/recalculate-purchase-prices/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -449,7 +454,7 @@ export default function Kitchen() {
 
       console.log("🔧 UPDATE RECIPE - Données envoyées:", JSON.stringify(updateData, null, 2));
 
-      const response = await fetch(`http://127.0.0.1:8000/api/kitchen/recipes/${editingRecipe.id}/`, {
+      const response = await fetch(`${API_URL}/kitchen/recipes/${editingRecipe.id}/`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -1083,7 +1088,7 @@ export default function Kitchen() {
 
                                 // Appel API pour créer la recette
                                 console.log("Données envoyées:", JSON.stringify(recipeData, null, 2));
-                                const response = await fetch('http://127.0.0.1:8000/api/kitchen/recipes/', {
+                                const response = await fetch(`${API_URL}/kitchen/recipes/`, {
                                   method: 'POST',
                                   headers: {
                                     'Content-Type': 'application/json',

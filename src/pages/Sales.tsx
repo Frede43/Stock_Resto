@@ -23,6 +23,9 @@ import {
   MapPin
 } from "lucide-react";
 
+// Configuration API dynamique
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 interface MenuItem {
   id: number;
   name: string;
@@ -405,7 +408,7 @@ export default function Sales() {
           // Récupérer et afficher la facture imprimable
           if ((result as any)?.invoice_url) {
             try {
-              const response = await fetch(`http://127.0.0.1:8000${(result as any).invoice_url}?format=json`);
+              const response = await fetch(`${API_BASE_URL}${(result as any).invoice_url}?format=json`);
               if (response.ok) {
                 const invoiceData = await response.json();
                 setInvoiceData(invoiceData.invoice);
