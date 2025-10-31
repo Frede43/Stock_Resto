@@ -10,6 +10,7 @@ import { WebSocketProvider } from "./components/WebSocketProvider";
 import { SidebarProvider } from "./context/SidebarContext";
 import { Layout } from "./components/layout/ModernLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { OfflineIndicator } from "./components/OfflineIndicator";
 import { Lock } from "lucide-react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -183,6 +184,9 @@ const App = () => (
           <WebSocketProvider>
             <></>
           </WebSocketProvider>
+          
+          {/* Indicateur de statut offline/online */}
+          <OfflineIndicator />
           </NotificationProvider>
           </SidebarProvider>
         </AuthProvider>
