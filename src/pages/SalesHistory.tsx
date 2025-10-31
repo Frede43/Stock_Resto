@@ -335,37 +335,37 @@ export default function SalesHistory() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6 p-4 md:p-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 Historique des ventes
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 {isAdmin() || isManager() 
                   ? "Consultez et gérez l'historique de toutes les ventes" 
                   : "Consultez l'historique de vos ventes"}
               </p>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleRefresh} className="gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={handleRefresh} className="gap-2 flex-1 sm:flex-none">
                 <RefreshCw className="h-4 w-4" />
-                Actualiser
+                <span className="hidden sm:inline">Actualiser</span>
               </Button>
               {(isAdmin() || isManager()) && (
                 <>
-                  <Button variant="outline" onClick={() => exportSales("pdf")} className="gap-2">
+                  <Button variant="outline" onClick={() => exportSales("pdf")} className="gap-2 flex-1 sm:flex-none">
                     <Download className="h-4 w-4" />
-                    PDF
+                    <span className="hidden sm:inline">PDF</span>
                   </Button>
-                  <Button variant="outline" onClick={() => exportSales("excel")} className="gap-2">
+                  <Button variant="outline" onClick={() => exportSales("excel")} className="gap-2 flex-1 sm:flex-none hidden md:flex">
                     <Download className="h-4 w-4" />
-                    Excel
+                    <span className="hidden sm:inline">Excel</span>
                   </Button>
-                  <Button variant="outline" onClick={() => exportSales("csv")} className="gap-2">
+                  <Button variant="outline" onClick={() => exportSales("csv")} className="gap-2 flex-1 sm:flex-none hidden lg:flex">
                     <Download className="h-4 w-4" />
-                    CSV
+                    <span className="hidden sm:inline">CSV</span>
                   </Button>
                 </>
               )}
@@ -374,16 +374,16 @@ export default function SalesHistory() {
 
           {/* Summary Stats */}
           <ErrorBoundary>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-primary-foreground" />
+              <CardContent className="pt-4 md:pt-6">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center flex-shrink-0">
+                    <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total ventes</p>
-                    <p className="text-xl font-bold">
+                  <div className="min-w-0">
+                    <p className="text-xs md:text-sm text-muted-foreground">Total ventes</p>
+                    <p className="text-base md:text-xl font-bold truncate">
                       {salesLoading ? "Chargement..." : `${salesStats.totalSales.toLocaleString()} FBu`}
                     </p>
                   </div>
@@ -392,28 +392,28 @@ export default function SalesHistory() {
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-gradient-to-br from-success to-success/80 rounded-lg flex items-center justify-center">
-                    <CheckCircle className="h-6 w-6 text-success-foreground" />
+              <CardContent className="pt-4 md:pt-6">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-success to-success/80 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-success-foreground" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Terminées</p>
-                    <p className="text-xl font-bold text-success">{salesStats.completedCount}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs md:text-sm text-muted-foreground">Terminées</p>
+                    <p className="text-base md:text-xl font-bold text-success">{salesStats.completedCount}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-gradient-to-br from-warning to-warning/80 rounded-lg flex items-center justify-center">
-                    <Clock className="h-6 w-6 text-warning-foreground" />
+              <CardContent className="pt-4 md:pt-6">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-warning to-warning/80 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Clock className="h-5 w-5 md:h-6 md:w-6 text-warning-foreground" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">En attente</p>
-                    <p className="text-xl font-bold text-warning">
+                  <div className="min-w-0">
+                    <p className="text-xs md:text-sm text-muted-foreground">En attente</p>
+                    <p className="text-base md:text-xl font-bold text-warning">
                       {salesStats.pendingCount}
                     </p>
                   </div>
@@ -422,14 +422,14 @@ export default function SalesHistory() {
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-gradient-to-br from-secondary to-secondary/80 rounded-lg flex items-center justify-center">
-                    <FileText className="h-6 w-6 text-secondary-foreground" />
+              <CardContent className="pt-4 md:pt-6">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-secondary to-secondary/80 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText className="h-5 w-5 md:h-6 md:w-6 text-secondary-foreground" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total ventes</p>
-                    <p className="text-xl font-bold">{filteredSales.length}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs md:text-sm text-muted-foreground">Total ventes</p>
+                    <p className="text-base md:text-xl font-bold">{filteredSales.length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -439,41 +439,42 @@ export default function SalesHistory() {
 
           {/* Filters */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
+            <CardHeader className="pb-3 md:pb-6">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                <Filter className="h-4 w-4 md:h-5 md:w-5" />
                 Filtres avancés
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={`grid grid-cols-1 md:grid-cols-2 ${isAdmin() || isManager() ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4`}>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Recherche</label>
+              <div className={`grid grid-cols-1 sm:grid-cols-2 ${isAdmin() || isManager() ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-3 md:gap-4`}>
+                <div className="space-y-1.5 md:space-y-2">
+                  <label className="text-xs md:text-sm font-medium">Recherche</label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-2.5 md:left-3 top-2.5 md:top-3 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
                     <Input
                       placeholder="ID, client, table..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-8 md:pl-10 text-sm md:text-base h-9 md:h-10"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Date</label>
+                <div className="space-y-1.5 md:space-y-2">
+                  <label className="text-xs md:text-sm font-medium">Date</label>
                   <Input
                     type="date"
                     value={dateFilter}
                     onChange={(e) => setDateFilter(e.target.value)}
+                    className="text-sm md:text-base h-9 md:h-10"
                   />
                 </div>
 
                 {(isAdmin() || isManager()) && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Serveur</label>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <label className="text-xs md:text-sm font-medium">Serveur</label>
                     <Select value={serverFilter} onValueChange={setServerFilter} disabled={serversLoading}>
-                      <SelectTrigger>
+                      <SelectTrigger className="text-sm md:text-base h-9 md:h-10">
                         <SelectValue placeholder={serversLoading ? "Chargement..." : "Sélectionner un serveur"} />
                       </SelectTrigger>
                       <SelectContent>
@@ -487,11 +488,11 @@ export default function SalesHistory() {
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Statut</label>
+                <div className="space-y-1.5 md:space-y-2">
+                  <label className="text-xs md:text-sm font-medium">Statut</label>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
+                    <SelectTrigger className="text-sm md:text-base h-9 md:h-10">
+                      <SelectValue placeholder="Tous les statuts" />
                     </SelectTrigger>
                     <SelectContent>
                       {statuses.map(status => (
@@ -507,9 +508,9 @@ export default function SalesHistory() {
                   </Select>
                 </div>
 
-                <div className="flex items-end">
-                  <Button variant="outline" className="w-full gap-2" onClick={handleResetFilters}>
-                    <Filter className="h-4 w-4" />
+                <div className="flex items-end sm:col-span-2 lg:col-span-1">
+                  <Button variant="outline" className="w-full gap-2 h-9 md:h-10 text-sm md:text-base" onClick={handleResetFilters}>
+                    <Filter className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     Réinitialiser
                   </Button>
                 </div>
