@@ -45,6 +45,9 @@ urlpatterns = [
     
     # Notifications
     path('notifications/tables/', views.table_notifications, name='table_notifications'),
+    
+    # Historique des ventes par table
+    path('tables/<int:table_id>/sales-by-day/', views.table_sales_by_day, name='table_sales_by_day'),
 
     # Statistiques et rapports
     path('stats/', views.sales_stats, name='sales_stats'),

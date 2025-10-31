@@ -1057,6 +1057,68 @@ def table_notifications(request):
     })
 
 
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def table_sales_by_day(request, table_id):
+    """
+    Récupère l'historique des ventes d'une table groupées par jour
+    """
+    try:
+        table = Table.objects.get(id=table_id)
+    except Table.DoesNotExist:
+        return Response(
+            {'error': 'Table non trouvée'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    # Récupérer toutes les ventes de cette table
+    sales = Sale.objects.filter(table=table).order_by('-created_at')
+    
+    # Grouper par jour
+    from collections import defaultdict
+    sales_by_day = defaultdict(list)
+    
+    for sale in sales:
+        # Date au format YYYY-MM-DD
+        day_key = sale.created_at.date().isoformat()
+        sales_by_day[day_key].append({
+            'id': sale.id,
+            'reference': sale.reference,
+            'customer_name': sale.customer_name,
+            'total_amount': float(sale.total_amount) if sale.total_amount else 0,
+            'status': sale.status,
+            'payment_method': sale.payment_method,
+            'created_at': sale.created_at.isoformat(),
+            'items_count': sale.items.count(),
+            'server': f"{sale.server.first_name} {sale.server.last_name}" if sale.server else None,
+        })
+    
+    # Calculer les statistiques par jour
+    daily_reports = []
+    for day, day_sales in sorted(sales_by_day.items(), reverse=True):
+        paid_sales = [s for s in day_sales if s['status'] == 'paid']
+        total_revenue = sum(s['total_amount'] for s in paid_sales)
+        
+        daily_reports.append({
+            'date': day,
+            'sales_count': len(day_sales),
+            'paid_count': len(paid_sales),
+            'total_revenue': total_revenue,
+            'sales': day_sales,
+            'is_today': day == timezone.now().date().isoformat(),
+        })
+    
+    return Response({
+        'table': {
+            'id': table.id,
+            'number': table.number,
+            'location': table.location,
+        },
+        'daily_reports': daily_reports,
+        'total_sales': sales.count(),
+    })
+
+
 @api_view(['GET', 'POST'])
 @permission_classes([permissions.AllowAny])  # Temporaire pour test 
 def test_sales_endpoint(request):

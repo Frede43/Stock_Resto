@@ -15,7 +15,10 @@ import {
   Settings,
   CheckCircle,
   AlertCircle,
-  XCircle
+  XCircle,
+  TrendingUp,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -47,6 +50,18 @@ interface Sale {
   created_at: string;
   payment_method: string;
   items: any[];
+  customer_name?: string;
+  server?: string;
+  items_count?: number;
+}
+
+interface DailyReport {
+  date: string;
+  sales_count: number;
+  paid_count: number;
+  total_revenue: number;
+  sales: Sale[];
+  is_today: boolean;
 }
 
 export default function TableDetails() {
@@ -56,6 +71,8 @@ export default function TableDetails() {
   
   const [table, setTable] = useState<TableDetail | null>(null);
   const [sales, setSales] = useState<Sale[]>([]);
+  const [dailyReports, setDailyReports] = useState<DailyReport[]>([]);
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set([new Date().toISOString().split('T')[0]]));
   const [loading, setLoading] = useState(true);
   const [salesLoading, setSalesLoading] = useState(false);
 
@@ -63,8 +80,34 @@ export default function TableDetails() {
   useEffect(() => {
     if (id) {
       fetchTableDetails();
-      fetchTableSales();
+      fetchTableSalesByDay();
     }
+  }, [id]);
+  
+  // Actualiser automatiquement à minuit
+  useEffect(() => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+    
+    const timer = setTimeout(() => {
+      // Actualiser les données à minuit
+      if (id) {
+        fetchTableSalesByDay();
+      }
+      
+      // Afficher notification
+      toast({
+        title: "📊 Nouveau jour",
+        description: "Les rapports ont été mis à jour pour aujourd'hui",
+        duration: 5000,
+      });
+    }, timeUntilMidnight);
+    
+    return () => clearTimeout(timer);
   }, [id]);
 
   const fetchTableDetails = async () => {
@@ -96,10 +139,10 @@ export default function TableDetails() {
     }
   };
 
-  const fetchTableSales = async () => {
+  const fetchTableSalesByDay = async () => {
     setSalesLoading(true);
     try {
-      const response = await fetch(`${API_URL}/sales/?table=${id}`, {
+      const response = await fetch(`${API_URL}/sales/tables/${id}/sales-by-day/`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
         },
@@ -107,13 +150,29 @@ export default function TableDetails() {
 
       if (response.ok) {
         const data = await response.json();
-        setSales(data.results || []);
+        setDailyReports(data.daily_reports || []);
+        
+        // Extraire toutes les ventes pour compatibilité
+        const allSales = data.daily_reports.flatMap((report: DailyReport) => report.sales);
+        setSales(allSales);
       }
     } catch (error) {
       console.error('Erreur chargement ventes:', error);
     } finally {
       setSalesLoading(false);
     }
+  };
+  
+  const toggleDayExpansion = (date: string) => {
+    setExpandedDays(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(date)) {
+        newSet.delete(date);
+      } else {
+        newSet.add(date);
+      }
+      return newSet;
+    });
   };
 
   const changeTableStatus = async (newStatus: string) => {
@@ -323,12 +382,12 @@ export default function TableDetails() {
             </CardContent>
           </Card>
 
-          {/* Historique des ventes */}
+          {/* Historique des ventes groupé par jour */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <History className="h-5 w-5" />
-                Historique des ventes
+                Historique des ventes par jour
               </CardTitle>
               <CardDescription>
                 {sales.length} vente(s) enregistrée(s) pour cette table
@@ -340,31 +399,96 @@ export default function TableDetails() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
                   <p>Chargement des ventes...</p>
                 </div>
-              ) : sales.length > 0 ? (
+              ) : dailyReports.length > 0 ? (
                 <div className="space-y-4">
-                  {sales.slice(0, 5).map((sale) => (
-                    <div key={sale.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <div className="font-medium">Vente #{sale.reference}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {formatDate(sale.created_at)} • {sale.payment_method}
+                  {dailyReports.map((report) => (
+                    <div key={report.date} className="border rounded-lg overflow-hidden">
+                      {/* En-tête du jour */}
+                      <div 
+                        className={`p-4 cursor-pointer transition-colors ${
+                          report.is_today 
+                            ? 'bg-blue-50 hover:bg-blue-100 border-l-4 border-blue-500' 
+                            : 'bg-gray-50 hover:bg-gray-100'
+                        }`}
+                        onClick={() => toggleDayExpansion(report.date)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {expandedDays.has(report.date) ? (
+                              <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                            )}
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4" />
+                                <span className="font-semibold">
+                                  {new Date(report.date).toLocaleDateString('fr-FR', { 
+                                    weekday: 'long', 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                  })}
+                                </span>
+                                {report.is_today && (
+                                  <Badge variant="default" className="bg-blue-500">Aujourd'hui</Badge>
+                                )}
+                              </div>
+                              <div className="text-sm text-muted-foreground mt-1">
+                                {report.sales_count} vente(s) • {report.paid_count} payée(s)
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="text-right">
+                            <div className="flex items-center gap-2 text-lg font-bold text-green-600">
+                              <TrendingUp className="h-5 w-5" />
+                              {formatCurrency(report.total_revenue)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Revenu total
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold">{formatCurrency(sale.total_amount)}</div>
-                        <Badge variant={sale.status === 'paid' ? 'default' : 'secondary'}>
-                          {sale.status === 'paid' ? 'Payée' : sale.status}
-                        </Badge>
-                      </div>
+                      
+                      {/* Liste des ventes du jour */}
+                      {expandedDays.has(report.date) && (
+                        <div className="p-4 space-y-3 bg-white">
+                          {report.sales.map((sale) => (
+                            <div key={sale.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">#{sale.reference}</span>
+                                  <Badge variant={
+                                    sale.status === 'paid' ? 'default' :
+                                    sale.status === 'cancelled' ? 'destructive' :
+                                    'secondary'
+                                  }>
+                                    {sale.status === 'paid' ? 'Payée' :
+                                     sale.status === 'cancelled' ? 'Annulée' :
+                                     sale.status === 'pending' ? 'En attente' :
+                                     sale.status}
+                                  </Badge>
+                                </div>
+                                <div className="text-sm text-muted-foreground mt-1">
+                                  {sale.customer_name && `${sale.customer_name} • `}
+                                  {new Date(sale.created_at).toLocaleTimeString('fr-FR')}
+                                  {sale.server && ` • Serveur: ${sale.server}`}
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {sale.items_count} article(s) • {sale.payment_method}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold">{formatCurrency(sale.total_amount)}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
-                  {sales.length > 5 && (
-                    <div className="text-center">
-                      <Button variant="outline" size="sm">
-                        Voir toutes les ventes ({sales.length})
-                      </Button>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
