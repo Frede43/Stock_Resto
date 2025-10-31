@@ -124,7 +124,12 @@ export default function Tables() {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/sales/tables/', {
+      // Utiliser l'URL API depuis les variables d'environnement
+      const API_URL = import.meta.env.VITE_API_URL 
+        ? `${import.meta.env.VITE_API_URL}/api`
+        : 'http://127.0.0.1:8000/api';
+      
+      const response = await fetch(`${API_URL}/sales/tables/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
