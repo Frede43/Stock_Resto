@@ -42,6 +42,9 @@ urlpatterns = [
 
     # Test endpoint pour débogage
     path('test/', views.test_sales_endpoint, name='test_sales'),
+    
+    # Notifications
+    path('notifications/tables/', views.table_notifications, name='table_notifications'),
 
     # Statistiques et rapports
     path('stats/', views.sales_stats, name='sales_stats'),

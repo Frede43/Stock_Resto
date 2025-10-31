@@ -1031,6 +1031,32 @@ def mark_sale_as_paid(request, sale_id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def table_notifications(request):
+    """
+    Récupère les notifications récentes de libération de tables
+    """
+    from django.core.cache import cache
+    
+    # Récupérer les notifications récentes du cache
+    notifications = cache.get('recent_table_notifications', [])
+    
+    # Filtrer les notifications des 5 dernières minutes si demandé
+    if request.GET.get('recent_only') == 'true':
+        from datetime import datetime, timedelta
+        five_minutes_ago = timezone.now() - timedelta(minutes=5)
+        notifications = [
+            n for n in notifications
+            if datetime.fromisoformat(n['freed_at'].replace('Z', '+00:00')) > five_minutes_ago
+        ]
+    
+    return Response({
+        'notifications': notifications,
+        'count': len(notifications)
+    })
+
+
 @api_view(['GET', 'POST'])
 @permission_classes([permissions.AllowAny])  # Temporaire pour test 
 def test_sales_endpoint(request):

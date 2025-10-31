@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,14 @@ import {
   MapPin,
   CheckCircle,
   AlertCircle,
-  Utensils
+  Utensils,
+  Bell,
+  DollarSign,
+  RefreshCw
 } from "lucide-react";
 import { useTables, useOccupyTable, useFreeTable, useCreateReservation } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
+import { useTableNotifications } from "@/hooks/use-table-notifications";
 
 export default function Tables() {
   const [showReservationDialog, setShowReservationDialog] = useState(false);
@@ -49,6 +53,25 @@ export default function Tables() {
   const occupyTableMutation = useOccupyTable();
   const freeTableMutation = useFreeTable();
   const createReservationMutation = useCreateReservation();
+  
+  // Hook pour les notifications de tables libérées
+  const { notifications, unreadCount } = useTableNotifications({
+    enabled: true,
+    pollInterval: 15000, // Vérifier toutes les 15 secondes
+    onTableFreed: () => {
+      // Actualiser la liste des tables quand une table est libérée
+      refetchTables();
+    }
+  });
+  
+  // Actualiser automatiquement les tables toutes les 30 secondes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetchTables();
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [refetchTables]);
 
   // Extraire les tables des données paginées
   const tables = tablesData?.results || [];
@@ -218,6 +241,23 @@ export default function Tables() {
               </p>
             </div>
             <div className="flex gap-2">
+              {/* Bouton de rafraîchissement */}
+              <Button variant="outline" onClick={() => refetchTables()} className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Actualiser
+              </Button>
+              
+              {/* Indicateur de notifications */}
+              {unreadCount > 0 && (
+                <div className="relative">
+                  <Button variant="outline" className="gap-2">
+                    <Bell className="h-4 w-4" />
+                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  </Button>
+                </div>
+              )}
               <Dialog open={showCreateTableDialog} onOpenChange={setShowCreateTableDialog}>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="gap-2">
@@ -487,18 +527,18 @@ export default function Tables() {
                 </CardHeader>
                 <CardContent className="pt-0">
                   {table.status === "available" ? (
-                    <Button 
-                      onClick={() => {
-                        const customerName = prompt("Nom du client:");
-                        if (customerName) {
-                          occupyTable(table.id.toString(), customerName);
-                        }
-                      }}
-                      className="w-full"
-                      size="sm"
-                    >
-                      Occuper
-                    </Button>
+                    <div className="space-y-2">
+                      <Button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate('/sales', { state: { selectedTable: table.id.toString() } });
+                        }}
+                        className="w-full"
+                        size="sm"
+                      >
+                        Créer une vente
+                      </Button>
+                    </div>
                   ) : table.status === "occupied" ? (
                     <div className="space-y-2">
                       {table.customer && (
@@ -506,24 +546,31 @@ export default function Tables() {
                           <strong>Client:</strong> {table.customer}
                         </div>
                       )}
+                      
                       {table.server && (
                         <div className="text-xs text-muted-foreground">
                           <strong>Serveur:</strong> {table.server}
                         </div>
                       )}
+                      
                       {table.occupied_since && (
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Clock className="h-3 w-3" />
                           Depuis {new Date(table.occupied_since).toLocaleTimeString()}
                         </div>
                       )}
+                      
                       <Button 
-                        onClick={() => freeTable(table.id.toString())}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/tables/${table.id}`);
+                        }}
                         variant="outline"
                         className="w-full"
                         size="sm"
                       >
-                        Libérer
+                        <DollarSign className="h-3 w-3 mr-1" />
+                        Voir la vente
                       </Button>
                     </div>
                   ) : (
@@ -536,5 +583,4 @@ export default function Tables() {
             ))}
           </div>
         </main>
-  );
 }
