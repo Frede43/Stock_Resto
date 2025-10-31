@@ -35,6 +35,7 @@ import Alerts from "./pages/Alerts";
 import Monitoring from "./pages/Monitoring";
 import Help from "./pages/Help";
 import Kitchen from "./pages/Kitchen";
+import OfflineTest from "./pages/OfflineTest";
 // Dashboard supprimé - Admin utilise Index
 import CashierDashboard from "./pages/CashierDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
@@ -177,6 +178,9 @@ const App = () => (
           <Route path="/alerts" element={<ProtectedRoute><Layout><Alerts /></Layout></ProtectedRoute>} />
           <Route path="/monitoring" element={<ProtectedRoute><Layout><Monitoring /></Layout></ProtectedRoute>} />
           <Route path="/help" element={<ProtectedRoute><Layout><Help /></Layout></ProtectedRoute>} />
+          
+          {/* Test Offline */}
+          <Route path="/offline-test" element={<ProtectedRoute><Layout><OfflineTest /></Layout></ProtectedRoute>} />
 
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
