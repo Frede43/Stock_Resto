@@ -556,7 +556,8 @@ class Sale(models.Model):
             if hasattr(item.product, 'recipe') and item.product.recipe:
                 # Pour les plats avec recette, décompter les ingrédients
                 try:
-                    item.product.recipe.prepare_dish(item.quantity)
+                    # Consommer les ingrédients de la recette pour la quantité vendue
+                    item.product.recipe.consume_ingredients(quantity=item.quantity, user=user)
                 except Exception as e:
                     raise ValueError(f"Impossible de préparer {item.product.name}: {str(e)}")
             else:

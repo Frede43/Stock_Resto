@@ -151,37 +151,35 @@ def shopping_list_generator(request):
         
         # Ingrédients en stock bas
         try:
-            from inventory.models import Ingredient
             low_stock_ingredients = Ingredient.objects.filter(
                 quantite_restante__lte=F('seuil_alerte'),
-                actif=True
+                is_active=True
             ).order_by('quantite_restante')
-            
+
             for ingredient in low_stock_ingredients:
                 # Calculer la quantité recommandée
                 current_stock = float(ingredient.quantite_restante)
                 alert_threshold = float(ingredient.seuil_alerte)
-                
+
                 # Recommander 3x le seuil d'alerte
                 recommended_quantity = alert_threshold * 3 - current_stock
                 estimated_cost = recommended_quantity * float(ingredient.prix_unitaire)
-                
+
                 shopping_list.append({
                     'ingredient_id': ingredient.id,
                     'name': ingredient.nom,
-                    'category': ingredient.categorie,
                     'current_stock': current_stock,
                     'alert_threshold': alert_threshold,
                     'recommended_quantity': round(recommended_quantity, 2),
-                    'unit': ingredient.unite_mesure,
+                    'unit': ingredient.unite,
                     'unit_price': float(ingredient.prix_unitaire),
                     'estimated_cost': round(estimated_cost, 2),
-                    'supplier': ingredient.fournisseur.nom if ingredient.fournisseur else 'Non défini',
+                    'supplier': (ingredient.fournisseur.name if hasattr(ingredient.fournisseur, 'name') else ingredient.fournisseur.nom) if ingredient.fournisseur else 'Non défini',
                     'urgency': 'critical' if current_stock <= alert_threshold * 0.3 else 'normal'
                 })
-                
+
                 total_cost += estimated_cost
-        
+
         except Exception as e:
             print(f"Erreur génération liste: {e}")
         
