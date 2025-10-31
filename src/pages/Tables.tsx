@@ -371,7 +371,7 @@ export default function Tables() {
                 </div>
               </DialogContent>
             </Dialog>
-            </div>
+          </div>
 
           {/* Dialog de création de table */}
           <Dialog open={showCreateTableDialog} onOpenChange={setShowCreateTableDialog}>
@@ -583,4 +583,5 @@ export default function Tables() {
             ))}
           </div>
         </main>
+  );
 }
