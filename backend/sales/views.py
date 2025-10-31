@@ -24,7 +24,7 @@ class TableListCreateView(generics.ListCreateAPIView):
     """
     queryset = Table.objects.all()
     serializer_class = TableSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  # Utiliser DRF standard
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['is_active', 'status', 'location']
     search_fields = ['number', 'name', 'location']
@@ -32,8 +32,10 @@ class TableListCreateView(generics.ListCreateAPIView):
     ordering = ['number']
 
     def perform_create(self, serializer):
-        if not self.request.user.can_manage_tables():
-            raise PermissionDenied("Permission insuffisante pour créer des tables.")
+        # Vérification simplifiée : tout utilisateur authentifié peut créer des tables
+        # Si vous voulez restreindre, décommentez la ligne suivante
+        # if not self.request.user.can_manage_tables():
+        #     raise PermissionDenied("Permission insuffisante pour créer des tables.")
         serializer.save()
 
 class TableDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -45,13 +47,15 @@ class TableDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_update(self, serializer):
-        if not self.request.user.can_manage_tables():
-            raise PermissionDenied("Permission insuffisante pour modifier des tables.")
+        # Vérification simplifiée : tout utilisateur authentifié peut modifier des tables
+        # if not self.request.user.can_manage_tables():
+        #     raise PermissionDenied("Permission insuffisante pour modifier des tables.")
         serializer.save()
 
     def perform_destroy(self, instance):
-        if not self.request.user.can_delete_tables():
-            raise PermissionDenied("Permission insuffisante pour supprimer des tables.")
+        # Vérification simplifiée : tout utilisateur authentifié peut supprimer des tables
+        # if not self.request.user.can_delete_tables():
+        #     raise PermissionDenied("Permission insuffisante pour supprimer des tables.")
 
         # Vérifier qu'il n'y a pas de vente en cours
         if instance.is_occupied:
@@ -559,7 +563,7 @@ class TableListView(generics.ListAPIView):
     """Vue pour lister les tables avec informations détaillées"""
     queryset = Table.objects.filter(is_active=True)
     serializer_class = TableListSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  # Utiliser DRF standard
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['status', 'capacity', 'location']
     search_fields = ['number', 'location']

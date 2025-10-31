@@ -9,7 +9,15 @@ class IsAuthenticated(permissions.BasePermission):
     Permission pour les utilisateurs authentifiés
     """
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated
+        # Debug logs
+        print(f"🔐 IsAuthenticated Check:")
+        print(f"  - User: {request.user}")
+        print(f"  - Is authenticated: {request.user.is_authenticated if request.user else False}")
+        print(f"  - Auth header: {request.META.get('HTTP_AUTHORIZATION', 'NO AUTH HEADER')}")
+        
+        is_auth = request.user and request.user.is_authenticated
+        print(f"  - Result: {is_auth}")
+        return is_auth
 
 class IsAdminOrGerant(permissions.BasePermission):
     """

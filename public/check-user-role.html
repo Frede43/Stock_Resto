@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérifier Rôle Utilisateur</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+        .success {
+            background: #e8f5e9;
+            border-left-color: #4CAF50;
+        }
+        .error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+        .warning {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        pre {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Vérifier Rôle Utilisateur</h1>
+        
+        <button onclick="checkUserRole()">Vérifier Mon Rôle</button>
+        <button onclick="testTableCreation()">Tester Création Table</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://127.0.0.1:8000/api'
+            : 'https://barstock-api.onrender.com/api';
+
+        async function checkUserRole() {
+            const token = localStorage.getItem('access_token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const result = document.getElementById('result');
+            
+            if (!token) {
+                result.innerHTML = '<div class="info error"><strong>❌ Erreur:</strong> Aucun token trouvé. Connectez-vous d\'abord.</div>';
+                return;
+            }
+
+            // Décoder le token
+            const parts = token.split('.');
+            const payload = JSON.parse(atob(parts[1]));
+
+            // Récupérer les infos utilisateur depuis l'API
+            try {
+                const response = await fetch(`${API_URL}/accounts/me/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    result.innerHTML = `<div class="info error"><strong>❌ Erreur:</strong> ${response.status} - ${response.statusText}</div>`;
+                    return;
+                }
+
+                const userData = await response.json();
+
+                // Vérifier si le rôle permet de gérer les tables
+                const allowedRoles = ['admin', 'manager', 'server', 'cashier'];
+                const canManageTables = allowedRoles.includes(userData.role);
+
+                let html = '<div class="info ' + (canManageTables ? 'success' : 'error') + '">';
+                html += '<h2>👤 Informations Utilisateur</h2>';
+                html += '<table>';
+                html += `<tr><th>Propriété</th><th>Valeur</th></tr>`;
+                html += `<tr><td><strong>Username</strong></td><td>${userData.username}</td></tr>`;
+                html += `<tr><td><strong>Email</strong></td><td>${userData.email || 'N/A'}</td></tr>`;
+                html += `<tr><td><strong>Rôle</strong></td><td><strong>${userData.role}</strong></td></tr>`;
+                html += `<tr><td><strong>Prénom</strong></td><td>${userData.first_name || 'N/A'}</td></tr>`;
+                html += `<tr><td><strong>Nom</strong></td><td>${userData.last_name || 'N/A'}</td></tr>`;
+                html += `<tr><td><strong>Actif</strong></td><td>${userData.is_active ? '✅ Oui' : '❌ Non'}</td></tr>`;
+                html += '</table>';
+                html += '</div>';
+
+                html += '<div class="info ' + (canManageTables ? 'success' : 'error') + '">';
+                html += '<h2>🔐 Permissions pour Gérer les Tables</h2>';
+                html += '<p><strong>Rôles autorisés:</strong> admin, manager, server, cashier</p>';
+                html += '<p><strong>Votre rôle:</strong> <code>' + userData.role + '</code></p>';
+                html += '<p><strong>Peut gérer les tables:</strong> ' + (canManageTables ? '✅ <strong>OUI</strong>' : '❌ <strong>NON</strong>') + '</p>';
+                
+                if (!canManageTables) {
+                    html += '<hr>';
+                    html += '<p class="error"><strong>⚠️ PROBLÈME IDENTIFIÉ:</strong></p>';
+                    html += '<p>Votre rôle <code>' + userData.role + '</code> ne permet pas de créer des tables.</p>';
+                    html += '<p><strong>Solutions:</strong></p>';
+                    html += '<ol>';
+                    html += '<li>Demander à un admin de changer votre rôle en <code>admin</code>, <code>manager</code>, <code>server</code> ou <code>cashier</code></li>';
+                    html += '<li>Ou modifier le code backend pour autoriser votre rôle</li>';
+                    html += '</ol>';
+                }
+                html += '</div>';
+
+                // Token info
+                html += '<div class="info">';
+                html += '<h2>🔑 Token JWT</h2>';
+                html += '<pre>' + JSON.stringify(payload, null, 2) + '</pre>';
+                html += '</div>';
+
+                result.innerHTML = html;
+
+            } catch (error) {
+                result.innerHTML = `<div class="info error"><strong>❌ Erreur:</strong> ${error.message}</div>`;
+            }
+        }
+
+        async function testTableCreation() {
+            const token = localStorage.getItem('access_token');
+            const result = document.getElementById('result');
+            
+            if (!token) {
+                result.innerHTML = '<div class="info error"><strong>❌ Erreur:</strong> Aucun token trouvé.</div>';
+                return;
+            }
+
+            result.innerHTML = '<div class="info"><p>⏳ Test de création de table en cours...</p></div>';
+
+            try {
+                const response = await fetch(`${API_URL}/sales/tables/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'Table Test ' + Date.now(),
+                        capacity: 4,
+                        location: 'Test Zone'
+                    })
+                });
+
+                const data = await response.json();
+
+                let html = '<div class="info ' + (response.ok ? 'success' : 'error') + '">';
+                html += '<h2>' + (response.ok ? '✅ Succès' : '❌ Échec') + '</h2>';
+                html += '<p><strong>Status:</strong> ' + response.status + ' ' + response.statusText + '</p>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                if (!response.ok) {
+                    html += '<hr>';
+                    html += '<p><strong>💡 Analyse de l\'erreur:</strong></p>';
+                    
+                    if (response.status === 401) {
+                        html += '<p>❌ <strong>401 Unauthorized:</strong> Token invalide ou expiré</p>';
+                    } else if (response.status === 403) {
+                        html += '<p>❌ <strong>403 Forbidden:</strong> Vous n\'avez pas la permission</p>';
+                        html += '<p>Vérifiez votre rôle avec le bouton "Vérifier Mon Rôle"</p>';
+                    } else if (response.status === 400) {
+                        html += '<p>❌ <strong>400 Bad Request:</strong> Données invalides</p>';
+                    }
+                }
+                
+                html += '</div>';
+                result.innerHTML = html;
+
+            } catch (error) {
+                result.innerHTML = `<div class="info error"><strong>❌ Erreur:</strong> ${error.message}</div>`;
+            }
+        }
+
+        // Auto-check au chargement
+        window.onload = checkUserRole;
+    </script>
+</body>
+</html>
