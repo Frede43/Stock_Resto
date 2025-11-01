@@ -175,6 +175,18 @@ export default function Kitchen() {
     }));
   };
 
+  // Filtrer les produits pour n'afficher que les plats
+  const foodProducts = React.useMemo(() => {
+    const products = Array.isArray(productsData) ? productsData : productsData?.results || [];
+    const filtered = products.filter((product: any) => {
+      // Log pour déboguer
+      console.log('Product:', product.name, 'Category type:', product.category?.type);
+      return product.category?.type === 'plats';
+    });
+    console.log('Filtered food products:', filtered.length, 'out of', products.length);
+    return filtered;
+  }, [productsData]);
+
   // Calculer les statistiques réelles à partir des ingrédients
   const realStats = React.useMemo(() => {
     const ingredients = Array.isArray(ingredientsData) ? ingredientsData : ingredientsData?.results || [];
@@ -859,13 +871,17 @@ export default function Kitchen() {
                                 <SelectValue placeholder="Sélectionner un plat" />
                               </SelectTrigger>
                               <SelectContent>
-                                {(Array.isArray(productsData) ? productsData : productsData?.results || [])
-                                  .filter((product: any) => product.category?.type === 'food')
-                                  .map((product: any) => (
+                                {foodProducts.length > 0 ? (
+                                  foodProducts.map((product: any) => (
                                     <SelectItem key={product.id} value={product.id.toString()}>
                                       {product.name}
                                     </SelectItem>
-                                  ))}
+                                  ))
+                                ) : (
+                                  <div className="p-2 text-sm text-muted-foreground">
+                                    Aucun plat disponible
+                                  </div>
+                                )}
                               </SelectContent>
                             </Select>
                           </div>
