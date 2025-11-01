@@ -178,13 +178,40 @@ export default function Kitchen() {
   // Filtrer les produits pour n'afficher que les plats
   const foodProducts = React.useMemo(() => {
     const products = Array.isArray(productsData) ? productsData : productsData?.results || [];
+    
+    console.log('🔍 Total products loaded:', products.length);
+    console.log('📦 All products:', products.map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      category_name: p.category_name,
+      category_type: p.category_type
+    })));
+    
     const filtered = products.filter((product: any) => {
       // Le backend envoie category_type directement
       const categoryType = product.category_type || product.category?.type;
-      console.log('Product:', product.name, 'Category type:', categoryType);
-      return categoryType === 'plats';
+      const categoryName = product.category_name || product.category?.name;
+      
+      console.log('🍽️ Product:', product.name, '| Type:', categoryType, '| Name:', categoryName);
+      
+      // Filtrer sur le type OU sur le nom de la catégorie
+      const isFood = categoryType === 'plats' || 
+                     categoryType === 'Plats' ||
+                     categoryName === 'Plats' ||
+                     categoryName === 'plats' ||
+                     categoryName?.toLowerCase().includes('plat');
+      
+      if (isFood) {
+        console.log('✅ KEPT:', product.name);
+      }
+      
+      return isFood;
     });
-    console.log('Filtered food products:', filtered.length, 'out of', products.length);
+    
+    console.log('✅ Filtered food products:', filtered.length, 'out of', products.length);
+    console.log('🍽️ Food products:', filtered.map((p: any) => p.name));
+    
     return filtered;
   }, [productsData]);
 
