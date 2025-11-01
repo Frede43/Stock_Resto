@@ -1,9 +1,11 @@
 """
 Signaux pour la synchronisation automatique des tables et ventes
++ Déduction automatique des ingrédients après paiement
 """
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
+from decimal import Decimal
 from .models import Sale, Table
 
 
@@ -57,6 +59,80 @@ def occupy_table_on_sale_creation(sender, instance, created, **kwargs):
             table.server = server_name
         
         table.save()
+
+
+@receiver(post_save, sender=Sale)
+def deduct_ingredients_on_payment(sender, instance, created, **kwargs):
+    """
+    Déduit automatiquement les ingrédients du stock quand une vente est payée
+    
+    C'est le CŒUR du système cuisine-ventes :
+    - Récupère les items de la vente
+    - Pour chaque produit, vérifie s'il a une recette
+    - Déduit les ingrédients utilisés du stock
+    - Génère des alertes si stock faible
+    """
+    # Ne déduire que si la vente vient d'être payée
+    if not created and instance.status == 'paid':
+        # Vérifier si c'est un changement de statut vers 'paid'
+        try:
+            old_instance = Sale.objects.get(pk=instance.pk)
+            if old_instance.status == 'paid':
+                # Déjà payé, ne rien faire
+                return
+        except Sale.DoesNotExist:
+            return
+        
+        # Importer ici pour éviter les imports circulaires
+        from kitchen.models import Ingredient
+        
+        # Parcourir tous les items de la vente
+        for item in instance.items.all():
+            product = item.product
+            quantity_sold = item.quantity
+            
+            # Vérifier si le produit a une recette
+            if hasattr(product, 'recipe') and product.recipe:
+                recipe = product.recipe
+                
+                # Parcourir tous les ingrédients de la recette
+                for recipe_ingredient in recipe.ingredients.all():
+                    ingredient = recipe_ingredient.ingredient
+                    
+                    # Calculer la quantité à déduire
+                    # quantite_utilisee_par_plat est en grammes
+                    # quantite_restante de l'ingrédient est dans son unité (kg, L, etc.)
+                    quantity_per_dish = recipe_ingredient.quantite_utilisee_par_plat
+                    total_quantity_used = quantity_per_dish * quantity_sold
+                    
+                    # Convertir en unité de l'ingrédient
+                    if recipe_ingredient.unite == 'g' and ingredient.unite == 'kg':
+                        # Convertir grammes en kilogrammes
+                        quantity_to_deduct = Decimal(total_quantity_used) / Decimal('1000')
+                    elif recipe_ingredient.unite == 'ml' and ingredient.unite == 'L':
+                        # Convertir millilitres en litres
+                        quantity_to_deduct = Decimal(total_quantity_used) / Decimal('1000')
+                    elif recipe_ingredient.unite == ingredient.unite:
+                        # Même unité, pas de conversion
+                        quantity_to_deduct = Decimal(total_quantity_used)
+                    else:
+                        # Unités incompatibles, utiliser la quantité telle quelle
+                        quantity_to_deduct = Decimal(total_quantity_used)
+                    
+                    # Déduire du stock
+                    ingredient.quantite_restante -= quantity_to_deduct
+                    
+                    # Sauvegarder l'ingrédient
+                    ingredient.save()
+                    
+                    # Log pour debug
+                    print(f"✅ Déduit {quantity_to_deduct} {ingredient.unite} de {ingredient.nom} (Vente #{instance.id})")
+                    
+                    # Vérifier si alerte nécessaire
+                    if ingredient.quantite_restante <= 0:
+                        print(f"🚨 RUPTURE: {ingredient.nom} épuisé!")
+                    elif ingredient.quantite_restante <= ingredient.seuil_alerte:
+                        print(f"⚠️ ALERTE: {ingredient.nom} stock faible ({ingredient.quantite_restante} {ingredient.unite})")
 
 
 def create_table_freed_notification(table, sale):
