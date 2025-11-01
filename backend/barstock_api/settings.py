@@ -473,14 +473,15 @@ if not DEBUG:
     )
 
 # Affichage de la configuration au démarrage
-print(f"""
-{'='*50}
-🚀 BarStockWise API Configuration
-{'='*50}
-DEBUG: {DEBUG}
-DATABASE: {DATABASES['default']['NAME']}
-ALLOWED_HOSTS: {ALLOWED_HOSTS}
-STATIC_ROOT: {STATIC_ROOT}
-MEDIA_ROOT: {MEDIA_ROOT}
-{'='*50}
-""")
+# Commenté temporairement pour éviter les problèmes d'encodage sur Windows
+# print(f"""
+# {'='*50}
+# BarStockWise API Configuration
+# {'='*50}
+# DEBUG: {DEBUG}
+# DATABASE: {DATABASES['default']['NAME']}
+# ALLOWED_HOSTS: {ALLOWED_HOSTS}
+# STATIC_ROOT: {STATIC_ROOT}
+# MEDIA_ROOT: {MEDIA_ROOT}
+# {'='*50}
+# """)
