@@ -261,8 +261,50 @@ export default function Products() {
         description: "Catégorie créée avec succès",
         variant: "default",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur création catégorie:', error);
+      
+      // Extraire le message d'erreur de l'API
+      let errorMessage = "Erreur lors de la création de la catégorie";
+      let errorTitle = "Erreur";
+      
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        
+        // Si l'erreur contient un message pour le champ 'name'
+        if (errorData.name && Array.isArray(errorData.name)) {
+          errorTitle = "Nom de catégorie invalide";
+          errorMessage = errorData.name[0];
+        }
+        // Si l'erreur contient un message pour le champ 'type'
+        else if (errorData.type && Array.isArray(errorData.type)) {
+          errorTitle = "Type de catégorie invalide";
+          errorMessage = errorData.type[0];
+        }
+        // Si l'erreur contient un message général
+        else if (errorData.detail) {
+          errorMessage = errorData.detail;
+        }
+        // Si l'erreur contient un message non-field
+        else if (errorData.non_field_errors && Array.isArray(errorData.non_field_errors)) {
+          errorMessage = errorData.non_field_errors[0];
+        }
+        // Si l'erreur contient d'autres champs
+        else {
+          // Prendre le premier champ d'erreur disponible
+          const firstErrorKey = Object.keys(errorData)[0];
+          if (firstErrorKey && Array.isArray(errorData[firstErrorKey])) {
+            errorTitle = `Erreur: ${firstErrorKey}`;
+            errorMessage = errorData[firstErrorKey][0];
+          }
+        }
+      }
+      
+      toast({
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive",
+      });
     }
   };
 

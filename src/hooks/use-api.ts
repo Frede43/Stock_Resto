@@ -78,7 +78,7 @@ export function useCreateCategory() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (categoryData: { name: string; description?: string; category_type: string }) => 
+    mutationFn: (categoryData: { name: string; description?: string; type: string }) => 
       apiService.post('/products/categories/', categoryData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
