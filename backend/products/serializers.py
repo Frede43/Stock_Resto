@@ -121,6 +121,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     """
     
     category_name = serializers.CharField(source='category.name', read_only=True)
+    category_type = serializers.CharField(source='category.type', read_only=True)
     unit_display = serializers.CharField(source='get_unit_display', read_only=True)
     is_low_stock = serializers.BooleanField(read_only=True)
     is_out_of_stock = serializers.BooleanField(read_only=True)
@@ -128,7 +129,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'category', 'category_name', 'code', 'unit_display',
+            'id', 'name', 'category', 'category_name', 'category_type', 'code', 'unit_display',
             'purchase_price', 'selling_price', 'current_stock', 'minimum_stock',
             'is_low_stock', 'is_out_of_stock', 'is_available'
         ]
