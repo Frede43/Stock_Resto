@@ -179,9 +179,10 @@ export default function Kitchen() {
   const foodProducts = React.useMemo(() => {
     const products = Array.isArray(productsData) ? productsData : productsData?.results || [];
     const filtered = products.filter((product: any) => {
-      // Log pour déboguer
-      console.log('Product:', product.name, 'Category type:', product.category?.type);
-      return product.category?.type === 'plats';
+      // Le backend envoie category_type directement
+      const categoryType = product.category_type || product.category?.type;
+      console.log('Product:', product.name, 'Category type:', categoryType);
+      return categoryType === 'plats';
     });
     console.log('Filtered food products:', filtered.length, 'out of', products.length);
     return filtered;
