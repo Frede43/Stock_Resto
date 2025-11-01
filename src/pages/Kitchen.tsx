@@ -859,11 +859,13 @@ export default function Kitchen() {
                                 <SelectValue placeholder="Sélectionner un plat" />
                               </SelectTrigger>
                               <SelectContent>
-                                {(Array.isArray(productsData) ? productsData : productsData?.results || []).map((product: any) => (
-                                  <SelectItem key={product.id} value={product.id.toString()}>
-                                    {product.name}
-                                  </SelectItem>
-                                ))}
+                                {(Array.isArray(productsData) ? productsData : productsData?.results || [])
+                                  .filter((product: any) => product.category?.type === 'food')
+                                  .map((product: any) => (
+                                    <SelectItem key={product.id} value={product.id.toString()}>
+                                      {product.name}
+                                    </SelectItem>
+                                  ))}
                               </SelectContent>
                             </Select>
                           </div>
