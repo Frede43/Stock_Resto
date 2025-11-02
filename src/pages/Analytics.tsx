@@ -190,12 +190,12 @@ export default function Analytics() {
   ];
 
   return (
-    <main className="flex-1 p-6 overflow-y-auto">
+    <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           {/* Debug Panel - Afficher les erreurs */}
           {(dashboardError || salesError || productsError || ordersError || analyticsError) && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <h3 className="font-semibold text-red-800 mb-2">🚨 Erreurs de chargement des données :</h3>
-              <div className="space-y-1 text-sm text-red-700">
+            <div className="mb-4 md:mb-6 p-3 md:p-4 bg-red-50 border border-red-200 rounded-lg">
+              <h3 className="font-semibold text-red-800 mb-2 text-sm md:text-base">🚨 Erreurs de chargement des données :</h3>
+              <div className="space-y-1 text-xs md:text-sm text-red-700">
                 {dashboardError && <div>• Dashboard: {dashboardError.message}</div>}
                 {salesError && <div>• Ventes: {salesError.message}</div>}
                 {productsError && <div>• Produits: {productsError.message}</div>}
@@ -206,17 +206,17 @@ export default function Analytics() {
           )}
 
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 md:mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 Analyses avancées
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 Tableaux de bord analytiques et prédictions IA
               </p>
             </div>
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -230,7 +230,7 @@ export default function Analytics() {
           </div>
 
           {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 my-4 md:my-6">
             {isLoading ? (
               Array.from({ length: 4 }).map((_, index) => (
                 <Card key={index}>

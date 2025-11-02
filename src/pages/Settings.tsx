@@ -260,27 +260,28 @@ export default function Settings() {
   }
 
   return (
-    <main className="flex-1 p-6 space-y-6">
-          <div className="flex items-center justify-between">
+    <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-3">
-                <SettingsIcon className="h-8 w-8" />
-                Paramètres Système
+              <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2 md:gap-3">
+                <SettingsIcon className="h-6 w-6 md:h-8 md:w-8" />
+                <span className="hidden sm:inline">Paramètres Système</span>
+                <span className="sm:hidden">Paramètres</span>
                 {hasUnsavedChanges && (
                   <Badge variant="destructive" className="ml-2">
                     <AlertCircle className="h-3 w-3 mr-1" />
-                    Non sauvegardé
+                    <span className="hidden sm:inline">Non sauvegardé</span>
                   </Badge>
                 )}
               </h1>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-sm md:text-base text-muted-foreground mt-2">
                 Configuration et personnalisation de l'application
               </p>
             </div>
           </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 md:space-y-6">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
           <TabsTrigger value="general">Général</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="printing">Impression</TabsTrigger>

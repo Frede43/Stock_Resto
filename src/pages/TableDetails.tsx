@@ -237,7 +237,7 @@ export default function TableDetails() {
 
   if (loading) {
     return (
-      <main className="flex-1 p-6 flex items-center justify-center">
+      <main className="flex-1 p-4 md:p-6 flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
               <p>Chargement des détails...</p>
@@ -248,7 +248,7 @@ export default function TableDetails() {
 
   if (!table) {
     return (
-      <main className="flex-1 p-6 flex items-center justify-center">
+      <main className="flex-1 p-4 md:p-6 flex items-center justify-center">
             <div className="text-center">
               <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">Table non trouvée</h2>
@@ -263,9 +263,9 @@ export default function TableDetails() {
   }
 
   return (
-    <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
           {/* Header avec navigation */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <Button variant="outline" onClick={() => navigate('/tables')}>
                 <ArrowLeft className="h-4 w-4 mr-2" />

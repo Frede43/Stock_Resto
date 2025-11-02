@@ -174,21 +174,21 @@ export default function Stocks() {
   };
 
   return (
-    <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 Gestion des stocks
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 Surveillez et gérez vos inventaires en temps réel
               </p>
             </div>
           </div>
 
           {/* Stats Overview - Produits */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">

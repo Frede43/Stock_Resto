@@ -229,22 +229,22 @@ export default function Tables() {
   }
 
   return (
-    <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 Gestion des tables
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 Plan de salle interactif et gestion des réservations
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               {/* Bouton de rafraîchissement */}
-              <Button variant="outline" onClick={() => refetchTables()} className="gap-2">
+              <Button variant="outline" onClick={() => refetchTables()} className="gap-2 flex-1 sm:flex-none">
                 <RefreshCw className="h-4 w-4" />
-                Actualiser
+                <span className="hidden sm:inline">Actualiser</span>
               </Button>
               
               {/* Indicateur de notifications */}
@@ -260,18 +260,20 @@ export default function Tables() {
               )}
               <Dialog open={showCreateTableDialog} onOpenChange={setShowCreateTableDialog}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2 flex-1 sm:flex-none">
                     <Utensils className="h-4 w-4" />
-                    Nouvelle Table
+                    <span className="hidden sm:inline">Nouvelle Table</span>
+                    <span className="sm:hidden">Table</span>
                   </Button>
                 </DialogTrigger>
               </Dialog>
 
               <Dialog open={showReservationDialog} onOpenChange={setShowReservationDialog}>
                 <DialogTrigger asChild>
-                  <Button className="gap-2">
+                  <Button className="gap-2 flex-1 sm:flex-none">
                     <Calendar className="h-4 w-4" />
-                    Nouvelle réservation
+                    <span className="hidden sm:inline">Nouvelle réservation</span>
+                    <span className="sm:hidden">Réserver</span>
                   </Button>
                 </DialogTrigger>
               <DialogContent>
@@ -305,7 +307,7 @@ export default function Tables() {
                       onChange={(e) => setReservationData(prev => ({...prev, customerName: e.target.value}))}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div className="space-y-2">
                       <Label>Téléphone</Label>
                       <Input
@@ -324,7 +326,7 @@ export default function Tables() {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label>Date *</Label>
                       <Input

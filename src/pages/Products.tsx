@@ -309,22 +309,23 @@ export default function Products() {
   };
 
   return (
-    <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
           {/* Header Section */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 Gestion des produits
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 Gérez votre inventaire et vos prix de vente
               </p>
             </div>
             <Dialog open={showNewProductDialog} onOpenChange={setShowNewProductDialog}>
               <DialogTrigger asChild>
-                <Button variant="accent" className="gap-2">
+                <Button variant="accent" className="gap-2 w-full sm:w-auto">
                   <Plus className="h-4 w-4" />
-                  Nouveau produit
+                  <span className="hidden sm:inline">Nouveau produit</span>
+                  <span className="sm:hidden">Nouveau</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
@@ -335,7 +336,7 @@ export default function Products() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Nom du produit</Label>
                       <Input

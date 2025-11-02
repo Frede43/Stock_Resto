@@ -350,22 +350,23 @@ export default function Supplies() {
   };
 
   return (
-    <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 Approvisionnements
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 Gérez vos livraisons et mettez à jour vos stocks
               </p>
             </div>
             <Dialog open={showNewSupplyDialog} onOpenChange={setShowNewSupplyDialog}>
               <DialogTrigger asChild>
-                <Button className="gap-2">
+                <Button className="gap-2 w-full sm:w-auto">
                   <Plus className="h-4 w-4" />
-                  Nouvelle livraison
+                  <span className="hidden sm:inline">Nouvelle livraison</span>
+                  <span className="sm:hidden">Nouveau</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
@@ -376,7 +377,7 @@ export default function Supplies() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Fournisseur *</Label>
                       <Select value={newSupply.supplier} onValueChange={(value) => setNewSupply(prev => ({...prev, supplier: value}))}>

@@ -163,20 +163,21 @@ export default function Suppliers() {
   };
 
   return (
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-6">
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-4 md:p-6">
+          <div className="space-y-4 md:space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Fournisseurs</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Fournisseurs</h1>
+                <p className="text-sm md:text-base text-muted-foreground">
                   Gérez vos fournisseurs et leurs informations
                 </p>
               </div>
               <Dialog open={showNewSupplierDialog} onOpenChange={setShowNewSupplierDialog}>
                 <DialogTrigger asChild>
-                  <Button>
+                  <Button className="w-full sm:w-auto">
                     <Plus className="mr-2 h-4 w-4" />
-                    Nouveau fournisseur
+                    <span className="hidden sm:inline">Nouveau fournisseur</span>
+                    <span className="sm:hidden">Nouveau</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">

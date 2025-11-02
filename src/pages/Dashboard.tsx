@@ -113,34 +113,34 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 📊 Tableau de Bord Complet
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 Vue d'ensemble avec données réelles du backend
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4 w-full sm:w-auto">
               <Button 
                 onClick={handleRefresh} 
                 variant="outline" 
                 size="sm"
                 disabled={statsLoading}
-                className="gap-2"
+                className="gap-2 flex-1 sm:flex-none"
               >
                 <RefreshCw className={`h-4 w-4 ${statsLoading ? 'animate-spin' : ''}`} />
-                Actualiser
+                <span className="hidden sm:inline">Actualiser</span>
               </Button>
               <QuickActions />
             </div>
           </div>
 
           {/* Stats Cards - Données Réelles */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-6">
             <StatsCard
               title="Ventes du jour"
               value={statsLoading ? "..." : `${dashboardStats?.today?.daily_revenue?.toLocaleString() || 0} BIF`}
@@ -151,8 +151,8 @@ export default function Dashboard() {
             />
             <StatsCard
               title="Commandes"
-              value={statsLoading ? "..." : `${dashboardStats?.today?.orders || 0}`}
-              change={statsLoading ? "..." : `${dashboardStats?.today?.pending_orders || 0}`}
+              value={statsLoading ? "..." : `${dashboardStats?.today?.sales || 0}`}
+              change={statsLoading ? "..." : `${dashboardStats?.today?.pending_sales || 0}`}
               changeType="positive"
               icon={ShoppingCart}
               description="en attente"
@@ -175,8 +175,8 @@ export default function Dashboard() {
             />
             <StatsCard
               title="Tables occupées"
-              value={statsLoading ? "..." : `${dashboardStats?.quick_stats?.occupied_tables || 0}`}
-              change={statsLoading ? "..." : `/${dashboardStats?.quick_stats?.total_tables || 10}`}
+              value={statsLoading ? "..." : "0"}
+              change={statsLoading ? "..." : "/10"}
               changeType="neutral"
               icon={Users}
               description="taux d'occupation"
@@ -184,7 +184,7 @@ export default function Dashboard() {
           </div>
 
           {/* Stats Cuisine - Nouvelles Fonctionnalités */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
