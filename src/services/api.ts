@@ -70,8 +70,11 @@ class ApiService {
     localStorage.removeItem('user');
   }
 
-  // Méthode générique pour les requêtes HTTP avec support cross-browser
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  // Méthode générique pour les requêtes HTTP avec support cross-browser et retry automatique
+  private async request<T>(endpoint: string, options: RequestInit = {}, retryCount = 0): Promise<T> {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAYS = [2000, 5000, 10000]; // 2s, 5s, 10s
+    
     let url = `${this.baseURL}${endpoint}`;
     
     // Log des requêtes pour le débogage
@@ -80,6 +83,7 @@ class ApiService {
       url: url,
       baseURL: this.baseURL,
       hasToken: !!this.accessToken,
+      retryCount,
       body: options.body ? JSON.parse(options.body as string) : null
     });
     
@@ -119,8 +123,29 @@ class ApiService {
         }
       }
 
+      // Gestion erreur 503 (Service Unavailable) - Render en veille
+      if (response.status === 503 && retryCount < MAX_RETRIES) {
+        const delay = RETRY_DELAYS[retryCount];
+        console.warn(`⏳ Service en veille (503). Nouvelle tentative dans ${delay/1000}s... (${retryCount + 1}/${MAX_RETRIES})`);
+        
+        // Attendre avant de réessayer
+        await new Promise(resolve => setTimeout(resolve, delay));
+        
+        // Réessayer la requête
+        return this.request<T>(endpoint, options, retryCount + 1);
+      }
+
       return this.handleResponse<T>(response);
     } catch (error) {
+      // Retry en cas d'erreur réseau si le service est probablement en veille
+      if (retryCount < MAX_RETRIES && (error instanceof TypeError || (error as any).message?.includes('fetch'))) {
+        const delay = RETRY_DELAYS[retryCount];
+        console.warn(`⏳ Erreur réseau. Nouvelle tentative dans ${delay/1000}s... (${retryCount + 1}/${MAX_RETRIES})`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.request<T>(endpoint, options, retryCount + 1);
+      }
+      
       console.error('API Request Error:', error);
       throw error;
     }
