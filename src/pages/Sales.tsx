@@ -78,6 +78,9 @@ export default function Sales() {
   const { data: serversData, isLoading: serversLoading } = useServers({ is_active: true });
   const createSaleMutation = useCreateSale();
 
+  // Calculer le montant total du panier
+  const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
   // Récupérer les données de commande depuis l'URL
   const orderDataParam = searchParams.get('orderData');
 
