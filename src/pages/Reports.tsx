@@ -254,23 +254,23 @@ export default function Reports() {
   const hasError = statsError || reportError;
 
   return (
-    <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-6">
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
+    <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-4 md:p-6">
+          <div className="space-y-4 md:space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Rapports</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Rapports</h1>
+                <p className="text-sm md:text-base text-muted-foreground">
                   Générez et analysez vos rapports d'activité
                 </p>
               </div>
-              <div className="flex items-center gap-4">
-                <Button onClick={handleExport} className="gap-2">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <Button onClick={handleExport} className="gap-2 flex-1 sm:flex-none">
                   <Download className="h-4 w-4" />
-                  Exporter
+                  <span className="hidden sm:inline">Exporter</span>
                 </Button>
-                <Button onClick={handleScheduleReport} variant="outline" className="gap-2">
+                <Button onClick={handleScheduleReport} variant="outline" className="gap-2 flex-1 sm:flex-none">
                   <Mail className="h-4 w-4" />
-                  Programmer
+                  <span className="hidden sm:inline">Programmer</span>
                 </Button>
               </div>
             </div>

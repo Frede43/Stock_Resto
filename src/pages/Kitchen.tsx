@@ -562,31 +562,32 @@ export default function Kitchen() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6 p-4 md:p-6">
             
             {/* En-tête */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2">
-                  <ChefHat className="h-8 w-8" />
+                <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+                  <ChefHat className="h-6 w-6 md:h-8 md:w-8" />
                   Gestion de Cuisine
                 </h1>
-                <p className="text-muted-foreground">Interface technique complète</p>
+                <p className="text-sm md:text-base text-muted-foreground">Interface technique complète</p>
               </div>
-              <div className="flex gap-2">
-                <Button onClick={refreshData} variant="outline">
+              <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                <Button onClick={refreshData} variant="outline" className="flex-1 sm:flex-none">
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Actualiser
+                  <span className="hidden sm:inline">Actualiser</span>
                 </Button>
-                <Button onClick={handleRecalculatePrices} variant="outline" className="bg-blue-50 hover:bg-blue-100 border-blue-200">
+                <Button onClick={handleRecalculatePrices} variant="outline" className="bg-blue-50 hover:bg-blue-100 border-blue-200 flex-1 sm:flex-none">
                   <DollarSign className="h-4 w-4 mr-2" />
-                  Recalculer Prix
+                  <span className="hidden sm:inline">Recalculer Prix</span>
                 </Button>
                 <Dialog open={showAddIngredient} onOpenChange={setShowAddIngredient}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button className="flex-1 sm:flex-none">
                       <Plus className="h-4 w-4 mr-2" />
-                      Ajouter Ingrédient
+                      <span className="hidden sm:inline">Ajouter Ingrédient</span>
+                      <span className="sm:hidden">Nouveau</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md">

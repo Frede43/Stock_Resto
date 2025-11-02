@@ -465,7 +465,7 @@ export default function Sales() {
             name: item.name,
             quantity: item.quantity,
             price: item.price,
-            product_code: item.id?.toString()
+            product_code: item.menu_item_id?.toString()
           })),
           totalAmount
         );
@@ -483,7 +483,7 @@ export default function Sales() {
           name: item.name,
           quantity: item.quantity,
           price: item.price,
-          product_code: item.id?.toString()
+          product_code: item.menu_item_id?.toString()
         })),
         totalAmount
       );
@@ -539,7 +539,7 @@ export default function Sales() {
           name: item.name,
           quantity: item.quantity,
           price: item.price,
-          product_code: item.id?.toString()
+          product_code: item.menu_item_id?.toString()
         })),
         totalAmount
       );
@@ -580,22 +580,21 @@ export default function Sales() {
       </div>
     </div>
   );
-  }
 
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 h-full p-4 md:p-6">
             
             {/* Menu - 2/3 de l'écran */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center justify-between">
+            <div className="lg:col-span-2 space-y-4 md:space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-3xl font-bold">Menu de Vente</h1>
-                  <p className="text-muted-foreground">Interface commerciale simplifiée</p>
+                  <h1 className="text-2xl md:text-3xl font-bold">Menu de Vente</h1>
+                  <p className="text-sm md:text-base text-muted-foreground">Interface commerciale simplifiée</p>
                 </div>
-                <Button onClick={refreshProducts} variant="outline">
+                <Button onClick={refreshProducts} variant="outline" className="w-full sm:w-auto">
                   <Package className="h-4 w-4 mr-2" />
-                  Actualiser
+                  <span className="hidden sm:inline">Actualiser</span>
                 </Button>
               </div>
 
@@ -976,4 +975,5 @@ export default function Sales() {
         )}
     </>
   );
+ }
 }

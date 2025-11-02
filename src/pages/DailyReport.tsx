@@ -751,37 +751,37 @@ export default function DailyReport() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6 p-4 md:p-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 Rapport quotidien
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 Rapport détaillé des activités et stocks du jour
               </p>
             </div>
-            <div className="flex gap-2 no-print">
-              <Button variant="outline" onClick={handleRefresh} className="gap-2">
+            <div className="flex flex-wrap gap-2 no-print w-full sm:w-auto">
+              <Button variant="outline" onClick={handleRefresh} className="gap-2 flex-1 sm:flex-none">
                 <RefreshCw className="h-4 w-4" />
-                Actualiser
+                <span className="hidden sm:inline">Actualiser</span>
               </Button>
-              <Button variant="outline" onClick={exportToPDF} className="gap-2">
+              <Button variant="outline" onClick={exportToPDF} className="gap-2 flex-1 sm:flex-none hidden md:flex">
                 <Download className="h-4 w-4" />
-                Imprimer
+                <span className="hidden sm:inline">Imprimer</span>
               </Button>
-              <Button variant="outline" onClick={generatePDF} className="gap-2">
+              <Button variant="outline" onClick={generatePDF} className="gap-2 flex-1 sm:flex-none hidden lg:flex">
                 <FileOutput className="h-4 w-4" />
-                Générer PDF
+                <span className="hidden sm:inline">PDF</span>
               </Button>
-              <Button variant="outline" onClick={exportToExcel} className="gap-2">
+              <Button variant="outline" onClick={exportToExcel} className="gap-2 flex-1 sm:flex-none hidden lg:flex">
                 <FileText className="h-4 w-4" />
-                Export Excel
+                <span className="hidden sm:inline">Excel</span>
               </Button>
-              <Button onClick={saveReport} className="gap-2">
+              <Button onClick={saveReport} className="gap-2 flex-1 sm:flex-none">
                 <Save className="h-4 w-4" />
-                Sauvegarder
+                <span className="hidden sm:inline">Sauvegarder</span>
               </Button>
             </div>
           </div>
