@@ -70,7 +70,7 @@ export default function Sales() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
-  const { isOnline } = useOfflineSync();
+  const { isOnline, addToQueue } = useOfflineSync();
 
   // Récupérer les tables disponibles, les produits et les serveurs
   const { data: tablesData, isLoading: tablesLoading } = useTables({ status: 'available' });
@@ -381,7 +381,7 @@ export default function Sales() {
         return;
       }
 
-      // Utiliser l'API de ventes standard avec client, table et serveur
+      // Préparer les données de vente
       const saleData = {
         table: parseInt(selectedTable),
         customer_name: customerName.trim(),
@@ -397,83 +397,35 @@ export default function Sales() {
 
       console.log('🔍 Données de vente à envoyer:', saleData);
 
-      // Utiliser le hook de création de vente
-      createSaleMutation.mutate(saleData, {
-        onSuccess: async (result) => {
-          setShowConfirmation(false); // Fermer le modal de confirmation
-          
-          toast({
-            title: "Vente réussie !",
-            description: `Vente créée pour ${customerName} - Table ${selectedTable}`,
-            variant: "default",
-          });
+      // Vérifier si on est en ligne
+      if (isOnline) {
+        // Mode ONLINE : utiliser l'API standard
+        createSaleMutation.mutate(saleData, {
+          onSuccess: async (result) => {
+            setShowConfirmation(false);
+            
+            toast({
+              title: "Vente réussie !",
+              description: `Vente créée pour ${customerName} - Table ${selectedTable}`,
+              variant: "default",
+            });
 
-          // Récupérer et afficher la facture imprimable
-          if (isOnline && (result as any)?.invoice_url) {
-            // Mode online : récupérer depuis l'API
-            try {
-              const response = await fetch(`${API_BASE_URL}${(result as any).invoice_url}?format=json`);
-              if (response.ok) {
-                const invoiceData = await response.json();
-                setInvoiceData(invoiceData.invoice);
-                setShowInvoice(true);
-              } else {
-                // Fallback sur génération locale
-                throw new Error('Erreur API');
-              }
-            } catch (error) {
-              console.warn('Erreur API, génération facture locale:', error);
-              const localInvoice = generateOfflineInvoice(
-                (result as any).id || 'temp',
-                customerName,
-                selectedTable,
-                serversData?.results?.find((s: any) => s.id === parseInt(selectedServer))?.username || 'Serveur',
-                cart.map(item => ({
-                  name: item.name,
-                  quantity: item.quantity,
-                  price: item.price,
-                  product_code: item.id?.toString()
-                })),
-                totalAmount
-              );
-              setInvoiceData(localInvoice);
-              setShowInvoice(true);
-            }
-          } else {
-            // Mode offline : génération locale
-            const localInvoice = generateOfflineInvoice(
-              (result as any)?.id || `offline-${Date.now()}`,
-              customerName,
-              selectedTable,
-              serversData?.results?.find((s: any) => s.id === parseInt(selectedServer))?.username || 'Serveur',
-              cart.map(item => ({
-                name: item.name,
-                quantity: item.quantity,
-                price: item.price,
-                product_code: item.id?.toString()
-              })),
-              totalAmount
-            );
-            setInvoiceData(localInvoice);
-            setShowInvoice(true);
+            // Récupérer et afficher la facture
+            await handleInvoiceGeneration(result);
+
+            // Réinitialiser le formulaire
+            resetForm();
+          },
+          onError: (error) => {
+            console.error('Erreur lors de la création de la vente:', error);
+            setShowConfirmation(false);
+            setProcessing(false);
           }
-
-          // Réinitialiser le formulaire
-          setCart([]);
-          setCustomerName('');
-          setSelectedTable('');
-          setSelectedServer('');
-          setProcessing(false);
-
-          // Actualiser les produits pour mettre à jour les stocks
-          refreshProducts();
-        },
-        onError: (error) => {
-          console.error('Erreur lors de la création de la vente:', error);
-          setShowConfirmation(false); // Fermer le modal même en cas d'erreur
-          setProcessing(false);
-        }
-      });
+        });
+      } else {
+        // Mode OFFLINE : sauvegarder localement
+        await handleOfflineSale(saleData, serverName);
+      }
 
     } catch (error: any) {
       toast({
@@ -485,7 +437,136 @@ export default function Sales() {
     }
   };
 
-  const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  // Fonction pour gérer la génération de facture
+  const handleInvoiceGeneration = async (result: any) => {
+    if (isOnline && (result as any)?.invoice_url) {
+      // Mode online : récupérer depuis l'API
+      try {
+        const response = await fetch(`${API_BASE_URL}${(result as any).invoice_url}?format=json`);
+        if (response.ok) {
+          const invoiceData = await response.json();
+          setInvoiceData(invoiceData.invoice);
+          setShowInvoice(true);
+        } else {
+          // Fallback sur génération locale
+          throw new Error('Erreur API');
+        }
+      } catch (error) {
+        console.warn('Erreur API, génération facture locale:', error);
+        const localInvoice = generateOfflineInvoice(
+          (result as any).id || 'temp',
+          customerName,
+          selectedTable,
+          serversData?.results?.find((s: any) => s.id === parseInt(selectedServer))?.username || 'Serveur',
+          cart.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            product_code: item.id?.toString()
+          })),
+          totalAmount
+        );
+        setInvoiceData(localInvoice);
+        setShowInvoice(true);
+      }
+    } else {
+      // Mode offline : génération locale
+      const localInvoice = generateOfflineInvoice(
+        (result as any)?.id || `offline-${Date.now()}`,
+        customerName,
+        selectedTable,
+        serversData?.results?.find((s: any) => s.id === parseInt(selectedServer))?.username || 'Serveur',
+        cart.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          product_code: item.id?.toString()
+        })),
+        totalAmount
+      );
+      setInvoiceData(localInvoice);
+      setShowInvoice(true);
+    }
+  };
+
+  // Fonction pour gérer les ventes en mode offline
+  const handleOfflineSale = async (saleData: any, serverName: string) => {
+    try {
+      // Importer le service de stockage offline
+      const { offlineStorage } = await import('@/services/offline-storage');
+      
+      // Générer un ID temporaire pour la vente
+      const tempSaleId = `offline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Préparer la vente pour le stockage offline
+      const offlineSaleData = {
+        id: tempSaleId,
+        ...saleData,
+        created_at: new Date().toISOString(),
+        status: 'paid', // Considérer comme payée en mode offline
+        total_amount: totalAmount,
+        server_name: serverName,
+        offline: true,
+      };
+      
+      // Sauvegarder la vente dans IndexedDB
+      await offlineStorage.saveSale(offlineSaleData, false);
+      
+      // Ajouter à la file de synchronisation
+      await addToQueue('create', '/sales/', saleData);
+      
+      // Fermer le modal de confirmation
+      setShowConfirmation(false);
+      
+      // Notification de succès en mode offline
+      toast({
+        title: "Vente enregistrée hors ligne ! 📱",
+        description: `Vente sauvegardée localement. Elle sera synchronisée quand internet reviendra.`,
+        variant: "default",
+        duration: 5000,
+      });
+
+      // Générer la facture locale
+      const localInvoice = generateOfflineInvoice(
+        tempSaleId,
+        customerName,
+        selectedTable,
+        serverName,
+        cart.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          product_code: item.id?.toString()
+        })),
+        totalAmount
+      );
+      setInvoiceData(localInvoice);
+      setShowInvoice(true);
+
+      // Réinitialiser le formulaire
+      resetForm();
+      
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde offline:', error);
+      toast({
+        title: "Erreur de sauvegarde",
+        description: "Impossible de sauvegarder la vente hors ligne. Vérifiez votre connexion.",
+        variant: "destructive",
+      });
+      setProcessing(false);
+    }
+  };
+
+  // Fonction pour réinitialiser le formulaire
+  const resetForm = () => {
+    setCart([]);
+    setCustomerName('');
+    setSelectedTable('');
+    setSelectedServer('');
+    setProcessing(false);
+    // Actualiser les produits pour mettre à jour les stocks (même en offline)
+    refreshProducts();
+  };
 
   if (loading || productsLoading) {
     return (
