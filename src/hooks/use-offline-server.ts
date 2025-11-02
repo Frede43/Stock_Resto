@@ -10,6 +10,7 @@ export function useOfflineServer() {
   const [cachedMenu, setCachedMenu] = useState<any[]>([]);
   const [cachedTables, setCachedTables] = useState<any[]>([]);
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Charger le menu en cache
   useEffect(() => {
@@ -17,10 +18,15 @@ export function useOfflineServer() {
       try {
         const products = await offlineStorage.getAllProducts();
         const tables = await offlineStorage.getAllTables();
-        setCachedMenu(products);
-        setCachedTables(tables);
+        setCachedMenu(products || []);
+        setCachedTables(tables || []);
+        console.log(`💾 Cache chargé: ${products?.length || 0} produits, ${tables?.length || 0} tables`);
       } catch (error) {
         console.error('Erreur chargement cache:', error);
+        setCachedMenu([]);
+        setCachedTables([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -35,9 +41,11 @@ export function useOfflineServer() {
     const loadPendingOrders = async () => {
       try {
         const orders = await offlineStorage.getUnsyncedOrders();
-        setPendingOrders(orders);
+        setPendingOrders(orders || []);
+        console.log(`📊 ${orders?.length || 0} commandes en attente`);
       } catch (error) {
         console.error('Erreur chargement commandes en attente:', error);
+        setPendingOrders([]);
       }
     };
 
@@ -154,6 +162,7 @@ export function useOfflineServer() {
 
   return {
     isOnline,
+    isLoading,
     cachedMenu,
     cachedTables,
     pendingOrders,

@@ -22,6 +22,7 @@ export function useOfflineManager() {
   const [cachedProducts, setCachedProducts] = useState<any[]>([]);
   const [cachedStaff, setCachedStaff] = useState<any[]>([]);
   const [pendingInventoryAdjustments, setPendingInventoryAdjustments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Charger les rapports en cache
   useEffect(() => {
@@ -32,19 +33,23 @@ export function useOfflineManager() {
         // Calculer les statistiques depuis le cache
         const report: CachedReport = {
           sales_summary: {
-            total_sales: sales.length,
-            total_revenue: sales.reduce((sum: number, sale: any) => 
+            total_sales: sales?.length || 0,
+            total_revenue: (sales || []).reduce((sum: number, sale: any) => 
               sum + (sale.data?.total_amount || 0), 0),
-            paid_sales: sales.filter((s: any) => s.data?.status === 'paid').length,
-            pending_sales: sales.filter((s: any) => s.data?.status === 'pending').length,
+            paid_sales: (sales || []).filter((s: any) => s.data?.status === 'paid').length,
+            pending_sales: (sales || []).filter((s: any) => s.data?.status === 'pending').length,
           },
           top_products: [], // Calculé depuis les ventes
           cached_at: new Date().toISOString(),
         };
 
         setCachedReports(report);
+        console.log(`💾 Rapports chargés: ${sales?.length || 0} ventes`);
       } catch (error) {
         console.error('Erreur chargement rapports en cache:', error);
+        setCachedReports(null);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -59,9 +64,11 @@ export function useOfflineManager() {
     const loadCachedProducts = async () => {
       try {
         const products = await offlineStorage.getAllProducts();
-        setCachedProducts(products);
+        setCachedProducts(products || []);
+        console.log(`💾 ${products?.length || 0} produits en cache`);
       } catch (error) {
         console.error('Erreur chargement produits en cache:', error);
+        setCachedProducts([]);
       }
     };
 
@@ -73,9 +80,11 @@ export function useOfflineManager() {
     const loadPendingAdjustments = async () => {
       try {
         const movements = await offlineStorage.getUnsyncedStockMovements();
-        setPendingInventoryAdjustments(movements);
+        setPendingInventoryAdjustments(movements || []);
+        console.log(`📊 ${movements?.length || 0} ajustements en attente`);
       } catch (error) {
         console.error('Erreur chargement ajustements en attente:', error);
+        setPendingInventoryAdjustments([]);
       }
     };
 
@@ -210,6 +219,7 @@ export function useOfflineManager() {
 
   return {
     isOnline,
+    isLoading,
     cachedReports,
     cachedProducts,
     cachedStaff,

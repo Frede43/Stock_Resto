@@ -9,15 +9,20 @@ export function useOfflineCashier() {
   const { isOnline, addToQueue } = useOfflineSync();
   const [cachedSales, setCachedSales] = useState<any[]>([]);
   const [pendingPayments, setPendingPayments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Charger les ventes en cache
   useEffect(() => {
     const loadCachedSales = async () => {
       try {
         const sales = await offlineStorage.getAllSales();
-        setCachedSales(sales);
+        setCachedSales(sales || []);
+        console.log(`💾 Cache chargé: ${sales?.length || 0} ventes`);
       } catch (error) {
         console.error('Erreur chargement ventes en cache:', error);
+        setCachedSales([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -32,9 +37,11 @@ export function useOfflineCashier() {
     const loadPendingPayments = async () => {
       try {
         const payments = await offlineStorage.getUnsyncedPayments();
-        setPendingPayments(payments);
+        setPendingPayments(payments || []);
+        console.log(`📊 ${payments?.length || 0} paiements en attente`);
       } catch (error) {
         console.error('Erreur chargement paiements en attente:', error);
+        setPendingPayments([]);
       }
     };
 
@@ -114,10 +121,11 @@ export function useOfflineCashier() {
     try {
       const saleId = `offline-sale-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
+      // Récupérer les produits depuis le cache
+      const cachedProducts = await offlineStorage.getAllProducts();
+      
       // Calculer le total
       const total = saleData.items.reduce((sum, item) => {
-        // Récupérer le prix depuis le cache
-        const cachedProducts = await offlineStorage.getAllProducts();
         const product = cachedProducts.find((p: any) => p.id === item.product);
         return sum + (product?.selling_price || 0) * item.quantity;
       }, 0);
@@ -195,6 +203,7 @@ export function useOfflineCashier() {
 
   return {
     isOnline,
+    isLoading,
     cachedSales,
     pendingPayments,
     processOfflinePayment,

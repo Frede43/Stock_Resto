@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useOfflineServer } from "@/hooks/use-offline-server";
 import { useTables, useProducts, useServers } from "@/hooks/use-api";
+import { OfflineLoadingState } from "@/components/OfflineLoadingState";
 import {
   ShoppingCart,
   Plus,
@@ -36,6 +37,7 @@ export default function ServerOrders() {
   const { toast } = useToast();
   const {
     isOnline,
+    isLoading,
     cachedMenu,
     cachedTables,
     pendingOrders,
@@ -165,6 +167,11 @@ export default function ServerOrders() {
 
     setProcessing(false);
   };
+
+  // Afficher l'état de chargement si les données sont en cours de chargement
+  if (isLoading && !isOnline && cachedMenu.length === 0) {
+    return <OfflineLoadingState message="Chargement du menu et des tables depuis le cache..." />;
+  }
 
   return (
     <div className="space-y-6">

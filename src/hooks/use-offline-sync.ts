@@ -13,52 +13,6 @@ export function useOfflineSync() {
   const [pendingCount, setPendingCount] = useState(0);
   const { toast } = useToast();
 
-  // Détecter les changements de connexion
-  useEffect(() => {
-    const handleOnline = () => {
-      console.log('🌐 Connexion internet rétablie');
-      setIsOnline(true);
-      toast({
-        title: '🌐 Connexion rétablie',
-        description: 'Synchronisation des données en cours...',
-        duration: 3000,
-      });
-      syncPendingData();
-    };
-
-    const handleOffline = () => {
-      console.log('📡 Connexion internet perdue');
-      setIsOnline(false);
-      toast({
-        title: '📡 Mode hors ligne',
-        description: 'Les modifications seront synchronisées quand internet reviendra',
-        variant: 'destructive',
-        duration: 5000,
-      });
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  // Compter les éléments en attente
-  useEffect(() => {
-    const updatePendingCount = async () => {
-      const queue = await offlineStorage.getSyncQueue();
-      setPendingCount(queue.length);
-    };
-
-    updatePendingCount();
-    const interval = setInterval(updatePendingCount, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   // Synchroniser les données en attente
   const syncPendingData = useCallback(async () => {
     if (!navigator.onLine || isSyncing) return;
@@ -70,12 +24,24 @@ export function useOfflineSync() {
       const queue = await offlineStorage.getSyncQueue();
       console.log(`📊 ${queue.length} éléments à synchroniser`);
 
+      if (queue.length === 0) {
+        setIsSyncing(false);
+        return;
+      }
+
       let successCount = 0;
       let errorCount = 0;
 
       for (const item of queue) {
         try {
           const token = localStorage.getItem('access_token');
+          
+          if (!token) {
+            console.warn('⚠️ Pas de token d\'authentification');
+            errorCount++;
+            continue;
+          }
+
           const response = await fetch(`${API_URL}${item.endpoint}`, {
             method: item.type === 'create' ? 'POST' : 
                     item.type === 'update' ? 'PATCH' : 'DELETE',
@@ -91,6 +57,31 @@ export function useOfflineSync() {
             await offlineStorage.removeSyncItem(item.id);
             successCount++;
             console.log(`✅ Synchronisé: ${item.endpoint}`);
+            
+            // Marquer l'élément comme synchronisé dans IndexedDB
+            if (item.type === 'create' && item.endpoint.includes('/orders/')) {
+              const orderId = item.data.id || `offline-order-${item.id}`;
+              await offlineStorage.markOrderAsSynced(orderId);
+            } else if (item.type === 'create' && item.endpoint.includes('/sales/')) {
+              const saleId = item.data.id || `offline-sale-${item.id}`;
+              await offlineStorage.markSaleAsSynced(saleId);
+            } else if (item.type === 'create' && item.endpoint.includes('/payments/')) {
+              const paymentId = item.data.id || `offline-payment-${item.id}`;
+              await offlineStorage.markPaymentAsSynced(paymentId);
+            } else if (item.type === 'create' && item.endpoint.includes('/stock/')) {
+              const movementId = item.data.id || `offline-stock-${item.id}`;
+              await offlineStorage.markStockMovementAsSynced(movementId);
+            }
+          } else if (response.status === 401) {
+            // Token expiré
+            console.error('❌ Token expiré - Reconnexion nécessaire');
+            toast({
+              title: '🔐 Session expirée',
+              description: 'Veuillez vous reconnecter pour synchroniser les données',
+              variant: 'destructive',
+              duration: 7000,
+            });
+            break; // Arrêter la synchronisation
           } else {
             // Échec : incrémenter les tentatives
             await offlineStorage.incrementRetries(item.id);
@@ -140,6 +131,54 @@ export function useOfflineSync() {
       console.log('🏁 Fin de la synchronisation');
     }
   }, [isSyncing, toast]);
+
+  // Détecter les changements de connexion
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log('🌐 Connexion internet rétablie');
+      setIsOnline(true);
+      toast({
+        title: '🌐 Connexion rétablie',
+        description: 'Synchronisation des données en cours...',
+        duration: 3000,
+      });
+      // Synchroniser après un délai pour laisser la connexion se stabiliser
+      setTimeout(() => syncPendingData(), 2000);
+    };
+
+    const handleOffline = () => {
+      console.log('📡 Connexion internet perdue');
+      setIsOnline(false);
+      toast({
+        title: '📡 Mode hors ligne',
+        description: 'Les modifications seront synchronisées quand internet reviendra',
+        variant: 'destructive',
+        duration: 5000,
+      });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [syncPendingData, toast]);
+
+  // Compter les éléments en attente
+  useEffect(() => {
+    const updatePendingCount = async () => {
+      const queue = await offlineStorage.getSyncQueue();
+      setPendingCount(queue.length);
+    };
+
+    updatePendingCount();
+    const interval = setInterval(updatePendingCount, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
 
   // Synchronisation automatique toutes les 30 secondes si en ligne
   useEffect(() => {

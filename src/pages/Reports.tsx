@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   FileText, 
   Download, 
@@ -18,7 +20,12 @@ import {
   Users,
   Clock,
   Mail,
-  Loader2
+  Loader2,
+  Maximize2,
+  Filter,
+  RefreshCw,
+  Eye,
+  Printer
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell } from "recharts";
 
@@ -77,6 +84,10 @@ export default function Reports() {
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
   const [selectedFormat, setSelectedFormat] = useState("pdf");
+  const [showSalesDialog, setShowSalesDialog] = useState(false);
+  const [showInventoryDialog, setShowInventoryDialog] = useState(false);
+  const [showCustomersDialog, setShowCustomersDialog] = useState(false);
+  const [showFinancialDialog, setShowFinancialDialog] = useState(false);
   const { toast } = useToast();
 
   // Calculer la date de fin en fonction de la plage de dates sélectionnée
