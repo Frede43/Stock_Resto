@@ -202,19 +202,24 @@ SIMPLE_JWT = {
 # CORS settings - Configuration pour développement et production
 CORS_ALLOW_CREDENTIALS = True  # Permet l'envoi de cookies et credentials
 
-# En production, utiliser la liste spécifique
+# En développement, autoriser toutes les origines
 if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True  # Autorise toutes les origines en développement
+    CORS_ALLOW_ALL_ORIGINS = True
+    print("⚠️ CORS: Toutes les origines autorisées (DEBUG=True)")
 else:
     CORS_ALLOW_ALL_ORIGINS = False
+    print("✅ CORS: Mode production activé")
 
+# Liste des origines autorisées (dev + production)
 CORS_ALLOWED_ORIGINS = [
+    # Développement local
     "http://localhost:5173",
     "http://127.0.0.1:5173", 
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://barstock-web.onrender.com",  # Production frontend
-    
+    # Production Render
+    "https://barstock-web.onrender.com",
+    "https://barstock-api.onrender.com",  # API elle-même
 ]
 
 # Configuration alternative plus restrictive (commentée)
@@ -386,15 +391,10 @@ if IS_RENDER or os.environ.get('DATABASE_URL'):
     )
     print("✅ Configuration PostgreSQL Render activée")
 
-# Configuration CORS pour production
+# Log de la configuration CORS active
 if not DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = False
-    CORS_ALLOWED_ORIGINS = config(
-        'CORS_ALLOWED_ORIGINS',
-        default='https://barstock-web.onrender.com',
-        cast=Csv()
-    )
     print(f"✅ CORS configuré pour production: {CORS_ALLOWED_ORIGINS}")
+    print(f"✅ CORS_ALLOW_CREDENTIALS: {CORS_ALLOW_CREDENTIALS}")
 
 # Configuration WhiteNoise pour les fichiers statiques
 if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
