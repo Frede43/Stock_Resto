@@ -832,9 +832,10 @@ export function useApproveExpense() {
 
   return useMutation({
     mutationFn: (expenseId: string | number) => 
-      apiService.post(`/expenses/${expenseId}/approve/`),
+      apiService.post(`/expenses/expenses/${expenseId}/approve/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-settings'] });
       toast({
         title: "Dépense approuvée",
         description: "La dépense a été approuvée avec succès."
@@ -843,7 +844,7 @@ export function useApproveExpense() {
     onError: (error: any) => {
       toast({
         title: "Erreur",
-        description: "Impossible d'approuver la dépense.",
+        description: error?.response?.data?.error || "Impossible d'approuver la dépense.",
         variant: "destructive"
       });
     }
@@ -855,8 +856,8 @@ export function useRejectExpense() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (expenseId: string | number) => 
-      apiService.post(`/expenses/${expenseId}/reject/`),
+    mutationFn: ({ expenseId, reason }: { expenseId: string | number; reason?: string }) => 
+      apiService.post(`/expenses/expenses/${expenseId}/reject/`, { reason }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       toast({
@@ -867,43 +868,50 @@ export function useRejectExpense() {
     onError: (error: any) => {
       toast({
         title: "Erreur",
-        description: "Impossible de rejeter la dépense.",
+        description: error?.response?.data?.error || "Impossible de rejeter la dépense.",
         variant: "destructive"
       });
     }
   });
 }
 
-export function useBudgetSettings() {
+export function useBudgetSettings(params?: any) {
   return useQuery({
-    queryKey: ['budget-settings'],
-    queryFn: () => apiService.get('/expenses/budget-settings/'),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    retry: false, // Don't retry on 404
-    throwOnError: false, // Don't throw on error
+    queryKey: ['budget-settings', params],
+    queryFn: () => apiService.get('/expenses/budgets/', { params }),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
-export function useUpdateBudgetSettings() {
+export function useUpdateBudgetSetting() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (budgetData: any) => apiService.put('/expenses/budget-settings/', budgetData),
+    mutationFn: ({ id, data }: { id: string | number; data: any }) => 
+      apiService.patch(`/expenses/budgets/${id}/`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budget-settings'] });
       toast({
         title: "Budget mis à jour",
-        description: "Les paramètres de budget ont été mis à jour."
+        description: "Le budget a été mis à jour avec succès."
       });
     },
     onError: (error: any) => {
       toast({
         title: "Erreur",
-        description: "Impossible de mettre à jour le budget.",
+        description: error?.response?.data?.error || "Impossible de mettre à jour le budget.",
         variant: "destructive"
       });
     }
+  });
+}
+
+export function useExpenseAnalytics() {
+  return useQuery({
+    queryKey: ['expense-analytics'],
+    queryFn: () => apiService.get('/expenses/analytics/'),
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
@@ -1582,7 +1590,7 @@ export function useExpenses(params?: {
 }) {
   return useQuery<PaginatedResponse<Expense>, Error, PaginatedResponse<Expense>>({
     queryKey: ['expenses', params],
-    queryFn: () => apiService.get('/expenses/', { params }),
+    queryFn: () => apiService.get('/expenses/expenses/', { params }),
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 }
@@ -1600,10 +1608,11 @@ export function useCreateExpense() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (data: Omit<Expense, 'id' | 'created_at' | 'updated_at'>) =>
-      apiService.post('/expenses/', data),
+    mutationFn: (data: any) =>
+      apiService.post('/expenses/expenses/', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-settings'] });
       toast({
         title: "Succès",
         description: "Dépense créée avec succès",
@@ -1613,7 +1622,33 @@ export function useCreateExpense() {
     onError: (error: any) => {
       toast({
         title: "Erreur",
-        description: error.message || "Erreur lors de la création de la dépense",
+        description: error?.response?.data?.error || error.message || "Erreur lors de la création de la dépense",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useUpdateExpense() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string | number; data: any }) =>
+      apiService.patch(`/expenses/expenses/${id}/`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-settings'] });
+      toast({
+        title: "Succès",
+        description: "Dépense mise à jour avec succès",
+        variant: "default",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error?.response?.data?.error || error.message || "Erreur lors de la mise à jour",
         variant: "destructive",
       });
     },
