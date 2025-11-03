@@ -215,9 +215,9 @@ export default function Expenses() {
     }
   };
 
-  const rejectExpense = async (expenseId: string) => {
+  const rejectExpense = async (expenseId: string, reason?: string) => {
     try {
-      await rejectExpenseMutation.mutateAsync(expenseId);
+      await rejectExpenseMutation.mutateAsync({ expenseId, reason });
       refetchExpenses();
     } catch (error) {
       // Error handling is done in the mutation hook
@@ -396,61 +396,61 @@ export default function Expenses() {
 
             {/* Budget Management Dialog */}
             <Dialog open={showBudgetDialog} onOpenChange={setShowBudgetDialog}>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Gestion des budgets mensuels</DialogTitle>
                   <DialogDescription>
                     Configurez les budgets mensuels par catégorie de dépenses
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {budgetLoading ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
-                          <div className="h-8 bg-gray-200 rounded w-24 animate-pulse"></div>
+                        <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                          <div className="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {categories.map((category) => {
                         const budget = monthlyBudgets[category];
                         return (
-                          <div key={category} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="flex-1">
-                              <h4 className="font-medium">{category}</h4>
+                          <div key={category} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-sm truncate">{category}</h4>
                               {budget && (
-                                <p className="text-sm text-muted-foreground">
-                                  Dépensé: {budget.spent.toLocaleString()} FBu
+                                <p className="text-xs text-muted-foreground">
+                                  {budget.spent.toLocaleString()} FBu
                                 </p>
                               )}
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
                               <Input
                                 type="number"
-                                placeholder="Budget mensuel"
+                                placeholder="Budget"
                                 defaultValue={budget?.budget || 0}
-                                className="w-32"
+                                className="w-24 h-8 text-sm"
                                 onChange={(e) => {
                                   // Handle budget update
                                   const newBudget = parseFloat(e.target.value) || 0;
                                   // TODO: Implement budget update API call
                                 }}
                               />
-                              <span className="text-sm text-muted-foreground">FBu</span>
+                              <span className="text-xs text-muted-foreground">FBu</span>
                             </div>
                           </div>
                         );
                       })}
                     </div>
                   )}
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setShowBudgetDialog(false)}>
+                  <div className="flex justify-end gap-2 pt-3">
+                    <Button variant="outline" size="sm" onClick={() => setShowBudgetDialog(false)}>
                       Annuler
                     </Button>
-                    <Button onClick={() => {
+                    <Button size="sm" onClick={() => {
                       toast({
                         title: "Budgets mis à jour",
                         description: "Les budgets mensuels ont été sauvegardés."
@@ -468,9 +468,9 @@ export default function Expenses() {
           {/* Budget Overview */}
           {Object.keys(monthlyBudgets).length > 0 && (
             <Card>
-              <CardHeader>
-                <CardTitle>Suivi budgétaire mensuel</CardTitle>
-                <CardDescription>
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-lg md:text-xl">Suivi budgétaire mensuel</CardTitle>
+                <CardDescription className="text-xs md:text-sm">
                   Progression par rapport aux budgets calculés dynamiquement
                 </CardDescription>
               </CardHeader>
@@ -485,20 +485,20 @@ export default function Expenses() {
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {Object.entries(monthlyBudgets).map(([category, data]) => {
                       const percentage = (data.spent / data.budget) * 100;
                       const isOverBudget = percentage > 100;
                       
                       return (
                         <div key={category} className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">{category}</span>
-                            <div className="text-right">
-                              <span className="font-bold">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                            <span className="font-medium text-sm md:text-base">{category}</span>
+                            <div className="flex items-center justify-between sm:justify-end gap-2">
+                              <span className="font-bold text-xs md:text-sm">
                                 {data.spent.toLocaleString()} / {data.budget.toLocaleString()} FBu
                               </span>
-                              <Badge variant={isOverBudget ? "destructive" : percentage > 80 ? "warning" : "success"} className="ml-2">
+                              <Badge variant={isOverBudget ? "destructive" : percentage > 80 ? "warning" : "success"} className="text-xs">
                                 {percentage.toFixed(1)}%
                               </Badge>
                             </div>
@@ -523,11 +523,11 @@ export default function Expenses() {
 
           {/* Filters */}
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <Label>Filtrer par catégorie:</Label>
+            <CardContent className="p-4 md:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4">
+                <Label className="text-sm md:text-base">Filtrer par catégorie:</Label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-64">
+                  <SelectTrigger className="w-full sm:w-64">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -543,9 +543,9 @@ export default function Expenses() {
                     )}
                   </SelectContent>
                 </Select>
-                <div className="ml-auto">
-                  <span className="text-sm text-muted-foreground">Total affiché: </span>
-                  <span className="font-bold text-lg">{totalExpenses.toLocaleString()} FBu</span>
+                <div className="sm:ml-auto w-full sm:w-auto text-right">
+                  <span className="text-xs md:text-sm text-muted-foreground">Total affiché: </span>
+                  <span className="font-bold text-base md:text-lg">{totalExpenses.toLocaleString()} FBu</span>
                 </div>
               </div>
             </CardContent>
@@ -553,9 +553,9 @@ export default function Expenses() {
 
           {/* Expenses List */}
           <Card>
-            <CardHeader>
-              <CardTitle>Liste des dépenses</CardTitle>
-              <CardDescription>
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="text-lg md:text-xl">Liste des dépenses</CardTitle>
+              <CardDescription className="text-xs md:text-sm">
                 {filteredExpenses.length} dépense(s) • Total: {totalExpenses.toLocaleString()} FBu
               </CardDescription>
             </CardHeader>
@@ -588,19 +588,19 @@ export default function Expenses() {
                       : `Aucune dépense dans la catégorie "${selectedCategory}".`
                     }
                   </p>
-                  <div className="flex gap-2">
-              <Button onClick={() => setShowNewExpenseDialog(true)}>
+                  <div className="flex flex-col sm:flex-row gap-2">
+              <Button onClick={() => setShowNewExpenseDialog(true)} className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 Nouvelle dépense
               </Button>
-              <Button variant="outline" onClick={() => setShowBudgetDialog(true)}>
+              <Button variant="outline" onClick={() => setShowBudgetDialog(true)} className="w-full sm:w-auto">
                 <TrendingUp className="mr-2 h-4 w-4" />
                 Gérer les budgets
               </Button>
             </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {filteredExpenses.map((expense) => {
                   const statusInfo = getStatusInfo(expense.status);
                   const StatusIcon = statusInfo.icon;
@@ -608,28 +608,28 @@ export default function Expenses() {
                   return (
                     <div
                       key={expense.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className="flex flex-col md:flex-row md:items-center md:justify-between p-3 md:p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-3 md:gap-4"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center">
-                          <Receipt className="h-6 w-6 text-primary-foreground" />
+                      <div className="flex items-start gap-3 md:gap-4 flex-1 min-w-0">
+                        <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Receipt className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold">{expense.description}</h3>
-                            <Badge variant={statusInfo.variant} className="gap-1">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+                            <h3 className="font-semibold text-sm md:text-base truncate">{expense.description}</h3>
+                            <Badge variant={statusInfo.variant} className="gap-1 text-xs w-fit">
                               <StatusIcon className="h-3 w-3" />
                               {statusInfo.label}
                             </Badge>
                           </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
-                            <div className="flex items-center gap-4">
+                          <div className="text-xs md:text-sm text-muted-foreground space-y-1">
+                            <div className="flex flex-wrap items-center gap-2 md:gap-4">
                               <span className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
-                                {expense.date}
+                                <span className="truncate">{expense.date}</span>
                               </span>
-                              <Badge variant="outline">{expense.category}</Badge>
-                              <span>{getPaymentMethodLabel(expense.paymentMethod)}</span>
+                              <Badge variant="outline" className="text-xs">{expense.category}</Badge>
+                              <span className="text-xs truncate">{getPaymentMethodLabel(expense.paymentMethod)}</span>
                             </div>
                             {expense.supplier && (
                               <div>Fournisseur: {expense.supplier}</div>
@@ -641,15 +641,15 @@ export default function Expenses() {
                         </div>
                       </div>
 
-                      <div className="text-right">
-                        <div className="text-xl font-bold mb-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between md:justify-end gap-2 md:gap-3 md:text-right">
+                        <div className="text-lg md:text-xl font-bold">
                           {expense.amount.toLocaleString()} FBu
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           {expense.receipt && (
-                            <Button variant="outline" size="sm" className="gap-1">
-                              <FileText className="h-4 w-4" />
-                              Voir
+                            <Button variant="outline" size="sm" className="gap-1 text-xs">
+                              <FileText className="h-3 w-3 md:h-4 md:w-4" />
+                              <span className="hidden sm:inline">Voir</span>
                             </Button>
                           )}
                           
@@ -658,25 +658,25 @@ export default function Expenses() {
                               <Button 
                                 size="sm"
                                 onClick={() => approveExpense(expense.id)}
-                                className="gap-1"
+                                className="gap-1 text-xs"
                               >
-                                <CheckCircle className="h-4 w-4" />
-                                Approuver
+                                <CheckCircle className="h-3 w-3 md:h-4 md:w-4" />
+                                <span className="hidden sm:inline">Approuver</span>
                               </Button>
                               <Button 
                                 variant="destructive"
                                 size="sm"
                                 onClick={() => rejectExpense(expense.id)}
-                                className="gap-1"
+                                className="gap-1 text-xs"
                               >
-                                <AlertTriangle className="h-4 w-4" />
-                                Rejeter
+                                <AlertTriangle className="h-3 w-3 md:h-4 md:w-4" />
+                                <span className="hidden sm:inline">Rejeter</span>
                               </Button>
                             </>
                           )}
 
                           <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-3 w-3 md:h-4 md:w-4" />
                           </Button>
                         </div>
                       </div>
