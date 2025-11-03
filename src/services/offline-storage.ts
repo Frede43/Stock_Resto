@@ -41,6 +41,23 @@ interface SyncQueueRecord {
   data: any;
   timestamp: string;
   retries: number;
+  priority: number; // 1 = haute, 2 = moyenne, 3 = basse
+  status: 'pending' | 'syncing' | 'failed' | 'success';
+  lastError?: string;
+  lastAttempt?: string;
+  maxRetries: number;
+  dependencies?: string[]; // IDs d'autres items dont celui-ci dépend
+}
+
+interface ConflictRecord {
+  id: string;
+  type: 'data' | 'version' | 'deletion';
+  localData: any;
+  serverData: any;
+  timestamp: string;
+  resolved: boolean;
+  resolution?: 'local' | 'server' | 'merge';
+  autoResolvable: boolean;
 }
 
 // Interface pour la base de données (sans extends DBSchema pour éviter les erreurs)
@@ -76,14 +93,23 @@ interface BarStockDB {
   syncQueue: {
     key: string;
     value: SyncQueueRecord;
-    indexes: { 'by-timestamp': string };
+    indexes: { 'by-timestamp': string; 'by-priority': number; 'by-status': string };
+  };
+  conflicts: {
+    key: string;
+    value: ConflictRecord;
+    indexes: { 'by-resolved': boolean; 'by-timestamp': string };
+  };
+  syncMetadata: {
+    key: string;
+    value: any;
   };
 }
 
 class OfflineStorage {
   private db: IDBPDatabase<any> | null = null;
   private dbName = 'barstock-offline';
-  private version = 1;
+  private version = 2; // Incrémenté pour les nouvelles fonctionnalités
 
   async init() {
     if (this.db) return this.db;
@@ -130,6 +156,20 @@ class OfflineStorage {
         if (!db.objectStoreNames.contains('syncQueue')) {
           const syncStore = db.createObjectStore('syncQueue', { keyPath: 'id' });
           syncStore.createIndex('by-timestamp', 'timestamp');
+          syncStore.createIndex('by-priority', 'priority');
+          syncStore.createIndex('by-status', 'status');
+        }
+
+        // Store pour les conflits
+        if (!db.objectStoreNames.contains('conflicts')) {
+          const conflictsStore = db.createObjectStore('conflicts', { keyPath: 'id' });
+          conflictsStore.createIndex('by-resolved', 'resolved');
+          conflictsStore.createIndex('by-timestamp', 'timestamp');
+        }
+
+        // Store pour les métadonnées de synchronisation
+        if (!db.objectStoreNames.contains('syncMetadata')) {
+          db.createObjectStore('syncMetadata', { keyPath: 'key' });
         }
       },
     });
@@ -248,11 +288,16 @@ class OfflineStorage {
   async addToSyncQueue(
     type: 'create' | 'update' | 'delete',
     endpoint: string,
-    data: any
+    data: any,
+    priority: number = 2, // Par défaut: priorité moyenne
+    dependencies?: string[]
   ) {
     const db = await this.init();
     const id = `sync-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
+    // Déterminer le nombre max de tentatives selon la priorité
+    const maxRetries = priority === 1 ? 10 : priority === 2 ? 5 : 3;
+
     await db.put('syncQueue', {
       id,
       type,
@@ -260,14 +305,40 @@ class OfflineStorage {
       data,
       timestamp: new Date().toISOString(),
       retries: 0,
+      priority,
+      status: 'pending',
+      maxRetries,
+      dependencies,
     });
 
+    console.log(`📝 Ajouté à la file: ${endpoint} (priorité: ${priority})`);
     return id;
   }
 
   async getSyncQueue() {
     const db = await this.init();
-    return await db.getAllFromIndex('syncQueue', 'by-timestamp');
+    // Récupérer tous les items en attente ou échoués, triés par priorité puis timestamp
+    const allItems = await db.getAll('syncQueue');
+    return allItems
+      .filter(item => item.status === 'pending' || item.status === 'failed')
+      .sort((a, b) => {
+        // Trier par priorité d'abord (1 = haute priorité)
+        if (a.priority !== b.priority) {
+          return a.priority - b.priority;
+        }
+        // Puis par timestamp (plus ancien d'abord)
+        return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+      });
+  }
+
+  async getSyncQueueByPriority(priority: number) {
+    const db = await this.init();
+    return await db.getAllFromIndex('syncQueue', 'by-priority', priority);
+  }
+
+  async getSyncQueueByStatus(status: string) {
+    const db = await this.init();
+    return await db.getAllFromIndex('syncQueue', 'by-status', status);
   }
 
   async removeSyncItem(id: string) {
@@ -275,13 +346,56 @@ class OfflineStorage {
     await db.delete('syncQueue', id);
   }
 
+  async updateSyncItemStatus(id: string, status: 'pending' | 'syncing' | 'failed' | 'success', error?: string) {
+    const db = await this.init();
+    const item = await db.get('syncQueue', id);
+    if (item) {
+      item.status = status;
+      item.lastAttempt = new Date().toISOString();
+      if (error) {
+        item.lastError = error;
+      }
+      await db.put('syncQueue', item);
+    }
+  }
+
   async incrementRetries(id: string) {
     const db = await this.init();
     const item = await db.get('syncQueue', id);
     if (item) {
       item.retries++;
+      item.lastAttempt = new Date().toISOString();
+
+      // Si max tentatives atteint, marquer comme échoué définitivement
+      if (item.retries >= item.maxRetries) {
+        item.status = 'failed';
+        console.error(`❌ Item ${id} a atteint le max de tentatives (${item.maxRetries})`);
+      }
+
       await db.put('syncQueue', item);
     }
+  }
+
+  async canSyncItem(id: string): Promise<boolean> {
+    const db = await this.init();
+    const item = await db.get('syncQueue', id);
+
+    if (!item) return false;
+    if (item.status === 'success') return false;
+    if (item.retries >= item.maxRetries) return false;
+
+    // Vérifier les dépendances
+    if (item.dependencies && item.dependencies.length > 0) {
+      for (const depId of item.dependencies) {
+        const dep = await db.get('syncQueue', depId);
+        if (!dep || dep.status !== 'success') {
+          console.log(`⏸️ Item ${id} en attente de dépendance ${depId}`);
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   // ===== COMMANDES =====
@@ -411,6 +525,106 @@ class OfflineStorage {
     }
   }
 
+  // ===== CONFLITS =====
+
+  async addConflict(
+    type: 'data' | 'version' | 'deletion',
+    localData: any,
+    serverData: any,
+    autoResolvable: boolean = false
+  ) {
+    const db = await this.init();
+    const id = `conflict-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    await db.put('conflicts', {
+      id,
+      type,
+      localData,
+      serverData,
+      timestamp: new Date().toISOString(),
+      resolved: false,
+      autoResolvable,
+    });
+
+    console.log(`⚠️ Conflit détecté: ${type}`);
+    return id;
+  }
+
+  async getConflicts() {
+    const db = await this.init();
+    return await db.getAllFromIndex('conflicts', 'by-resolved', false);
+  }
+
+  async resolveConflict(id: string, resolution: 'local' | 'server' | 'merge', mergedData?: any) {
+    const db = await this.init();
+    const conflict = await db.get('conflicts', id);
+
+    if (conflict) {
+      conflict.resolved = true;
+      conflict.resolution = resolution;
+
+      // Si merge, stocker les données fusionnées
+      if (resolution === 'merge' && mergedData) {
+        conflict.localData = mergedData;
+      }
+
+      await db.put('conflicts', conflict);
+      console.log(`✅ Conflit ${id} résolu: ${resolution}`);
+    }
+  }
+
+  async autoResolveConflicts() {
+    const db = await this.init();
+    const conflicts = await this.getConflicts();
+    const autoResolvable = conflicts.filter(c => c.autoResolvable);
+
+    for (const conflict of autoResolvable) {
+      // Stratégie: privilégier les données serveur pour les auto-résolvables
+      await this.resolveConflict(conflict.id, 'server');
+    }
+
+    console.log(`🤖 ${autoResolvable.length} conflits auto-résolus`);
+    return autoResolvable.length;
+  }
+
+  // ===== MÉTADONNÉES DE SYNCHRONISATION =====
+
+  async setLastSyncTime(key: string = 'global') {
+    const db = await this.init();
+    await db.put('syncMetadata', {
+      key: `lastSync_${key}`,
+      value: new Date().toISOString(),
+    });
+  }
+
+  async getLastSyncTime(key: string = 'global'): Promise<string | null> {
+    const db = await this.init();
+    const metadata = await db.get('syncMetadata', `lastSync_${key}`);
+    return metadata?.value || null;
+  }
+
+  async setSyncStats(stats: any) {
+    const db = await this.init();
+    await db.put('syncMetadata', {
+      key: 'syncStats',
+      value: {
+        ...stats,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  }
+
+  async getSyncStats() {
+    const db = await this.init();
+    const metadata = await db.get('syncMetadata', 'syncStats');
+    return metadata?.value || {
+      totalSynced: 0,
+      totalFailed: 0,
+      lastSyncDuration: 0,
+      averageSyncTime: 0,
+    };
+  }
+
   // ===== UTILITAIRES =====
 
   async clearAll() {
@@ -422,11 +636,27 @@ class OfflineStorage {
     await db.clear('payments');
     await db.clear('stockMovements');
     await db.clear('syncQueue');
+    await db.clear('conflicts');
+    await db.clear('syncMetadata');
+  }
+
+  async clearSyncedData() {
+    const db = await this.init();
+
+    // Supprimer uniquement les items synchronisés avec succès
+    const syncQueue = await db.getAll('syncQueue');
+    const successItems = syncQueue.filter(item => item.status === 'success');
+
+    for (const item of successItems) {
+      await db.delete('syncQueue', item.id);
+    }
+
+    console.log(`🧹 ${successItems.length} items synchronisés supprimés`);
   }
 
   async getStats() {
     const db = await this.init();
-    const [sales, tables, products, orders, payments, stockMovements, syncQueue] = await Promise.all([
+    const [sales, tables, products, orders, payments, stockMovements, syncQueue, conflicts] = await Promise.all([
       db.count('sales'),
       db.count('tables'),
       db.count('products'),
@@ -434,7 +664,15 @@ class OfflineStorage {
       db.count('payments'),
       db.count('stockMovements'),
       db.count('syncQueue'),
+      db.count('conflicts'),
     ]);
+
+    // Compter les items par statut
+    const allSyncItems = await db.getAll('syncQueue');
+    const pending = allSyncItems.filter(i => i.status === 'pending').length;
+    const syncing = allSyncItems.filter(i => i.status === 'syncing').length;
+    const failed = allSyncItems.filter(i => i.status === 'failed').length;
+    const success = allSyncItems.filter(i => i.status === 'success').length;
 
     return {
       sales,
@@ -443,7 +681,45 @@ class OfflineStorage {
       orders,
       payments,
       stockMovements,
-      syncQueue,
+      syncQueue: {
+        total: syncQueue,
+        pending,
+        syncing,
+        failed,
+        success,
+      },
+      conflicts,
+    };
+  }
+
+  async getDetailedSyncStatus() {
+    const db = await this.init();
+    const queue = await db.getAll('syncQueue');
+    const conflicts = await this.getConflicts();
+    const stats = await this.getSyncStats();
+    const lastSync = await this.getLastSyncTime();
+
+    return {
+      queue: {
+        total: queue.length,
+        byPriority: {
+          high: queue.filter(i => i.priority === 1).length,
+          medium: queue.filter(i => i.priority === 2).length,
+          low: queue.filter(i => i.priority === 3).length,
+        },
+        byStatus: {
+          pending: queue.filter(i => i.status === 'pending').length,
+          syncing: queue.filter(i => i.status === 'syncing').length,
+          failed: queue.filter(i => i.status === 'failed').length,
+          success: queue.filter(i => i.status === 'success').length,
+        },
+      },
+      conflicts: {
+        total: conflicts.length,
+        autoResolvable: conflicts.filter(c => c.autoResolvable).length,
+      },
+      stats,
+      lastSync,
     };
   }
 }
