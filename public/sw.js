@@ -193,29 +193,167 @@ async function cacheFirstStrategy(request) {
   }
 }
 
-// Synchronisation en arrière-plan
+// Synchronisation en arrière-plan (Background Sync API)
 self.addEventListener('sync', (event) => {
-  console.log('🔄 Background Sync:', event.tag);
-  
-  if (event.tag === 'sync-sales') {
-    event.waitUntil(syncData('sales'));
-  } else if (event.tag === 'sync-orders') {
-    event.waitUntil(syncData('orders'));
-  } else if (event.tag === 'sync-payments') {
-    event.waitUntil(syncData('payments'));
-  } else if (event.tag === 'sync-inventory') {
-    event.waitUntil(syncData('inventory'));
+  console.log('🔄 Background Sync Event:', event.tag);
+
+  if (event.tag === 'sync-offline-queue') {
+    event.waitUntil(syncOfflineQueue());
+  } else if (event.tag.startsWith('sync-priority-')) {
+    const priority = event.tag.replace('sync-priority-', '');
+    event.waitUntil(syncByPriority(parseInt(priority)));
   }
 });
 
-// Fonction de synchronisation générique
-async function syncData(dataType) {
-  console.log(`🔄 Synchronisation des ${dataType}...`);
-  
-  // La synchronisation réelle est gérée par le hook useOfflineSync
-  // Ce handler confirme juste que le SW est prêt
-  
-  return Promise.resolve();
+// Synchronisation de la file d'attente complète
+async function syncOfflineQueue() {
+  console.log('🔄 Background Sync: Synchronisation de la file complète...');
+
+  try {
+    // Ouvrir IndexedDB
+    const db = await openIndexedDB();
+
+    // Récupérer la file de synchronisation
+    const tx = db.transaction('syncQueue', 'readonly');
+    const store = tx.objectStore('syncQueue');
+    const queue = await store.getAll();
+
+    console.log(`📊 ${queue.length} items à synchroniser`);
+
+    // Trier par priorité
+    queue.sort((a, b) => {
+      if (a.priority !== b.priority) return a.priority - b.priority;
+      return new Date(a.timestamp) - new Date(b.timestamp);
+    });
+
+    let successCount = 0;
+    let failCount = 0;
+
+    // Synchroniser chaque item
+    for (const item of queue) {
+      // Vérifier si l'item peut être synchronisé
+      if (item.status === 'syncing' || item.status === 'success') {
+        continue;
+      }
+
+      // Vérifier les tentatives
+      if (item.retries >= item.maxRetries) {
+        console.log(`⏭️ Item ${item.id} ignoré (max retries atteint)`);
+        continue;
+      }
+
+      try {
+        // Marquer comme en cours
+        await updateSyncItemStatus(db, item.id, 'syncing');
+
+        // Envoyer la requête
+        const response = await fetch(item.endpoint, {
+          method: item.type === 'create' ? 'POST' :
+                  item.type === 'update' ? 'PUT' :
+                  item.type === 'delete' ? 'DELETE' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(item.data),
+        });
+
+        if (response.ok) {
+          // Succès
+          await updateSyncItemStatus(db, item.id, 'success');
+          await removeSyncItem(db, item.id);
+          successCount++;
+          console.log(`✅ Item ${item.id} synchronisé`);
+        } else {
+          // Échec
+          await updateSyncItemStatus(db, item.id, 'failed', `HTTP ${response.status}`);
+          failCount++;
+          console.log(`❌ Item ${item.id} échoué: ${response.status}`);
+        }
+      } catch (error) {
+        // Erreur réseau
+        await updateSyncItemStatus(db, item.id, 'failed', error.message);
+        failCount++;
+        console.log(`❌ Item ${item.id} erreur:`, error.message);
+      }
+    }
+
+    console.log(`✅ Background Sync terminé: ${successCount} réussis, ${failCount} échoués`);
+
+    // Notifier l'application
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_COMPLETE',
+        success: successCount,
+        failed: failCount,
+      });
+    });
+
+    return Promise.resolve();
+  } catch (error) {
+    console.error('❌ Erreur Background Sync:', error);
+    return Promise.reject(error);
+  }
+}
+
+// Synchronisation par priorité
+async function syncByPriority(priority) {
+  console.log(`🔄 Background Sync: Priorité ${priority}`);
+
+  try {
+    const db = await openIndexedDB();
+    const tx = db.transaction('syncQueue', 'readonly');
+    const store = tx.objectStore('syncQueue');
+    const index = store.index('by-priority');
+    const queue = await index.getAll(priority);
+
+    console.log(`📊 ${queue.length} items priorité ${priority}`);
+
+    for (const item of queue) {
+      if (item.status === 'pending' && item.retries < item.maxRetries) {
+        // Synchroniser l'item
+        // (logique similaire à syncOfflineQueue)
+      }
+    }
+
+    return Promise.resolve();
+  } catch (error) {
+    console.error('❌ Erreur sync priorité:', error);
+    return Promise.reject(error);
+  }
+}
+
+// Ouvrir IndexedDB
+function openIndexedDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('BarStockOfflineDB', 2);
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Mettre à jour le statut d'un item
+async function updateSyncItemStatus(db, id, status, error = null) {
+  const tx = db.transaction('syncQueue', 'readwrite');
+  const store = tx.objectStore('syncQueue');
+  const item = await store.get(id);
+
+  if (item) {
+    item.status = status;
+    item.lastAttempt = new Date().toISOString();
+    if (error) item.lastError = error;
+    if (status === 'failed') item.retries += 1;
+
+    await store.put(item);
+  }
+}
+
+// Supprimer un item de la file
+async function removeSyncItem(db, id) {
+  const tx = db.transaction('syncQueue', 'readwrite');
+  const store = tx.objectStore('syncQueue');
+  await store.delete(id);
 }
 
 // Pré-cache des endpoints prioritaires au premier chargement

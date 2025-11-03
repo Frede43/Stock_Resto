@@ -39,6 +39,7 @@ import Help from "./pages/Help";
 import Kitchen from "./pages/Kitchen";
 import OfflineTest from "./pages/OfflineTest";
 import SyncManagement from "./pages/SyncManagement";
+import OfflineSyncTest from "./pages/OfflineSyncTest";
 // Dashboard supprimé - Admin utilise Index
 import CashierDashboard from "./pages/CashierDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
@@ -200,6 +201,9 @@ const App = () => (
 
           {/* Gestion Synchronisation */}
           <Route path="/sync-management" element={<ProtectedRoute><Layout><SyncManagement /></Layout></ProtectedRoute>} />
+
+          {/* Test Synchronisation Avancée */}
+          <Route path="/offline-sync-test" element={<ProtectedRoute><Layout><OfflineSyncTest /></Layout></ProtectedRoute>} />
 
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />

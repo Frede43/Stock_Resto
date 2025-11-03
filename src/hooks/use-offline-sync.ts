@@ -1,6 +1,7 @@
 // Hook pour gérer la synchronisation offline
 import { useState, useEffect, useCallback } from 'react';
 import { offlineStorage } from '@/services/offline-storage';
+import { backgroundSync } from '@/services/background-sync';
 import { useToast } from '@/hooks/use-toast';
 
 const API_URL = import.meta.env.VITE_API_URL 
@@ -207,7 +208,7 @@ export function useOfflineSync() {
 
   // Détecter les changements de connexion
   useEffect(() => {
-    const handleOnline = () => {
+    const handleOnline = async () => {
       console.log('🌐 Connexion internet rétablie');
       setIsOnline(true);
       toast({
@@ -215,6 +216,15 @@ export function useOfflineSync() {
         description: 'Synchronisation des données en cours...',
         duration: 3000,
       });
+
+      // Enregistrer un Background Sync (non critique)
+      try {
+        await backgroundSync.syncOfflineQueue();
+        console.log('✅ Background Sync enregistré');
+      } catch (error) {
+        console.warn('⚠️ Background Sync non disponible, utilisation sync normale');
+      }
+
       // Synchroniser après un délai pour laisser la connexion se stabiliser
       setTimeout(() => syncPendingData(), 2000);
     };
