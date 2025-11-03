@@ -202,7 +202,14 @@ class OfflineStorage {
 
   async getUnsyncedSales() {
     const db = await this.init();
-    return await db.getAllFromIndex('sales', 'by-synced', false);
+    try {
+      const range = IDBKeyRange.only(false);
+      return await db.getAllFromIndex('sales', 'by-synced', range);
+    } catch (error) {
+      console.warn('Erreur lors de la récupération des ventes non synchronisées, utilisation du fallback:', error);
+      const allSales = await db.getAll('sales');
+      return allSales.filter(s => s.synced === false);
+    }
   }
 
   async markSaleAsSynced(id: string) {
@@ -423,7 +430,14 @@ class OfflineStorage {
 
   async getUnsyncedOrders() {
     const db = await this.init();
-    return await db.getAllFromIndex('orders', 'by-synced', false);
+    try {
+      const range = IDBKeyRange.only(false);
+      return await db.getAllFromIndex('orders', 'by-synced', range);
+    } catch (error) {
+      console.warn('Erreur lors de la récupération des commandes non synchronisées, utilisation du fallback:', error);
+      const allOrders = await db.getAll('orders');
+      return allOrders.filter(o => o.synced === false);
+    }
   }
 
   async markOrderAsSynced(id: string) {
@@ -476,7 +490,14 @@ class OfflineStorage {
 
   async getUnsyncedPayments() {
     const db = await this.init();
-    return await db.getAllFromIndex('payments', 'by-synced', false);
+    try {
+      const range = IDBKeyRange.only(false);
+      return await db.getAllFromIndex('payments', 'by-synced', range);
+    } catch (error) {
+      console.warn('Erreur lors de la récupération des paiements non synchronisés, utilisation du fallback:', error);
+      const allPayments = await db.getAll('payments');
+      return allPayments.filter(p => p.synced === false);
+    }
   }
 
   async markPaymentAsSynced(id: string) {
@@ -513,7 +534,14 @@ class OfflineStorage {
 
   async getUnsyncedStockMovements() {
     const db = await this.init();
-    return await db.getAllFromIndex('stockMovements', 'by-synced', false);
+    try {
+      const range = IDBKeyRange.only(false);
+      return await db.getAllFromIndex('stockMovements', 'by-synced', range);
+    } catch (error) {
+      console.warn('Erreur lors de la récupération des mouvements de stock non synchronisés, utilisation du fallback:', error);
+      const allMovements = await db.getAll('stockMovements');
+      return allMovements.filter(m => m.synced === false);
+    }
   }
 
   async markStockMovementAsSynced(id: string) {
@@ -552,7 +580,16 @@ class OfflineStorage {
 
   async getConflicts() {
     const db = await this.init();
-    return await db.getAllFromIndex('conflicts', 'by-resolved', false);
+    try {
+      // Utiliser IDBKeyRange pour les valeurs booléennes
+      const range = IDBKeyRange.only(false);
+      return await db.getAllFromIndex('conflicts', 'by-resolved', range);
+    } catch (error) {
+      // Fallback: récupérer tous et filtrer manuellement
+      console.warn('Erreur lors de la récupération des conflits, utilisation du fallback:', error);
+      const allConflicts = await db.getAll('conflicts');
+      return allConflicts.filter(c => c.resolved === false);
+    }
   }
 
   async resolveConflict(id: string, resolution: 'local' | 'server' | 'merge', mergedData?: any) {
