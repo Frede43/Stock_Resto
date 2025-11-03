@@ -565,29 +565,30 @@ export default function Kitchen() {
       <div className="space-y-4 md:space-y-6 p-4 md:p-6">
             
             {/* En-tête */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4">
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
                   <ChefHat className="h-6 w-6 md:h-8 md:w-8" />
-                  Gestion de Cuisine
+                  <span className="hidden sm:inline">Gestion de Cuisine</span>
+                  <span className="sm:hidden">Cuisine</span>
                 </h1>
-                <p className="text-sm md:text-base text-muted-foreground">Interface technique complète</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Interface technique complète</p>
               </div>
               <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                <Button onClick={refreshData} variant="outline" className="flex-1 sm:flex-none">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Actualiser</span>
+                <Button onClick={refreshData} variant="outline" size="sm" className="flex-1 sm:flex-none">
+                  <RefreshCw className="h-4 w-4" />
+                  <span className="ml-1 hidden sm:inline">Actualiser</span>
                 </Button>
-                <Button onClick={handleRecalculatePrices} variant="outline" className="bg-blue-50 hover:bg-blue-100 border-blue-200 flex-1 sm:flex-none">
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Recalculer Prix</span>
+                <Button onClick={handleRecalculatePrices} variant="outline" size="sm" className="bg-blue-50 hover:bg-blue-100 border-blue-200 flex-1 sm:flex-none">
+                  <DollarSign className="h-4 w-4" />
+                  <span className="ml-1 hidden sm:inline">Prix</span>
                 </Button>
                 <Dialog open={showAddIngredient} onOpenChange={setShowAddIngredient}>
                   <DialogTrigger asChild>
-                    <Button className="flex-1 sm:flex-none">
-                      <Plus className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Ajouter Ingrédient</span>
-                      <span className="sm:hidden">Nouveau</span>
+                    <Button size="sm" className="flex-1 sm:flex-none">
+                      <Plus className="h-4 w-4" />
+                      <span className="ml-1 hidden sm:inline">Ingrédient</span>
+                      <span className="ml-1 sm:hidden">Nouveau</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md">

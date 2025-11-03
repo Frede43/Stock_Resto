@@ -248,7 +248,7 @@ export default function Settings() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 md:p-6 lg:p-8 xl:p-10 space-y-4 md:space-y-6 lg:space-y-8 xl:space-y-10">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>

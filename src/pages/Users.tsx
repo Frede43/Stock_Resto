@@ -564,30 +564,30 @@ export default function Users() {
           </div>
 
           {/* Users Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center">
-                    <UsersIcon className="h-6 w-6 text-primary-foreground" />
+              <CardContent className="pt-4 md:pt-6">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center flex-shrink-0">
+                    <UsersIcon className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total utilisateurs</p>
-                    <p className="text-2xl font-bold">{users.length}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">Total utilisateurs</p>
+                    <p className="text-xl md:text-2xl font-bold">{users.length}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-gradient-to-br from-success to-success/80 rounded-lg flex items-center justify-center">
-                    <UserCheck className="h-6 w-6 text-success-foreground" />
+              <CardContent className="pt-4 md:pt-6">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-success to-success/80 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <UserCheck className="h-5 w-5 md:h-6 md:w-6 text-success-foreground" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Actifs</p>
-                    <p className="text-2xl font-bold text-success">
+                  <div className="min-w-0">
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">Actifs</p>
+                    <p className="text-xl md:text-2xl font-bold text-success">
                       {users.filter(u => u.status === "active").length}
                     </p>
                   </div>
@@ -596,14 +596,14 @@ export default function Users() {
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-gradient-to-br from-warning to-warning/80 rounded-lg flex items-center justify-center">
-                    <Shield className="h-6 w-6 text-warning-foreground" />
+              <CardContent className="pt-4 md:pt-6">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-warning to-warning/80 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-5 w-5 md:h-6 md:w-6 text-warning-foreground" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Administrateurs</p>
-                    <p className="text-2xl font-bold text-warning">
+                  <div className="min-w-0">
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">Administrateurs</p>
+                    <p className="text-xl md:text-2xl font-bold text-warning">
                       {users.filter(u => u.role === "admin").length}
                     </p>
                   </div>
@@ -612,14 +612,14 @@ export default function Users() {
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-gradient-to-br from-secondary to-secondary/80 rounded-lg flex items-center justify-center">
-                    <Activity className="h-6 w-6 text-secondary-foreground" />
+              <CardContent className="pt-4 md:pt-6">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-secondary to-secondary/80 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Activity className="h-5 w-5 md:h-6 md:w-6 text-secondary-foreground" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Connectés aujourd'hui</p>
-                    <p className="text-2xl font-bold text-secondary">
+                  <div className="min-w-0">
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">Connectés aujourd'hui</p>
+                    <p className="text-xl md:text-2xl font-bold text-secondary">
                       {users.filter(u => u.lastLogin.includes("2024-08-14")).length}
                     </p>
                   </div>
@@ -647,56 +647,62 @@ export default function Users() {
                     return (
                       <div
                         key={user.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                        className="flex flex-col md:flex-row items-start md:items-center justify-between p-3 md:p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-3 md:gap-4"
                       >
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-12 w-12">
+                        <div className="flex items-start gap-3 md:gap-4 w-full md:w-auto min-w-0">
+                          <Avatar className="h-10 w-10 md:h-12 md:w-12 flex-shrink-0">
                             <AvatarImage src={user.avatar} />
                             <AvatarFallback>
                               {user.firstName[0]}{user.lastName[0]}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold">{user.firstName} {user.lastName}</h3>
-                              <Badge variant={statusInfo.variant} className="gap-1">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+                              <h3 className="font-semibold text-sm md:text-base truncate">{user.firstName} {user.lastName}</h3>
+                              <Badge variant={statusInfo.variant} className="gap-1 w-fit">
                                 <StatusIcon className="h-3 w-3" />
-                                {statusInfo.label}
+                                <span className="text-xs">{statusInfo.label}</span>
                               </Badge>
                             </div>
-                            <div className="text-sm text-muted-foreground space-y-1">
-                              <div className="flex items-center gap-4">
-                                <span className="flex items-center gap-1">
-                                  <Mail className="h-3 w-3" />
-                                  {user.email}
+                            <div className="text-xs md:text-sm text-muted-foreground space-y-1">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                                <span className="flex items-center gap-1 truncate">
+                                  <Mail className="h-3 w-3 flex-shrink-0" />
+                                  <span className="truncate">{user.email}</span>
                                 </span>
-                                <span className="flex items-center gap-1">
-                                  <Phone className="h-3 w-3" />
-                                  {user.phone}
-                                </span>
+                                {user.phone && (
+                                  <span className="flex items-center gap-1">
+                                    <Phone className="h-3 w-3 flex-shrink-0" />
+                                    {user.phone}
+                                  </span>
+                                )}
                               </div>
-                              <div className="flex items-center gap-4">
-                                <Badge variant={roleInfo.color as any}>
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                                <Badge variant={roleInfo.color as any} className="w-fit text-xs">
                                   {roleInfo.label}
                                 </Badge>
-                                <span className="flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
-                                  Dernière connexion: {user.lastLogin}
+                                <span className="flex items-center gap-1 text-xs">
+                                  <Calendar className="h-3 w-3 flex-shrink-0" />
+                                  <span className="hidden sm:inline">Dernière connexion:</span>
+                                  <span className="sm:hidden">Connexion:</span>
+                                  <span className="truncate">{user.lastLogin}</span>
                                 </span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full md:w-auto justify-end">
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => setSelectedUser(user)}
+                                className="flex-1 md:flex-none"
                               >
                                 <Eye className="h-4 w-4" />
+                                <span className="ml-1 sm:hidden">Voir</span>
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="max-w-2xl">

@@ -151,22 +151,29 @@ export default function StockSync() {
   };
 
   return (
-    <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6">
+    <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-4 md:p-6">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                Synchronisation des stocks
-              </h1>
-              <p className="text-muted-foreground">
-                Résolvez les conflits entre les données produits et inventaire
-              </p>
-            </div>
-            <Button onClick={startSync} disabled={isScanning} className="gap-2">
-              <RefreshCw className={`h-4 w-4 ${isScanning ? 'animate-spin' : ''}`} />
-              {isScanning ? 'Analyse...' : 'Analyser'}
-            </Button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Synchronisation du Stock</h1>
+            <p className="text-xs md:text-sm text-muted-foreground">
+              Résolvez les conflits entre les ventes et l'inventaire
+            </p>
           </div>
+          <Button onClick={startSync} disabled={isScanning} size="sm" className="w-full sm:w-auto">
+            {isScanning ? (
+              <><RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                <span className="hidden sm:inline">Analyse en cours...</span>
+                <span className="sm:hidden">Analyse...</span>
+              </> 
+            ) : (
+              <><RefreshCw className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Scanner les conflits</span>
+                <span className="sm:hidden">Scanner</span>
+              </> 
+            )}
+          </Button>
+        </div>
 
           {/* Sync Status */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

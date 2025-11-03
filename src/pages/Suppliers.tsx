@@ -298,17 +298,17 @@ export default function Suppliers() {
             </Card>
 
             {/* Suppliers Stats */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total fournisseurs</CardTitle>
-                  <Truck className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-xs md:text-sm font-medium">Total fournisseurs</CardTitle>
+                  <Truck className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </CardHeader>
                 <CardContent>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total fournisseurs</p>
-                    <p className="text-2xl font-bold">
-                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : suppliers.length}
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">Total fournisseurs</p>
+                    <p className="text-xl md:text-2xl font-bold">
+                      {isLoading ? <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin" /> : suppliers.length}
                     </p>
                   </div>
                 </CardContent>
@@ -316,14 +316,14 @@ export default function Suppliers() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Actifs</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-xs md:text-sm font-medium">Actifs</CardTitle>
+                  <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </CardHeader>
                 <CardContent>
                   <div>
-                    <p className="text-sm text-muted-foreground">Actifs</p>
-                    <p className="text-2xl font-bold text-success">
-                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : suppliers.filter(s => s.status === "active").length}
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">Actifs</p>
+                    <p className="text-xl md:text-2xl font-bold text-success">
+                      {isLoading ? <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin" /> : suppliers.filter(s => s.status === "active").length}
                     </p>
                   </div>
                 </CardContent>
@@ -331,14 +331,14 @@ export default function Suppliers() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Inactifs</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-xs md:text-sm font-medium">Inactifs</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </CardHeader>
                 <CardContent>
                   <div>
-                    <p className="text-sm text-muted-foreground">Inactifs</p>
-                    <p className="text-2xl font-bold text-warning">
-                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : suppliers.filter(s => s.status === "inactive").length}
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">Inactifs</p>
+                    <p className="text-xl md:text-2xl font-bold text-warning">
+                      {isLoading ? <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin" /> : suppliers.filter(s => s.status === "inactive").length}
                     </p>
                   </div>
                 </CardContent>
@@ -346,14 +346,14 @@ export default function Suppliers() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Résultats filtrés</CardTitle>
-                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-xs md:text-sm font-medium">Résultats filtrés</CardTitle>
+                  <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </CardHeader>
                 <CardContent>
                   <div>
-                    <p className="text-sm text-muted-foreground">Résultats filtrés</p>
-                    <p className="text-xl font-bold text-secondary">
-                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : filteredSuppliers.length}
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">Résultats filtrés</p>
+                    <p className="text-lg md:text-xl font-bold text-secondary">
+                      {isLoading ? <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin" /> : filteredSuppliers.length}
                     </p>
                   </div>
                 </CardContent>
@@ -397,43 +397,45 @@ export default function Suppliers() {
                         const statusInfo = getStatusInfo(supplier.status);
                         
                         return (
-                          <div key={supplier.id} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="flex items-center space-x-4">
-                              <div className="h-10 w-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
+                          <div key={supplier.id} className="flex flex-col md:flex-row items-start md:items-center justify-between p-3 md:p-4 border rounded-lg gap-3 md:gap-4">
+                            <div className="flex items-start gap-3 md:gap-4 w-full md:w-auto min-w-0">
+                              <div className="h-10 w-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <Truck className="h-5 w-5 text-primary-foreground" />
                               </div>
-                              <div>
-                                <h3 className="font-semibold">{supplier.name}</h3>
-                                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                              <div className="min-w-0 flex-1">
+                                <h3 className="font-semibold text-sm md:text-base truncate">{supplier.name}</h3>
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs md:text-sm text-muted-foreground">
                                   {supplier.contact.email && (
-                                    <div className="flex items-center">
-                                      <Mail className="h-3 w-3 mr-1" />
-                                      {supplier.contact.email}
+                                    <div className="flex items-center gap-1 truncate">
+                                      <Mail className="h-3 w-3 flex-shrink-0" />
+                                      <span className="truncate">{supplier.contact.email}</span>
                                     </div>
                                   )}
                                   {supplier.contact.phone && (
-                                    <div className="flex items-center">
-                                      <Phone className="h-3 w-3 mr-1" />
+                                    <div className="flex items-center gap-1">
+                                      <Phone className="h-3 w-3 flex-shrink-0" />
                                       {supplier.contact.phone}
                                     </div>
                                   )}
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <Badge variant={statusInfo.variant}>
+                            <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                              <Badge variant={statusInfo.variant} className="text-xs">
                                 {statusInfo.label}
                               </Badge>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
                                 <Edit className="h-4 w-4" />
+                                <span className="ml-1 sm:hidden">Modifier</span>
                               </Button>
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="text-destructive hover:text-destructive"
+                                className="text-destructive hover:text-destructive flex-1 sm:flex-none"
                                 disabled
                               >
                                 <Trash2 className="h-4 w-4" />
+                                <span className="ml-1 sm:hidden">Supprimer</span>
                               </Button>
                             </div>
                           </div>
