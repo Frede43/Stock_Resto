@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useOfflineServer } from "@/hooks/use-offline-server";
+// Système offline désactivé
+// import { useOfflineServer } from "@/hooks/use-offline-server";
 import { useTables, useProducts, useServers } from "@/hooks/use-api";
-import { OfflineLoadingState } from "@/components/OfflineLoadingState";
+// import { OfflineLoadingState } from "@/components/OfflineLoadingState";
 import {
   ShoppingCart,
   Plus,
@@ -35,17 +36,18 @@ interface CartItem {
 
 export default function ServerOrders() {
   const { toast } = useToast();
-  const {
-    isOnline,
-    isLoading,
-    cachedMenu,
-    cachedTables,
-    pendingOrders,
-    createOfflineOrder,
-    addNotesToOrder,
-    updateMenuCache,
-    updateTablesCache,
-  } = useOfflineServer();
+  // Système offline désactivé
+  // const {
+  //   isOnline,
+  //   isLoading,
+  //   cachedMenu,
+  //   cachedTables,
+  //   pendingOrders,
+  //   createOfflineOrder,
+  //   addNotesToOrder,
+  //   updateMenuCache,
+  //   updateTablesCache,
+  // } = useOfflineServer();
 
   // Récupérer les données depuis l'API (et mettre à jour le cache)
   const { data: tablesData } = useTables({});

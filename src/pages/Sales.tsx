@@ -9,8 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useTables, useCreateSale, useProducts, useServers } from "@/hooks/use-api";
 import { PrintableInvoice } from "@/components/PrintableInvoice";
-import { useOfflineSync } from "@/hooks/use-offline-sync";
-import { generateOfflineInvoice } from "@/utils/invoice-generator";
 import {
   ShoppingCart,
   Plus,
@@ -58,7 +56,6 @@ export default function Sales() {
   const [menu, setMenu] = useState<Record<string, MenuItem[]>>({});
   const [filteredMenu, setFilteredMenu] = useState<Record<string, MenuItem[]>>({});
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [orderData, setOrderData] = useState<any>(null);
   const [customerName, setCustomerName] = useState<string>('');
@@ -70,7 +67,8 @@ export default function Sales() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
-  const { isOnline, addToQueue } = useOfflineSync();
+  // const { isOnline, addToQueue } = useOfflineSync(); // Système offline désactivé
+  const isOnline = true; // Application en ligne uniquement
 
   // Récupérer les tables disponibles, les produits et les serveurs
   const { data: tablesData, isLoading: tablesLoading } = useTables({ status: 'available' });
@@ -86,50 +84,52 @@ export default function Sales() {
 
   // Organiser les produits par catégorie quand les données sont chargées
   useEffect(() => {
-    if (productsData?.results) {
-      const products = productsData.results;
-      const organizedMenu: Record<string, MenuItem[]> = {};
+    // Attendre que productsLoading soit terminé
+    if (!productsLoading) {
+      if (productsData?.results) {
+        const products = productsData.results;
+        const organizedMenu: Record<string, MenuItem[]> = {};
 
-      products.forEach(product => {
-        const category = product.category_name || 'Autres';
+        products.forEach(product => {
+          const category = product.category_name || 'Autres';
 
-        if (!organizedMenu[category]) {
-          organizedMenu[category] = [];
-        }
+          if (!organizedMenu[category]) {
+            organizedMenu[category] = [];
+          }
 
-        // Déterminer le statut du stock
-        const isOutOfStock = product.current_stock <= 0;
-        const isLowStock = product.current_stock <= (product.minimum_stock || 5) && product.current_stock > 0;
+          // Déterminer le statut du stock
+          const isOutOfStock = product.current_stock <= 0;
+          const isLowStock = product.current_stock <= (product.minimum_stock || 5) && product.current_stock > 0;
 
-        // Ajouter des facteurs limitants selon le stock
-        const limitingFactors = [];
-        if (isOutOfStock) {
-          limitingFactors.push('Rupture de stock');
-        } else if (isLowStock) {
-          limitingFactors.push(`Stock faible (${product.current_stock} restant)`);
-        }
+          // Ajouter des facteurs limitants selon le stock
+          const limitingFactors = [];
+          if (isOutOfStock) {
+            limitingFactors.push('Rupture de stock');
+          } else if (isLowStock) {
+            limitingFactors.push(`Stock faible (${product.current_stock} restant)`);
+          }
 
-        organizedMenu[category].push({
-          id: product.id,
-          name: product.name,
-          category: category,
-          price: parseFloat(product.selling_price?.toString() || '0'),
-          description: product.description || '',
-          type: 'product',
-          availability: {
-            available_quantity: product.current_stock,
-            limiting_factors: limitingFactors
-          },
-          margin_percentage: 0,
-          isOutOfStock: isOutOfStock,
-          isLowStock: isLowStock
+          organizedMenu[category].push({
+            id: product.id,
+            name: product.name,
+            category: category,
+            price: parseFloat(product.selling_price?.toString() || '0'),
+            description: product.description || '',
+            type: 'product',
+            availability: {
+              available_quantity: product.current_stock,
+              limiting_factors: limitingFactors
+            },
+            margin_percentage: 0,
+            isOutOfStock: isOutOfStock,
+            isLowStock: isLowStock
+          });
         });
-      });
 
-      setMenu(organizedMenu);
-      setLoading(false);
+        setMenu(organizedMenu);
+      }
     }
-  }, [productsData]);
+  }, [productsData, productsLoading]);
 
   // Filtrer les produits selon la recherche et la catégorie
   useEffect(() => {
@@ -425,10 +425,10 @@ export default function Sales() {
             setProcessing(false);
           }
         });
-      } else {
+      } //else {
         // Mode OFFLINE : sauvegarder localement
-        await handleOfflineSale(saleData, serverName);
-      }
+        //await handleOfflineSale(saleData, serverName);
+      //}
 
     } catch (error: any) {
       toast({
@@ -455,108 +455,13 @@ export default function Sales() {
           throw new Error('Erreur API');
         }
       } catch (error) {
-        console.warn('Erreur API, génération facture locale:', error);
-        const localInvoice = generateOfflineInvoice(
-          (result as any).id || 'temp',
-          customerName,
-          selectedTable,
-          serversData?.results?.find((s: any) => s.id === parseInt(selectedServer))?.username || 'Serveur',
-          cart.map(item => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            product_code: item.menu_item_id?.toString()
-          })),
-          totalAmount
-        );
-        setInvoiceData(localInvoice);
-        setShowInvoice(true);
+        console.error('Erreur lors de la génération de la facture:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de générer la facture. Vérifiez votre connexion.",
+          variant: "destructive",
+        });
       }
-    } else {
-      // Mode offline : génération locale
-      const localInvoice = generateOfflineInvoice(
-        (result as any)?.id || `offline-${Date.now()}`,
-        customerName,
-        selectedTable,
-        serversData?.results?.find((s: any) => s.id === parseInt(selectedServer))?.username || 'Serveur',
-        cart.map(item => ({
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          product_code: item.menu_item_id?.toString()
-        })),
-        totalAmount
-      );
-      setInvoiceData(localInvoice);
-      setShowInvoice(true);
-    }
-  };
-
-  // Fonction pour gérer les ventes en mode offline
-  const handleOfflineSale = async (saleData: any, serverName: string) => {
-    try {
-      // Importer le service de stockage offline
-      const { offlineStorage } = await import('@/services/offline-storage');
-      
-      // Générer un ID temporaire pour la vente
-      const tempSaleId = `offline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Préparer la vente pour le stockage offline
-      const offlineSaleData = {
-        id: tempSaleId,
-        ...saleData,
-        created_at: new Date().toISOString(),
-        status: 'paid', // Considérer comme payée en mode offline
-        total_amount: totalAmount,
-        server_name: serverName,
-        offline: true,
-      };
-      
-      // Sauvegarder la vente dans IndexedDB
-      await offlineStorage.saveSale(offlineSaleData, false);
-      
-      // Ajouter à la file de synchronisation
-      await addToQueue('create', '/sales/', saleData);
-      
-      // Fermer le modal de confirmation
-      setShowConfirmation(false);
-      
-      // Notification de succès en mode offline
-      toast({
-        title: "Vente enregistrée hors ligne ! 📱",
-        description: `Vente sauvegardée localement. Elle sera synchronisée quand internet reviendra.`,
-        variant: "default",
-        duration: 5000,
-      });
-
-      // Générer la facture locale
-      const localInvoice = generateOfflineInvoice(
-        tempSaleId,
-        customerName,
-        selectedTable,
-        serverName,
-        cart.map(item => ({
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          product_code: item.menu_item_id?.toString()
-        })),
-        totalAmount
-      );
-      setInvoiceData(localInvoice);
-      setShowInvoice(true);
-
-      // Réinitialiser le formulaire
-      resetForm();
-      
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde offline:', error);
-      toast({
-        title: "Erreur de sauvegarde",
-        description: "Impossible de sauvegarder la vente hors ligne. Vérifiez votre connexion.",
-        variant: "destructive",
-      });
-      setProcessing(false);
     }
   };
 
@@ -571,7 +476,7 @@ export default function Sales() {
     refreshProducts();
   };
 
-  if (loading || productsLoading) {
+  if (productsLoading) {
     return (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="text-center">
@@ -580,6 +485,7 @@ export default function Sales() {
       </div>
     </div>
   );
+  }
 
   return (
     <>
@@ -675,6 +581,23 @@ export default function Sales() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Message si aucun produit */}
+              {Object.keys(filteredMenu).length === 0 && (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-lg font-semibold mb-2">Aucun produit disponible</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Aucun produit n'a été trouvé dans le système.
+                    </p>
+                    <Button onClick={refreshProducts} variant="outline">
+                      <Package className="h-4 w-4 mr-2" />
+                      Actualiser
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Catégories du menu filtrées */}
               {Object.entries(filteredMenu).map(([category, items]) => (
@@ -976,4 +899,4 @@ export default function Sales() {
     </>
   );
  }
-}
+

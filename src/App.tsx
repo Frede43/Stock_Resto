@@ -11,8 +11,6 @@ import { WebSocketProvider } from "./components/WebSocketProvider";
 import { SidebarProvider } from "./context/SidebarContext";
 import { Layout } from "./components/layout/ModernLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { OfflineIndicator } from "./components/OfflineIndicator";
-import { startCacheRefresh } from "./utils/cache-initializer";
 import { Lock } from "lucide-react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -37,9 +35,10 @@ import Alerts from "./pages/Alerts";
 import Monitoring from "./pages/Monitoring";
 import Help from "./pages/Help";
 import Kitchen from "./pages/Kitchen";
-import OfflineTest from "./pages/OfflineTest";
-import SyncManagement from "./pages/SyncManagement";
-import OfflineSyncTest from "./pages/OfflineSyncTest";
+// Pages offline désactivées
+// import OfflineTest from "./pages/OfflineTest";
+// import SyncManagement from "./pages/SyncManagement";
+// import OfflineSyncTest from "./pages/OfflineSyncTest";
 // Dashboard supprimé - Admin utilise Index
 import CashierDashboard from "./pages/CashierDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
@@ -89,17 +88,14 @@ const RestrictedForCashier = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Composant pour initialiser le cache
-const CacheInitializer = ({ children }: { children: React.ReactNode }) => {
-  useEffect(() => {
-    // Démarrer le rafraîchissement automatique du cache toutes les 5 minutes
-    const cleanup = startCacheRefresh(5);
-    
-    return cleanup;
-  }, []);
-
-  return <>{children}</>;
-};
+// Composant CacheInitializer désactivé
+// const CacheInitializer = ({ children }: { children: React.ReactNode }) => {
+//   useEffect(() => {
+//     const cleanup = startCacheRefresh(5);
+//     return cleanup;
+//   }, []);
+//   return <>{children}</>;
+// };
 
 const App = () => (
   <QueryProvider>
@@ -108,7 +104,6 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <CacheInitializer>
             <SidebarProvider>
               <NotificationProvider>
             <Routes>
@@ -196,27 +191,14 @@ const App = () => (
           <Route path="/monitoring" element={<ProtectedRoute><Layout><Monitoring /></Layout></ProtectedRoute>} />
           <Route path="/help" element={<ProtectedRoute><Layout><Help /></Layout></ProtectedRoute>} />
           
-          {/* Test Offline */}
-          <Route path="/offline-test" element={<ProtectedRoute><Layout><OfflineTest /></Layout></ProtectedRoute>} />
-
-          {/* Gestion Synchronisation */}
-          <Route path="/sync-management" element={<ProtectedRoute><Layout><SyncManagement /></Layout></ProtectedRoute>} />
-
-          {/* Test Synchronisation Avancée */}
-          <Route path="/offline-sync-test" element={<ProtectedRoute><Layout><OfflineSyncTest /></Layout></ProtectedRoute>} />
-
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
           <WebSocketProvider>
             <></>
           </WebSocketProvider>
-          
-          {/* Indicateur de statut offline/online */}
-          <OfflineIndicator />
           </NotificationProvider>
           </SidebarProvider>
-          </CacheInitializer>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

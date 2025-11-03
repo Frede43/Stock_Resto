@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { DollarSign, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { salesService } from "@/services/api";
-import { useOfflinePayments } from "@/hooks/use-offline-payments";
-import { useOfflineStocks } from "@/hooks/use-offline-stocks";
-import { useOfflineSync } from "@/hooks/use-offline-sync";
+// Système offline désactivé
+// import { useOfflinePayments } from "@/hooks/use-offline-payments";
+// import { useOfflineStocks } from "@/hooks/use-offline-stocks";
+// import { useOfflineSync } from "@/hooks/use-offline-sync";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,9 +26,10 @@ interface PayButtonProps {
 
 export function PayButton({ sale, onSuccess, variant = "default" }: PayButtonProps) {
   const { toast } = useToast();
-  const { isOnline } = useOfflineSync();
-  const { recordCashPayment } = useOfflinePayments();
-  const { recordSaleStockMovements } = useOfflineStocks();
+  // Système offline désactivé
+  // const { isOnline } = useOfflineSync();
+  // const { recordCashPayment } = useOfflinePayments();
+  // const { recordSaleStockMovements } = useOfflineStocks();
   const [showConfirm, setShowConfirm] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -39,36 +41,21 @@ export function PayButton({ sale, onSuccess, variant = "default" }: PayButtonPro
 
     try {
       const totalAmount = parseFloat(sale.total_amount || sale.total || 0);
-      const saleId = String(sale.id);
+      
+      // Toujours utiliser l'API (mode offline désactivé)
+      const numericId = typeof sale.id === 'string' 
+        ? parseInt(sale.id.replace(/\D/g, ''), 10)
+        : sale.id;
 
-      // Enregistrer le paiement (fonctionne offline)
-      await recordCashPayment(saleId, totalAmount);
-
-      // Enregistrer les mouvements de stock (fonctionne offline)
-      if (sale.items && sale.items.length > 0) {
-        await recordSaleStockMovements(sale.items, saleId);
+      if (isNaN(numericId)) {
+        throw new Error('ID de vente invalide');
       }
 
-      // Si online, marquer aussi comme payé via l'API
-      if (isOnline) {
-        try {
-          const numericId = typeof sale.id === 'string' 
-            ? parseInt(sale.id.replace(/\D/g, ''), 10)
-            : sale.id;
-
-          if (!isNaN(numericId)) {
-            await salesService.markAsPaid(numericId);
-          }
-        } catch (apiError) {
-          console.warn('API call failed, but payment saved offline:', apiError);
-        }
-      }
+      await salesService.markAsPaid(numericId);
 
       toast({
         title: "✅ Paiement enregistré",
-        description: isOnline 
-          ? `La vente #${sale.id} a été payée avec succès. Le stock a été mis à jour.`
-          : `La vente #${sale.id} a été payée (offline). Sera synchronisée quand internet reviendra.`,
+        description: `La vente #${sale.id} a été payée avec succès. Le stock a été mis à jour.`,
         duration: 5000,
       });
 
@@ -81,7 +68,7 @@ export function PayButton({ sale, onSuccess, variant = "default" }: PayButtonPro
       
       toast({
         title: "❌ Erreur de paiement",
-        description: errorMessage,
+        description: errorMessage + ". Vérifiez votre connexion.",
         variant: "destructive",
         duration: 5000,
       });

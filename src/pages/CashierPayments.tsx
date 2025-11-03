@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useOfflineCashier } from "@/hooks/use-offline-cashier";
+// Système offline désactivé
+// import { useOfflineCashier } from "@/hooks/use-offline-cashier";
 import { useProducts } from "@/hooks/use-api";
 import {
   DollarSign,
@@ -33,15 +34,16 @@ interface QuickSaleItem {
 
 export default function CashierPayments() {
   const { toast } = useToast();
-  const {
-    isOnline,
-    cachedSales,
-    pendingPayments,
-    processOfflinePayment,
-    createQuickSale,
-    getTodaySales,
-    updateSalesCache,
-  } = useOfflineCashier();
+  // Système offline désactivé
+  // const {
+  //   isOnline,
+  //   cachedSales,
+  //   pendingPayments,
+  //   processOfflinePayment,
+  //   createQuickSale,
+  //   getTodaySales,
+  //   updateSalesCache,
+  // } = useOfflineCashier();
 
   const { data: productsData } = useProducts({});
 
