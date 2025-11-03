@@ -10,10 +10,10 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from calendar import monthrange
 
-from .models import ExpenseCategory, Expense
+from .models import ExpenseCategory, Expense, BudgetSetting
 from .serializers import (
     ExpenseCategorySerializer, ExpenseSerializer, ExpenseSummarySerializer,
-    MonthlyExpenseReportSerializer, ExpenseByCategorySerializer
+    MonthlyExpenseReportSerializer, ExpenseByCategorySerializer, BudgetSettingSerializer
 )
 from accounts.permissions import IsAdminOrGerant, IsAuthenticated
 
@@ -86,6 +86,49 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         today_expenses = self.get_queryset().filter(expense_date=today)
         serializer = self.get_serializer(today_expenses, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAdminOrGerant])
+    def approve(self, request, pk=None):
+        """Approuver une dépense"""
+        expense = self.get_object()
+        
+        if expense.is_approved:
+            return Response(
+                {'error': 'Cette dépense est déjà approuvée'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        expense.is_approved = True
+        expense.approved_by = request.user
+        expense.approved_at = timezone.now()
+        expense.save()
+        
+        serializer = self.get_serializer(expense)
+        return Response({
+            'message': 'Dépense approuvée avec succès',
+            'expense': serializer.data
+        })
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAdminOrGerant])
+    def reject(self, request, pk=None):
+        """Rejeter une dépense"""
+        expense = self.get_object()
+        reason = request.data.get('reason', '')
+        
+        if expense.is_approved:
+            return Response(
+                {'error': 'Impossible de rejeter une dépense approuvée'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        expense.rejection_reason = reason
+        expense.save()
+        
+        serializer = self.get_serializer(expense)
+        return Response({
+            'message': 'Dépense rejetée',
+            'expense': serializer.data
+        })
 
 class ExpenseSummaryView(APIView):
     permission_classes = [IsAuthenticated]
@@ -237,3 +280,151 @@ class ExpensesByCategoryView(APIView):
 
         serializer = ExpenseByCategorySerializer(result, many=True)
         return Response(serializer.data)
+
+
+class BudgetSettingViewSet(viewsets.ModelViewSet):
+    """ViewSet pour la gestion des budgets"""
+    queryset = BudgetSetting.objects.all()
+    serializer_class = BudgetSettingSerializer
+    permission_classes = [IsAdminOrGerant]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['category', 'is_active']
+    search_fields = ['category__name']
+    ordering_fields = ['category__name', 'monthly_budget', 'created_at']
+    ordering = ['category__name']
+    
+    @action(detail=False, methods=['get'])
+    def current_status(self, request):
+        """Obtenir le statut actuel de tous les budgets"""
+        budgets = self.get_queryset().filter(is_active=True)
+        
+        data = []
+        for budget in budgets:
+            data.append({
+                'id': budget.id,
+                'category_id': budget.category.id,
+                'category_name': budget.category.name,
+                'monthly_budget': float(budget.monthly_budget),
+                'spent': budget.get_current_month_spent(),
+                'percentage': budget.get_budget_percentage(),
+                'remaining': float(budget.monthly_budget - budget.get_current_month_spent()),
+                'is_over_threshold': budget.is_over_threshold(),
+                'is_over_budget': budget.is_over_budget(),
+                'alert_threshold': budget.alert_threshold
+            })
+        
+        return Response(data)
+    
+    @action(detail=True, methods=['post'])
+    def update_budget(self, request, pk=None):
+        """Mettre à jour le budget d'une catégorie"""
+        budget_setting = self.get_object()
+        new_budget = request.data.get('monthly_budget')
+        
+        if new_budget:
+            budget_setting.monthly_budget = Decimal(new_budget)
+            budget_setting.save()
+            
+        serializer = self.get_serializer(budget_setting)
+        return Response({
+            'message': 'Budget mis à jour avec succès',
+            'budget': serializer.data
+        })
+
+
+class ExpenseAnalyticsView(APIView):
+    """Vue pour les statistiques avancées des dépenses"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Statistiques avancées des dépenses"""
+        now = timezone.now()
+        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        
+        # Total ce mois
+        total_month = Expense.objects.filter(
+            expense_date__gte=start_of_month,
+            is_approved=True
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        # Total en attente d'approbation
+        pending_total = Expense.objects.filter(
+            is_approved=False,
+            rejection_reason__isnull=True
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        pending_count = Expense.objects.filter(
+            is_approved=False,
+            rejection_reason__isnull=True
+        ).count()
+        
+        # Par catégorie ce mois
+        by_category = Expense.objects.filter(
+            expense_date__gte=start_of_month,
+            is_approved=True
+        ).values('category__name').annotate(
+            total=Sum('amount'),
+            count=Count('id')
+        ).order_by('-total')
+        
+        # Par méthode de paiement
+        by_payment_method = Expense.objects.filter(
+            expense_date__gte=start_of_month,
+            is_approved=True
+        ).values('payment_method').annotate(
+            total=Sum('amount'),
+            count=Count('id')
+        )
+        
+        # Top fournisseurs
+        top_suppliers = Expense.objects.filter(
+            expense_date__gte=start_of_month,
+            is_approved=True
+        ).exclude(
+            Q(supplier__isnull=True) & Q(supplier_name__isnull=True)
+        ).values('supplier__name', 'supplier_name').annotate(
+            total=Sum('amount'),
+            count=Count('id')
+        ).order_by('-total')[:5]
+        
+        # Formater les fournisseurs
+        formatted_suppliers = []
+        for supplier in top_suppliers:
+            name = supplier.get('supplier__name') or supplier.get('supplier_name') or 'Non spécifié'
+            formatted_suppliers.append({
+                'name': name,
+                'total': float(supplier['total']),
+                'count': supplier['count']
+            })
+        
+        # Évolution sur 6 mois
+        monthly_trend = []
+        for i in range(6):
+            month_date = now - timedelta(days=30*i)
+            month_start = month_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            
+            if month_date.month == 12:
+                month_end = month_date.replace(year=month_date.year + 1, month=1, day=1) - timedelta(seconds=1)
+            else:
+                month_end = month_date.replace(month=month_date.month + 1, day=1) - timedelta(seconds=1)
+            
+            month_total = Expense.objects.filter(
+                expense_date__gte=month_start,
+                expense_date__lte=month_end,
+                is_approved=True
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+            
+            monthly_trend.insert(0, {
+                'month': month_start.strftime('%Y-%m'),
+                'total': float(month_total)
+            })
+        
+        return Response({
+            'total_month': float(total_month),
+            'pending_total': float(pending_total),
+            'pending_count': pending_count,
+            'by_category': list(by_category),
+            'by_payment_method': list(by_payment_method),
+            'top_suppliers': formatted_suppliers,
+            'monthly_trend': monthly_trend
+        })
