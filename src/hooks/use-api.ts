@@ -801,31 +801,6 @@ export function useAlerts(params?: {
   });
 }
 
-
-export function useUpdateExpense() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string | number, data: any }) => 
-      apiService.put(`/expenses/${id}/`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      toast({
-        title: "Dépense mise à jour",
-        description: "La dépense a été mise à jour avec succès."
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour la dépense.",
-        variant: "destructive"
-      });
-    }
-  });
-}
-
 export function useApproveExpense() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
