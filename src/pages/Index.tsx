@@ -198,20 +198,20 @@ const Index = () => {
   return (
     <div className="space-y-6">
           {/* Welcome Section */}
-          <div className="bg-gradient-to-r from-primary to-primary-glow rounded-xl p-6 text-primary-foreground">
-            <div className="flex items-center justify-between">
+          <div className="bg-gradient-to-r from-primary to-primary-glow rounded-xl p-4 sm:p-6 text-primary-foreground">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">
                   Bienvenue dans Harry's Grill Bar-Testaurant
                 </h1>
-                <p className="text-primary-foreground/90 text-lg">
+                <p className="text-primary-foreground/90 text-base sm:text-lg">
                   Gérez votre établissement avec efficacité et simplicité
                 </p>
               </div>
               <Button 
                 variant="secondary" 
                 onClick={handleRefresh}
-                className="gap-2"
+                className="gap-2 w-full sm:w-auto"
                 disabled={statsLoading}
               >
                 <RefreshCw className={`h-4 w-4 ${statsLoading ? 'animate-spin' : ''}`} />
@@ -222,7 +222,7 @@ const Index = () => {
 
           {/* Stats Grid */}
           <ErrorBoundary>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {statsLoading ? (
                 <>
                   <StatsCardSkeleton />
@@ -270,7 +270,7 @@ const Index = () => {
           </ErrorBoundary>
 
           {/* Dashboard Widgets */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             <div className="lg:col-span-1 space-y-6">
               <ErrorBoundary>
                 <QuickActions />

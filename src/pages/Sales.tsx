@@ -635,7 +635,7 @@ export default function Sales() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     {/* Barre de recherche */}
                     <div className="flex-1">
                       <Label htmlFor="search-products">Rechercher</Label>
@@ -649,7 +649,7 @@ export default function Sales() {
                     </div>
 
                     {/* Filtre par catégorie */}
-                    <div className="w-48">
+                    <div className="w-full sm:w-48">
                       <Label htmlFor="category-filter">Catégorie</Label>
                       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                         <SelectTrigger className="mt-1">
@@ -751,7 +751,7 @@ export default function Sales() {
 
             {/* Panier - 1/3 de l'écran */}
             <div className="space-y-4">
-              <Card className="sticky top-0">
+              <Card className="sticky top-20 lg:top-0">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShoppingCart className="h-5 w-5" />
@@ -765,7 +765,7 @@ export default function Sales() {
                     </p>
                   ) : (
                     <>
-                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                      <div className="space-y-3 max-h-[50vh] lg:max-h-96 overflow-y-auto">
                         {cart.map((item) => (
                           <div key={item.menu_item_id} className="flex items-center justify-between p-3 border rounded">
                             <div className="flex-1">

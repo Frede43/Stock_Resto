@@ -74,40 +74,40 @@ export default function CashierDashboard() {
   // Statistiques supprimées - Interface simplifiée pour caissier
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="max-w-7xl mx-auto">
         {/* En-tête Dashboard Caissier */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Tableau de bord
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">
             En tant que <strong>Caissier</strong>, vous avez accès aux fonctionnalités suivantes :
           </p>
         </div>
 
         {/* Actions Principales */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
             Vos Fonctionnalités
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {quickActions.map((action, index) => (
               <Card
                 key={index}
                 className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-2 hover:border-blue-200"
                 onClick={action.action}
               >
-                <CardContent className="p-8">
-                  <div className="flex items-center space-x-6">
-                    <div className={`p-4 rounded-xl ${action.color} shadow-lg`}>
-                      <action.icon className="h-8 w-8 text-white" />
+                <CardContent className="p-4 sm:p-8">
+                  <div className="flex items-center space-x-4 sm:space-x-6">
+                    <div className={`p-3 sm:p-4 rounded-xl ${action.color} shadow-lg`}>
+                      <action.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">
                         {action.title}
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 text-sm sm:text-base">
                         {action.description}
                       </p>
                     </div>
@@ -119,16 +119,16 @@ export default function CashierDashboard() {
         </div>
 
         {/* Message d'aide simple */}
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           <Card className="bg-blue-50 border-blue-200">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-blue-600 text-sm font-bold">💡</span>
                 </div>
                 <div>
-                  <p className="text-blue-800 font-medium">Conseil</p>
-                  <p className="text-blue-700 text-sm">
+                  <p className="text-blue-800 font-medium text-sm sm:text-base">Conseil</p>
+                  <p className="text-blue-700 text-xs sm:text-sm">
                     Utilisez le menu de navigation à gauche pour accéder rapidement à vos fonctionnalités.
                   </p>
                 </div>

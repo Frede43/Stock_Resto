@@ -101,7 +101,7 @@ export function Header({ className }: HeaderProps = {}) {
           </button>
 
           {/* Page Title */}
-          <h1 className="text-lg font-semibold text-foreground hidden sm:block">
+          <h1 className="text-base sm:text-lg font-semibold text-foreground hidden sm:block truncate max-w-[200px] md:max-w-none">
             {pageTitle}
           </h1>
 

@@ -57,23 +57,23 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
           {/* En-tête Admin Amélioré */}
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-2xl opacity-10"></div>
-            <div className="relative text-center py-12 px-8">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full shadow-lg">
-                  <Crown className="h-8 w-8 text-white" />
+            <div className="relative text-center py-8 sm:py-12 px-4 sm:px-8">
+              <div className="flex items-center justify-center gap-3 mb-4 sm:mb-6">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full shadow-lg">
+                  <Crown className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                 </div>
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Administration
                 </h1>
               </div>
-              <p className="text-xl text-slate-600 mb-4">
+              <p className="text-base sm:text-lg md:text-xl text-slate-600 mb-4">
                 Bienvenue dans le centre de contrôle de Harry's Grill Bar-Resto
               </p>
-              <div className="flex items-center justify-center gap-6 text-sm text-slate-500">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-xs sm:text-sm text-slate-500">
                 <div className="flex items-center gap-2">
                   <Activity className="h-4 w-4 text-green-500" />
                   <span>Système opérationnel</span>
@@ -91,19 +91,20 @@ const AdminDashboard = () => {
           </div>
 
           {/* Actions rapides Admin Redesignées */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-slate-800">Outils d'Administration</h2>
-                <p className="text-slate-600">Accès rapide aux fonctions principales</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Outils d'Administration</h2>
+                <p className="text-sm sm:text-base text-slate-600">Accès rapide aux fonctions principales</p>
               </div>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 w-full sm:w-auto">
                 <Monitor className="h-4 w-4" />
-                État du système
+                <span className="hidden sm:inline">État du système</span>
+                <span className="sm:hidden">État</span>
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-4xl mx-auto">
               {adminQuickActions.map((action) => (
                 <Card 
                   key={action.href} 
@@ -143,7 +144,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Informations et Conseils */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200 shadow-md">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">

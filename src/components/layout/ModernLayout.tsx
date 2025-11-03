@@ -9,7 +9,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const { isExpanded, isHovered } = useSidebar();
+  const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const shouldShow = isExpanded || isHovered;
 
   return (
@@ -20,13 +20,16 @@ export function Layout({ children }: LayoutProps) {
       <div
         className={cn(
           "transition-all duration-300",
-          shouldShow ? "lg:ml-64" : "lg:ml-20"
+          // Mobile: no margin, Tablet+: show margin based on sidebar state
+          shouldShow ? "lg:ml-64" : "lg:ml-20",
+          // Responsive padding
+          "p-2 sm:p-4 lg:p-6"
         )}
       >
         <Header />
         
         {/* Page Content */}
-        <main className="p-4 lg:p-6">
+        <main className="mt-2 sm:mt-4 lg:mt-6">
           {children}
         </main>
       </div>

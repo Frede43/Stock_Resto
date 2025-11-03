@@ -19,11 +19,11 @@ export function OfflineIndicator() {
   } = useOfflineSync();
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 right-2 sm:right-4 z-50 max-w-[calc(100vw-1rem)]">
       {/* Badge de statut */}
       <Badge
         variant={isOnline ? 'default' : 'destructive'}
-        className="flex items-center gap-2 px-3 py-2 shadow-lg"
+        className="flex items-center gap-2 px-2 sm:px-3 py-2 shadow-lg text-xs sm:text-sm"
       >
         {isOnline ? (
           <>
