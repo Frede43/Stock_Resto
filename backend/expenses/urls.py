@@ -13,4 +13,5 @@ urlpatterns = [
     path('monthly-report/', views.MonthlyExpenseReportView.as_view(), name='monthly-expense-report'),
     path('by-category/', views.ExpensesByCategoryView.as_view(), name='expenses-by-category'),
     path('analytics/', views.ExpenseAnalyticsView.as_view(), name='expense-analytics'),
+    path('payment-methods/', views.PaymentMethodsView.as_view(), name='payment-methods'),
 ]

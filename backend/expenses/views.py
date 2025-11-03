@@ -428,3 +428,25 @@ class ExpenseAnalyticsView(APIView):
             'top_suppliers': formatted_suppliers,
             'monthly_trend': monthly_trend
         })
+
+
+class PaymentMethodsView(APIView):
+    """
+    Vue pour retourner la liste des méthodes de paiement disponibles
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Retourne la liste des méthodes de paiement"""
+        payment_methods = [
+            {
+                'code': code,
+                'name': name
+            }
+            for code, name in Expense.PAYMENT_METHODS
+        ]
+        
+        return Response({
+            'results': payment_methods,
+            'count': len(payment_methods)
+        })
