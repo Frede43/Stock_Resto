@@ -105,7 +105,8 @@ export interface Sale extends BaseModel {
   total_amount: number;
   discount_amount?: number;
   final_amount?: number;
-  payment_method: 'cash' | 'card' | 'mobile';
+  payment_method: 'cash' | 'card' | 'mobile' | 'credit';
+  credit_account?: number;
   status: 'pending' | 'preparing' | 'ready' | 'served' | 'paid' | 'cancelled';
   items?: SaleItem[];
   items_count?: number;
@@ -317,7 +318,8 @@ export interface UpdateStockRequest {
 
 export interface CreateSaleRequest {
   table_number?: number;
-  payment_method: 'cash' | 'card' | 'mobile';
+  payment_method: 'cash' | 'card' | 'mobile' | 'credit';
+  credit_account?: number;
   items: {
     product: number;
     quantity: number;

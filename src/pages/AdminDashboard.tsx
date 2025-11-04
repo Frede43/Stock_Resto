@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
+import { apiService } from "@/services/api";
 import {
   Users,
   BarChart3,
@@ -15,7 +17,11 @@ import {
   Activity,
   Bell,
   ArrowRight,
-  Zap
+  Zap,
+  DollarSign,
+  AlertCircle,
+  CheckCircle,
+  Clock
 } from "lucide-react";
 
 const AdminDashboard = () => {
@@ -24,6 +30,18 @@ const AdminDashboard = () => {
 
   console.log('👑 AdminDashboard - User:', user);
   console.log('👑 AdminDashboard - Role:', user?.role);
+
+  // Récupérer les dépenses en attente d'approbation
+  const { data: pendingExpenses } = useQuery({
+    queryKey: ['pending-expenses'],
+    queryFn: async () => {
+      const response = await apiService.get('/expenses/expenses/?status=pending') as any;
+      return response.data?.results || [];
+    },
+    refetchInterval: 30000, // Actualiser toutes les 30 secondes
+  });
+
+  const pendingCount = pendingExpenses?.length || 0;
 
   // Actions rapides pour admin avec priorités
   const adminQuickActions = [
@@ -53,6 +71,15 @@ const AdminDashboard = () => {
       color: "from-emerald-500 to-emerald-600",
       priority: "high",
       badge: "Quotidien"
+    },
+    {
+      title: "Dépenses à Approuver",
+      description: `${pendingCount} dépense(s) en attente de validation`,
+      icon: DollarSign,
+      href: "/expenses",
+      color: "from-red-500 to-red-600",
+      priority: pendingCount > 0 ? "high" : "normal",
+      badge: pendingCount > 0 ? `${pendingCount} en attente` : "Aucune"
     }
   ];
 
@@ -142,6 +169,35 @@ const AdminDashboard = () => {
               ))}
             </div>
           </div>
+
+          {/* Alerte Dépenses en Attente */}
+          {pendingCount > 0 && (
+            <Card className="bg-gradient-to-br from-red-50 to-orange-100 border-red-200 shadow-md">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-red-500 rounded-xl shadow-lg animate-pulse">
+                    <AlertCircle className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-red-900 mb-2">
+                      {pendingCount} Dépense{pendingCount > 1 ? 's' : ''} en Attente
+                    </h3>
+                    <p className="text-red-800 text-sm leading-relaxed mb-3">
+                      Des dépenses nécessitent votre approbation. Veuillez les examiner et les valider ou les rejeter.
+                    </p>
+                    <Button 
+                      onClick={() => navigate('/expenses')}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                      size="sm"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Voir les dépenses
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Informations et Conseils */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">

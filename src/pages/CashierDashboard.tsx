@@ -12,7 +12,8 @@ import {
   DollarSign,
   Package,
   Coffee,
-  User
+  User,
+  Receipt
 } from 'lucide-react';
 
 export default function CashierDashboard() {
@@ -61,6 +62,13 @@ export default function CashierDashboard() {
       icon: Coffee,
       color: 'bg-orange-500',
       action: () => navigate('/tables')
+    },
+    {
+      title: 'Dépenses',
+      description: 'Enregistrer les petites dépenses de caisse',
+      icon: Receipt,
+      color: 'bg-red-500',
+      action: () => navigate('/expenses')
     },
     {
       title: 'Profil',

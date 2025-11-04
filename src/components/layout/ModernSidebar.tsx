@@ -28,9 +28,11 @@ import {
   HelpCircle,
   ChevronDown,
   ChefHat,
+  DollarSign,
   Sparkles,
   Utensils,
-  X
+  X,
+  CreditCard
 } from "lucide-react";
 
 interface MenuItem {
@@ -81,6 +83,8 @@ const menuCategories: MenuCategory[] = [
       { href: "/daily-report", icon: Calendar, label: "Rapport Quotidien", permissionKey: "daily-report" },
       { href: "/reports", icon: BarChart3, label: "Rapports", permissionKey: "reports" },
       { href: "/analytics", icon: PieChart, label: "Analyses", permissionKey: "analytics" },
+      { href: "/expenses", icon: DollarSign, label: "Dépenses", permissionKey: "expenses" },
+      { href: "/credits", icon: CreditCard, label: "Crédits", permissionKey: "credits" },
     ]
   },
   {
@@ -97,6 +101,7 @@ const menuCategories: MenuCategory[] = [
     items: [
       { href: "/users", icon: Users, label: "Utilisateurs", permissionKey: "users" },
       { href: "/suppliers", icon: Truck, label: "Fournisseurs", permissionKey: "suppliers" },
+      
     ]
   },
   {

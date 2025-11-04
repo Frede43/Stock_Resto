@@ -22,6 +22,8 @@ import {
 import { useProducts, useCreateProduct, useUpdateProduct, useCategories, useCreateCategory } from "@/hooks/use-api";
 import { Product } from "@/types/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { useHasPermission } from "@/hooks/use-permissions";
 
 // Interface locale pour l'affichage (mapping depuis l'API)
 interface ProductDisplay {
@@ -113,6 +115,16 @@ export default function Products() {
     type: "boissons"
   });
   const { toast } = useToast();
+  const { user } = useAuth();
+  
+  // Vérifier les permissions
+  const canManageProducts = useHasPermission('products_manage');
+  const canCreateProducts = useHasPermission('products_create');
+  const canEditProducts = useHasPermission('products_edit');
+  const canDeleteProducts = useHasPermission('products_delete');
+  
+  // Mode lecture seule pour serveur et caissier
+  const isReadOnly = !canManageProducts && !canCreateProducts;
 
   // Hooks API
   const {
@@ -320,14 +332,15 @@ export default function Products() {
                 Gérez votre inventaire et vos prix de vente
               </p>
             </div>
-            <Dialog open={showNewProductDialog} onOpenChange={setShowNewProductDialog}>
-              <DialogTrigger asChild>
-                <Button variant="accent" className="gap-2 w-full sm:w-auto">
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Nouveau produit</span>
-                  <span className="sm:hidden">Nouveau</span>
-                </Button>
-              </DialogTrigger>
+            {(canCreateProducts || canManageProducts) && (
+              <Dialog open={showNewProductDialog} onOpenChange={setShowNewProductDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="accent" className="gap-2 w-full sm:w-auto">
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden sm:inline">Nouveau produit</span>
+                    <span className="sm:hidden">Nouveau</span>
+                  </Button>
+                </DialogTrigger>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>Nouveau produit</DialogTitle>
@@ -494,7 +507,8 @@ export default function Products() {
                   </Button>
                 </div>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            )}
           </div>
 
           {/* Stats Cards */}
@@ -688,18 +702,29 @@ export default function Products() {
                       </div>
                       
                       {/* Actions */}
-                      <div className="flex gap-2 justify-end sm:justify-start">
-                        <Button 
-                          variant="outline" 
-                          size="icon"
-                          onClick={() => handleEditProduct(product)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="icon">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      {(canEditProducts || canManageProducts || canDeleteProducts) && (
+                        <div className="flex gap-2 justify-end sm:justify-start">
+                          {(canEditProducts || canManageProducts) && (
+                            <Button 
+                              variant="outline" 
+                              size="icon"
+                              onClick={() => handleEditProduct(product)}
+                              title="Modifier le produit"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {(canDeleteProducts || canManageProducts) && (
+                            <Button 
+                              variant="outline" 
+                              size="icon"
+                              title="Supprimer le produit"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                     ))

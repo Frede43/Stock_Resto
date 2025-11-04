@@ -49,6 +49,7 @@ def api_root(request):
             'reports': '/api/reports/',
             'inventory': '/api/inventory/',
             'suppliers': '/api/suppliers/',
+            'expenses': '/api/expenses/',
             'settings': '/api/settings/',
             'kitchen': '/api/kitchen/',
             'analytics': '/api/analytics/',
@@ -78,6 +79,7 @@ urlpatterns = [
     path('api/reports/', include('reports.urls')),
     path('api/inventory/', include('inventory.urls')),
     path('api/suppliers/', include('suppliers.urls')),
+    path('api/expenses/', include('expenses.urls')),  # Gestion des dépenses
     path('api/settings/', include('settings.urls')),
     path('api/kitchen/', include('kitchen.urls')),
     path('api/analytics/', include('analytics.urls')),
@@ -85,6 +87,7 @@ urlpatterns = [
     path('api/monitoring/', include('monitoring.urls')),  # Ajout du monitoring
     path('api/dashboard/', include('dashboard.urls')),  # Ajout du dashboard
     path('api/help/', include('help.urls')),  # Ajout du système d'aide
+    path('api/credits/', include('credits.urls')),  # Gestion de crédit
 ]
 
 # Servir les fichiers media et static en développement

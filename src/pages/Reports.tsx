@@ -25,11 +25,14 @@ import {
   Filter,
   RefreshCw,
   Eye,
-  Printer
+  Printer,
+  CreditCard,
+  Receipt
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell } from "recharts";
 
 import { useDailyReport, useDashboardStats, useSalesReport, useInventoryReport, useFinancialReport } from "@/hooks/use-api";
+import { useExpensesReport, useCreditsReport } from "@/hooks/use-reports";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -88,7 +91,23 @@ export default function Reports() {
   const [showInventoryDialog, setShowInventoryDialog] = useState(false);
   const [showCustomersDialog, setShowCustomersDialog] = useState(false);
   const [showFinancialDialog, setShowFinancialDialog] = useState(false);
+  const [showExpensesDialog, setShowExpensesDialog] = useState(false);
+  const [showCreditsDialog, setShowCreditsDialog] = useState(false);
+  const [expensesPeriod, setExpensesPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
+  const [creditsPeriod, setCreditsPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const { toast } = useToast();
+  
+  // Hooks pour les nouveaux rapports
+  const { data: expensesReport, isLoading: expensesLoading } = useExpensesReport({ 
+    period: expensesPeriod,
+    start_date: startDate,
+    end_date: endDate
+  });
+  const { data: creditsReport, isLoading: creditsLoading } = useCreditsReport({ 
+    period: creditsPeriod,
+    start_date: startDate,
+    end_date: endDate
+  });
 
   // Calculer la date de fin en fonction de la plage de dates sélectionnée
   const getEndDate = () => {
@@ -254,6 +273,7 @@ export default function Reports() {
   const hasError = statsError || reportError;
 
   return (
+    <>
     <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-4 md:p-6">
           <div className="space-y-4 md:space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -422,6 +442,91 @@ export default function Reports() {
               </div>
             )}
 
+            {/* Cartes Rapports Dépenses et Crédits */}
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Carte Rapport Dépenses */}
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-primary"
+                onClick={() => setShowExpensesDialog(true)}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-lg font-medium">Rapport Dépenses</CardTitle>
+                  <Receipt className="h-5 w-5 text-orange-500" />
+                </CardHeader>
+                <CardContent>
+                  {expensesLoading ? (
+                    <div className="text-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                    </div>
+                  ) : expensesReport ? (
+                    <>
+                      <div className="text-3xl font-bold text-orange-600">
+                        {expensesReport.summary.total_amount.toLocaleString()} FBu
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {expensesReport.summary.total_count} dépense(s) - {expensesReport.period === 'daily' ? 'Aujourd\'hui' : expensesReport.period === 'weekly' ? 'Cette semaine' : 'Ce mois'}
+                      </p>
+                      <div className="flex gap-2 mt-3">
+                        <Badge variant="secondary" className="text-xs">
+                          {expensesReport.summary.by_status.find((s: any) => s.status === 'approved')?.count || 0} approuvées
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {expensesReport.summary.by_status.find((s: any) => s.status === 'pending')?.count || 0} en attente
+                        </Badge>
+                      </div>
+                      <Button variant="outline" size="sm" className="mt-4 w-full">
+                        <Eye className="h-4 w-4 mr-2" />
+                        Voir le rapport détaillé
+                      </Button>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Aucune donnée disponible</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Carte Rapport Crédits */}
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-primary"
+                onClick={() => setShowCreditsDialog(true)}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-lg font-medium">Rapport Crédits</CardTitle>
+                  <CreditCard className="h-5 w-5 text-blue-500" />
+                </CardHeader>
+                <CardContent>
+                  {creditsLoading ? (
+                    <div className="text-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                    </div>
+                  ) : creditsReport ? (
+                    <>
+                      <div className="text-3xl font-bold text-blue-600">
+                        {creditsReport.summary.accounts.total_debt.toLocaleString()} FBu
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Dette totale - {creditsReport.summary.accounts.accounts_with_debt} compte(s) avec dette
+                      </p>
+                      <div className="flex gap-2 mt-3">
+                        <Badge variant="secondary" className="text-xs">
+                          {creditsReport.summary.accounts.total_accounts} comptes
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {creditsReport.summary.transactions.total_count} transactions
+                        </Badge>
+                      </div>
+                      <Button variant="outline" size="sm" className="mt-4 w-full">
+                        <Eye className="h-4 w-4 mr-2" />
+                        Voir le rapport détaillé
+                      </Button>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Aucune donnée disponible</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Contenu des rapports */}
             {hasError && (
               <Card>
@@ -533,5 +638,305 @@ export default function Reports() {
             )}
           </div>
         </main>
+
+        {/* Dialog Rapport Dépenses */}
+        <Dialog open={showExpensesDialog} onOpenChange={setShowExpensesDialog}>
+          <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Rapport des Dépenses</DialogTitle>
+              <DialogDescription>
+                Période : {expensesReport?.start_date} au {expensesReport?.end_date}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {expensesReport && (
+              <div className="space-y-6">
+                {/* Sélecteur de période */}
+                <div className="flex gap-2">
+                  <Button 
+                    variant={expensesPeriod === 'daily' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setExpensesPeriod('daily')}
+                  >
+                    Journalier
+                  </Button>
+                  <Button 
+                    variant={expensesPeriod === 'weekly' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setExpensesPeriod('weekly')}
+                  >
+                    Hebdomadaire
+                  </Button>
+                  <Button 
+                    variant={expensesPeriod === 'monthly' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setExpensesPeriod('monthly')}
+                  >
+                    Mensuel
+                  </Button>
+                </div>
+                
+                {/* Statistiques */}
+                <div className="grid grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {expensesReport.summary.total_amount.toLocaleString()} FBu
+                      </div>
+                      <p className="text-xs text-muted-foreground">Total dépenses</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-2xl font-bold">
+                        {expensesReport.summary.total_count}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Nombre de dépenses</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-2xl font-bold text-green-600">
+                        {expensesReport.summary.by_status.find((s: any) => s.status === 'approved')?.count || 0}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Dépenses approuvées</p>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                {/* Graphique par catégorie */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Dépenses par catégorie</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={expensesReport.summary.by_category}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="category__name" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [`${value} FBu`, "Montant"]} />
+                        <Bar dataKey="total" fill="#f97316" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+                
+                {/* Tableau détaillé */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Liste des dépenses ({expensesReport.expenses.length})</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="max-h-96 overflow-y-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Catégorie</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead className="text-right">Montant</TableHead>
+                            <TableHead>Statut</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {expensesReport.expenses.map((expense: any) => (
+                            <TableRow key={expense.id}>
+                              <TableCell className="text-sm">{expense.date}</TableCell>
+                              <TableCell className="text-sm">{expense.category || '-'}</TableCell>
+                              <TableCell className="text-sm">{expense.description}</TableCell>
+                              <TableCell className="text-right font-medium">{expense.amount.toLocaleString()} FBu</TableCell>
+                              <TableCell>
+                                <Badge variant={
+                                  expense.status === 'approved' ? 'default' : 
+                                  expense.status === 'pending' ? 'secondary' : 
+                                  'destructive'
+                                }>
+                                  {expense.status_display}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog Rapport Crédits */}
+        <Dialog open={showCreditsDialog} onOpenChange={setShowCreditsDialog}>
+          <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Rapport des Crédits</DialogTitle>
+              <DialogDescription>
+                Période : {creditsReport?.start_date} au {creditsReport?.end_date}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {creditsReport && (
+              <div className="space-y-6">
+                {/* Sélecteur de période */}
+                <div className="flex gap-2">
+                  <Button 
+                    variant={creditsPeriod === 'daily' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCreditsPeriod('daily')}
+                  >
+                    Journalier
+                  </Button>
+                  <Button 
+                    variant={creditsPeriod === 'weekly' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCreditsPeriod('weekly')}
+                  >
+                    Hebdomadaire
+                  </Button>
+                  <Button 
+                    variant={creditsPeriod === 'monthly' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCreditsPeriod('monthly')}
+                  >
+                    Mensuel
+                  </Button>
+                </div>
+                
+                {/* Statistiques */}
+                <div className="grid grid-cols-4 gap-4">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-2xl font-bold">
+                        {creditsReport.summary.accounts.total_accounts}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Total comptes</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {creditsReport.summary.accounts.accounts_with_debt}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Avec dette</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-2xl font-bold text-red-600">
+                        {creditsReport.summary.accounts.total_debt.toLocaleString()} FBu
+                      </div>
+                      <p className="text-xs text-muted-foreground">Dette totale</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {creditsReport.summary.transactions.total_count}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Transactions</p>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                {/* Top débiteurs */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Top 10 Débiteurs</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Client</TableHead>
+                          <TableHead>Téléphone</TableHead>
+                          <TableHead className="text-right">Dette</TableHead>
+                          <TableHead className="text-right">Limite</TableHead>
+                          <TableHead className="text-right">Disponible</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {creditsReport.summary.top_debtors.map((debtor: any) => (
+                          <TableRow key={debtor.id}>
+                            <TableCell className="font-medium">{debtor.customer_name}</TableCell>
+                            <TableCell className="text-sm">{debtor.phone || '-'}</TableCell>
+                            <TableCell className="text-right font-bold text-orange-600">
+                              {debtor.current_balance.toLocaleString()} FBu
+                            </TableCell>
+                            <TableCell className="text-right text-sm">
+                              {debtor.credit_limit.toLocaleString()} FBu
+                            </TableCell>
+                            <TableCell className="text-right text-sm text-green-600">
+                              {debtor.available_credit.toLocaleString()} FBu
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+                
+                {/* Graphique transactions par type */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Transactions par type</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={creditsReport.summary.transactions.by_type}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="transaction_type" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [`${value} FBu`, "Montant"]} />
+                        <Bar dataKey="total" fill="#3b82f6" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+                
+                {/* Liste des transactions */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Dernières transactions ({creditsReport.transactions.length})</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="max-h-96 overflow-y-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Client</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead className="text-right">Montant</TableHead>
+                            <TableHead>Mode paiement</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {creditsReport.transactions.map((transaction: any) => (
+                            <TableRow key={transaction.id}>
+                              <TableCell className="text-sm">{transaction.date}</TableCell>
+                              <TableCell className="text-sm">{transaction.customer_name}</TableCell>
+                              <TableCell>
+                                <Badge variant={transaction.transaction_type === 'payment' ? 'default' : 'secondary'}>
+                                  {transaction.transaction_type_display}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right font-medium">
+                                {transaction.amount.toLocaleString()} FBu
+                              </TableCell>
+                              <TableCell className="text-sm">{transaction.payment_method_display || '-'}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+    </>
   );
 }

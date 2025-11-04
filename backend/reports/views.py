@@ -747,3 +747,275 @@ class SendTestNotificationView(APIView):
 
     def post(self, request):
         return Response({'message': 'Notification test envoyée'})
+
+
+# ==================== RAPPORTS DÉPENSES ====================
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def expenses_report(request):
+    """
+    Rapport des dépenses (journalier/mensuel)
+    Paramètres:
+    - period: 'daily', 'weekly', 'monthly' (défaut: 'monthly')
+    - start_date: Date de début (format: YYYY-MM-DD)
+    - end_date: Date de fin (format: YYYY-MM-DD)
+    - category: Filtrer par catégorie
+    - status: Filtrer par statut (pending, approved, rejected)
+    """
+    from expenses.models import Expense
+    
+    try:
+        # Récupérer les paramètres
+        period = request.GET.get('period', 'monthly')
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        category = request.GET.get('category')
+        status_filter = request.GET.get('status')
+        
+        # Définir les dates par défaut selon la période
+        today = timezone.now().date()
+        
+        if not start_date or not end_date:
+            if period == 'daily':
+                start_date = today
+                end_date = today
+            elif period == 'weekly':
+                start_date = today - timedelta(days=today.weekday())
+                end_date = start_date + timedelta(days=6)
+            else:  # monthly
+                start_date = today.replace(day=1)
+                # Dernier jour du mois
+                if today.month == 12:
+                    end_date = today.replace(day=31)
+                else:
+                    end_date = (today.replace(month=today.month + 1, day=1) - timedelta(days=1))
+        else:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        
+        # Filtrer les dépenses
+        expenses = Expense.objects.filter(
+            expense_date__gte=start_date,
+            expense_date__lte=end_date
+        ).select_related('category', 'supplier', 'created_by', 'approved_by')
+        
+        if category:
+            expenses = expenses.filter(category__name=category)
+        
+        if status_filter:
+            expenses = expenses.filter(status=status_filter)
+        
+        # Statistiques globales
+        total_expenses = expenses.aggregate(
+            total=Sum('amount'),
+            count=Count('id')
+        )
+        
+        # Par statut
+        by_status = expenses.values('status').annotate(
+            total=Sum('amount'),
+            count=Count('id')
+        ).order_by('status')
+        
+        # Par catégorie
+        by_category = expenses.values('category__name').annotate(
+            total=Sum('amount'),
+            count=Count('id')
+        ).order_by('-total')
+        
+        # Par mode de paiement
+        by_payment_method = expenses.values('payment_method').annotate(
+            total=Sum('amount'),
+            count=Count('id')
+        ).order_by('-total')
+        
+        # Liste détaillée des dépenses
+        expenses_list = []
+        for expense in expenses:
+            expenses_list.append({
+                'id': expense.id,
+                'date': expense.expense_date.isoformat(),
+                'category': expense.category.name if expense.category else None,
+                'description': expense.description,
+                'amount': float(expense.amount),
+                'payment_method': expense.payment_method,
+                'payment_method_display': expense.get_payment_method_display(),
+                'status': expense.status,
+                'status_display': expense.get_status_display(),
+                'supplier': expense.supplier.name if expense.supplier else None,
+                'created_by': expense.created_by.get_full_name() if expense.created_by else None,
+                'approved_by': expense.approved_by.get_full_name() if expense.approved_by else None,
+                'receipt_number': expense.receipt_number,
+            })
+        
+        return Response({
+            'period': period,
+            'start_date': start_date.isoformat(),
+            'end_date': end_date.isoformat(),
+            'summary': {
+                'total_amount': float(total_expenses['total'] or 0),
+                'total_count': total_expenses['count'],
+                'by_status': list(by_status),
+                'by_category': list(by_category),
+                'by_payment_method': list(by_payment_method),
+            },
+            'expenses': expenses_list
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ==================== RAPPORTS CRÉDITS ====================
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def credits_report(request):
+    """
+    Rapport des crédits (journalier/mensuel)
+    Paramètres:
+    - period: 'daily', 'weekly', 'monthly' (défaut: 'monthly')
+    - start_date: Date de début (format: YYYY-MM-DD)
+    - end_date: Date de fin (format: YYYY-MM-DD)
+    - account_status: Filtrer par statut de compte (active, suspended, closed)
+    - transaction_type: Filtrer par type de transaction (debt, payment, adjustment)
+    """
+    from credits.models import CreditAccount, CreditTransaction
+    
+    try:
+        # Récupérer les paramètres
+        period = request.GET.get('period', 'monthly')
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        account_status = request.GET.get('account_status')
+        transaction_type = request.GET.get('transaction_type')
+        
+        # Définir les dates par défaut selon la période
+        today = timezone.now().date()
+        
+        if not start_date or not end_date:
+            if period == 'daily':
+                start_date = today
+                end_date = today
+            elif period == 'weekly':
+                start_date = today - timedelta(days=today.weekday())
+                end_date = start_date + timedelta(days=6)
+            else:  # monthly
+                start_date = today.replace(day=1)
+                # Dernier jour du mois
+                if today.month == 12:
+                    end_date = today.replace(day=31)
+                else:
+                    end_date = (today.replace(month=today.month + 1, day=1) - timedelta(days=1))
+        else:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        
+        # Filtrer les transactions
+        transactions = CreditTransaction.objects.filter(
+            transaction_date__gte=start_date,
+            transaction_date__lte=end_date
+        ).select_related('credit_account', 'created_by', 'sale')
+        
+        if transaction_type:
+            transactions = transactions.filter(transaction_type=transaction_type)
+        
+        if account_status:
+            transactions = transactions.filter(credit_account__status=account_status)
+        
+        # Statistiques globales
+        total_stats = transactions.aggregate(
+            total_amount=Sum('amount'),
+            count=Count('id')
+        )
+        
+        # Par type de transaction
+        by_type = transactions.values('transaction_type').annotate(
+            total=Sum('amount'),
+            count=Count('id')
+        ).order_by('transaction_type')
+        
+        # Par mode de paiement (pour les paiements uniquement)
+        by_payment_method = transactions.filter(
+            transaction_type='payment'
+        ).values('payment_method').annotate(
+            total=Sum('amount'),
+            count=Count('id')
+        ).order_by('-total')
+        
+        # Statistiques des comptes
+        accounts = CreditAccount.objects.all()
+        if account_status:
+            accounts = accounts.filter(status=account_status)
+        
+        accounts_stats = accounts.aggregate(
+            total_accounts=Count('id'),
+            total_debt=Sum('current_balance'),
+            total_credit_limit=Sum('credit_limit'),
+        )
+        
+        # Comptes avec dette
+        accounts_with_debt = accounts.filter(current_balance__gt=0).count()
+        
+        # Top 10 débiteurs
+        top_debtors = accounts.filter(current_balance__gt=0).order_by('-current_balance')[:10]
+        top_debtors_list = []
+        for account in top_debtors:
+            top_debtors_list.append({
+                'id': account.id,
+                'customer_name': account.customer_name,
+                'phone': account.phone,
+                'current_balance': float(account.current_balance),
+                'credit_limit': float(account.credit_limit),
+                'available_credit': float(account.available_credit),
+                'is_over_limit': account.is_over_limit,
+            })
+        
+        # Liste détaillée des transactions
+        transactions_list = []
+        for transaction in transactions:
+            transactions_list.append({
+                'id': transaction.id,
+                'date': transaction.transaction_date.isoformat(),
+                'customer_name': transaction.credit_account.customer_name,
+                'transaction_type': transaction.transaction_type,
+                'transaction_type_display': transaction.get_transaction_type_display(),
+                'amount': float(transaction.amount),
+                'payment_method': transaction.payment_method,
+                'payment_method_display': transaction.get_payment_method_display() if transaction.payment_method else None,
+                'sale_id': transaction.sale.id if transaction.sale else None,
+                'notes': transaction.notes,
+                'created_by': transaction.created_by.get_full_name() if transaction.created_by else None,
+            })
+        
+        return Response({
+            'period': period,
+            'start_date': start_date.isoformat(),
+            'end_date': end_date.isoformat(),
+            'summary': {
+                'transactions': {
+                    'total_amount': float(total_stats['total_amount'] or 0),
+                    'total_count': total_stats['count'],
+                    'by_type': list(by_type),
+                    'by_payment_method': list(by_payment_method),
+                },
+                'accounts': {
+                    'total_accounts': accounts_stats['total_accounts'],
+                    'accounts_with_debt': accounts_with_debt,
+                    'total_debt': float(accounts_stats['total_debt'] or 0),
+                    'total_credit_limit': float(accounts_stats['total_credit_limit'] or 0),
+                },
+                'top_debtors': top_debtors_list,
+            },
+            'transactions': transactions_list
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

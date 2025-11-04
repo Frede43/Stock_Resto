@@ -57,11 +57,13 @@ INSTALLED_APPS = [
     'sales',
     'orders',
     'suppliers',
+    'expenses',
     'reports',
     'kitchen',
     'alerts',
     'monitoring',
     'help',
+    'credits',
 ]
 
 MIDDLEWARE = [

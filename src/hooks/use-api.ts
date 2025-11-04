@@ -196,7 +196,8 @@ export function useCreateSale() {
   return useMutation({
     mutationFn: (data: {
       table_number?: number;
-      payment_method: 'cash' | 'card' | 'mobile';
+      payment_method: 'cash' | 'card' | 'mobile' | 'credit';
+      credit_account?: number;
       items: Array<{
         product: number;
         quantity: number;
@@ -1427,7 +1428,7 @@ export function useInventoryReport(params?: { date?: string }) {
       const queryParams = new URLSearchParams();
       if (params?.date) queryParams.append('date', params.date);
       
-      const url = queryParams.toString() ? `/reports/daily-detailed-report/${params?.date || 'today'}/?${queryParams}` : '/reports/daily-detailed-report/today/';
+      const url = queryParams.toString() ? `/reports/daily-detailed/${params?.date || 'today'}/?${queryParams}` : '/reports/daily-detailed/today/';
       return apiService.get(url);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

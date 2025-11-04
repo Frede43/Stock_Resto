@@ -444,7 +444,8 @@ export class SalesService {
   // Créer une vente
   async createSale(data: {
     table_number?: number;
-    payment_method: 'cash' | 'card' | 'mobile';
+    payment_method: 'cash' | 'card' | 'mobile' | 'credit';
+    credit_account?: number;
     items: Array<{
       product: number;
       quantity: number;

@@ -20,9 +20,15 @@ import {
   DollarSign,
   FileOutput,
   RefreshCw,
-  ChefHat
+  ChefHat,
+  Receipt,
+  CreditCard,
+  Wallet,
+  ShoppingCart,
+  Clock
 } from "lucide-react";
 import { useDailyReport, useDashboardStats, useDailyDetailedReport, useProducts, useOrders, useAlerts, useKitchenReport, useRecipes } from "@/hooks/use-api";
+import { useExpensesReport, useCreditsReport } from "@/hooks/use-reports";
 
 interface ProductData {
   id: string;
@@ -164,6 +170,26 @@ export default function DailyReport() {
 
   // Récupérer les recettes avec leurs coûts
   const { data: recipesData } = useRecipes();
+
+  // Récupérer les rapports de dépenses et crédits pour la date sélectionnée
+  const { data: expensesReport, refetch: refetchExpenses } = useExpensesReport({ 
+    period: 'daily',
+    start_date: selectedDate,
+    end_date: selectedDate
+  });
+  
+  const { data: creditsReport, refetch: refetchCredits } = useCreditsReport({ 
+    period: 'daily',
+    start_date: selectedDate,
+    end_date: selectedDate
+  });
+
+  // Effet pour recharger les rapports de dépenses et crédits quand la date change
+  useEffect(() => {
+    console.log('DEBUG: Refetching expenses and credits for date:', selectedDate);
+    refetchExpenses();
+    refetchCredits();
+  }, [selectedDate, refetchExpenses, refetchCredits]);
 
   // Debug: Afficher les données reçues de l'API
   console.log('DEBUG: detailedReportData:', detailedReportData);
@@ -862,6 +888,221 @@ export default function DailyReport() {
                   <div>
                     <p className="text-sm text-muted-foreground">Alertes</p>
                     <p className="text-2xl font-bold text-warning">{(reportData.alerts.low_stock?.length || 0) + (reportData.alerts.out_of_stock?.length || 0)}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 💰 RÉSUMÉ FINANCIER */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-primary" />
+                RÉSUMÉ FINANCIER DU JOUR
+              </CardTitle>
+              <CardDescription>
+                {new Date(selectedDate).toLocaleDateString('fr-FR', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Ventes */}
+                <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ShoppingCart className="h-5 w-5 text-green-600" />
+                    <h3 className="font-semibold text-green-900 dark:text-green-100">Ventes Totales</h3>
+                  </div>
+                  <p className="text-3xl font-bold text-green-600">
+                    {reportData.totalRevenue?.toLocaleString() || 0} FBu
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {reportData.totalSales || 0} transaction(s)
+                  </p>
+                </div>
+
+                {/* Dépenses */}
+                <div className="p-4 bg-orange-50 dark:bg-orange-950 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Receipt className="h-5 w-5 text-orange-600" />
+                    <h3 className="font-semibold text-orange-900 dark:text-orange-100">Dépenses</h3>
+                  </div>
+                  <p className="text-3xl font-bold text-orange-600">
+                    -{expensesReport?.summary?.total_amount?.toLocaleString() || 0} FBu
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {expensesReport?.summary?.total_count || 0} dépense(s)
+                  </p>
+                </div>
+
+                {/* Crédits */}
+                <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CreditCard className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-100">Crédits Net</h3>
+                  </div>
+                  <p className="text-3xl font-bold text-blue-600">
+                    {creditsReport?.summary?.transactions?.net_amount?.toLocaleString() || 0} FBu
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {creditsReport?.summary?.transactions?.total_count || 0} transaction(s)
+                  </p>
+                </div>
+
+                {/* Net */}
+                <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-5 w-5 text-purple-600" />
+                    <h3 className="font-semibold text-purple-900 dark:text-purple-100">Net</h3>
+                  </div>
+                  <p className="text-3xl font-bold text-purple-600">
+                    {(
+                      (reportData.totalRevenue || 0) - 
+                      (expensesReport?.summary?.total_amount || 0) - 
+                      Math.abs(creditsReport?.summary?.transactions?.net_amount || 0)
+                    ).toLocaleString()} FBu
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Marge: {reportData.profitMargin?.toFixed(1) || 0}%
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 📊 DÉTAILS VENTES & 💸 DÉPENSES & 💳 CRÉDITS */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Dépenses */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Receipt className="h-5 w-5 text-orange-500" />
+                  Dépenses du Jour
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {expensesReport && expensesReport.summary?.total_count > 0 ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b">
+                      <span className="font-semibold">Total</span>
+                      <span className="text-lg font-bold text-orange-600">
+                        {(expensesReport.summary.total_amount || 0).toLocaleString()} FBu
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {expensesReport.summary.by_status?.map((status: any) => (
+                        <div key={status.status} className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground capitalize">
+                            {status.status === 'approved' ? '✓ Approuvées' : 
+                             status.status === 'pending' ? '⏳ En attente' : 
+                             status.status === 'rejected' ? '✗ Rejetées' : status.status}
+                          </span>
+                          <span className="font-medium">
+                            {status.count || 0} ({(status.total || 0).toLocaleString()} FBu)
+                          </span>
+                        </div>
+                      )) || []}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Receipt className="h-12 w-12 mx-auto mb-2 text-muted-foreground opacity-50" />
+                    <p className="text-sm text-muted-foreground">Aucune dépense</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Crédits */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-blue-500" />
+                  Crédits du Jour
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {creditsReport && creditsReport.summary?.transactions?.total_count > 0 ? (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      {creditsReport.summary.transactions.by_type?.map((type: any) => (
+                        <div key={type.transaction_type} className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground capitalize">
+                            {type.transaction_type === 'debt' ? '📈 Nouvelles dettes' : 
+                             type.transaction_type === 'payment' ? '📉 Paiements reçus' : 
+                             type.transaction_type}
+                          </span>
+                          <span className="font-medium">
+                            {type.transaction_type === 'debt' ? '+' : '-'}
+                            {type.total?.toLocaleString() || 0} FBu
+                          </span>
+                        </div>
+                      )) || []}
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <span className="font-semibold">Net</span>
+                      <span className="text-lg font-bold text-blue-600">
+                        {(creditsReport.summary.transactions.net_amount || 0).toLocaleString()} FBu
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground pt-2 border-t">
+                      <div className="flex justify-between">
+                        <span>Dette totale:</span>
+                        <span>{(creditsReport.summary.total_debt || 0).toLocaleString()} FBu</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Comptes actifs:</span>
+                        <span>{creditsReport.summary.active_accounts || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <CreditCard className="h-12 w-12 mx-auto mb-2 text-muted-foreground opacity-50" />
+                    <p className="text-sm text-muted-foreground">Aucune transaction</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Ventes par Mode de Paiement */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-green-500" />
+                  Modes de Paiement
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">💵 Espèces</span>
+                    <span className="font-medium">-</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">💳 Carte</span>
+                    <span className="font-medium">-</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">📱 Mobile Money</span>
+                    <span className="font-medium">-</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">🏦 Crédit</span>
+                    <span className="font-medium">
+                      {creditsReport?.summary?.transactions?.by_type?.find((t: any) => t.transaction_type === 'debt')?.total?.toLocaleString() || 0} FBu
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <span className="font-semibold">Total</span>
+                    <span className="text-lg font-bold text-green-600">
+                      {reportData.totalRevenue?.toLocaleString() || 0} FBu
+                    </span>
                   </div>
                 </div>
               </CardContent>

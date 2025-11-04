@@ -75,7 +75,7 @@ class SaleListCreateView(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['status', 'payment_method', 'table', 'server']
     search_fields = ['table__number', 'server__username', 'server__first_name', 'server__last_name', 'notes']
-    ordering_fields = ['created_at', 'total_amount', 'final_amount']
+    ordering_fields = ['created_at', 'total_amount']
     ordering = ['-created_at']
 
     def get_queryset(self):
@@ -442,7 +442,7 @@ def sales_statistics(request):
     pending_sales = queryset.filter(status='pending').count()
 
     total_revenue = queryset.filter(status='paid').aggregate(
-        total=Sum('final_amount')
+        total=Sum('total_amount')
     )['total'] or 0
 
     total_discount = queryset.aggregate(
@@ -452,7 +452,7 @@ def sales_statistics(request):
     # Ventes par méthode de paiement
     payment_methods = queryset.filter(status='paid').values('payment_method').annotate(
         count=Count('id'),
-        total=Sum('final_amount')
+        total=Sum('total_amount')
     )
 
     # Top produits vendus
@@ -516,7 +516,7 @@ def daily_sales_report(request):
         'paid_sales': daily_sales.filter(status='paid').count(),
         'pending_sales': daily_sales.filter(status='pending').count(),
         'total_revenue': daily_sales.filter(status='paid').aggregate(
-            total=Sum('final_amount')
+            total=Sum('total_amount')
         )['total'] or 0,
         'total_discount': daily_sales.aggregate(
             total=Sum('discount_amount')
@@ -530,7 +530,7 @@ def daily_sales_report(request):
         'server__last_name'
     ).annotate(
         sales_count=Count('id'),
-        revenue=Sum('final_amount', filter=Q(status='paid'))
+        revenue=Sum('total_amount', filter=Q(status='paid'))
     ).order_by('-revenue')
 
     # Ventes par heure
@@ -541,7 +541,7 @@ def daily_sales_report(request):
             status='paid'
         ).aggregate(
             count=Count('id'),
-            revenue=Sum('final_amount')
+            revenue=Sum('total_amount')
         )
 
         sales_by_hour.append({

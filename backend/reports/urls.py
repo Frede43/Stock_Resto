@@ -32,4 +32,8 @@ urlpatterns = [
     path('notifications/status/', views.NotificationStatusView.as_view(), name='notification-status'),
     path('notifications/trigger-stock-check/', views.TriggerStockCheckView.as_view(), name='trigger-stock-check'),
     path('notifications/test/', views.SendTestNotificationView.as_view(), name='send-test-notification'),
+    
+    # Rapports Dépenses et Crédits
+    path('expenses/', views.expenses_report, name='expenses_report'),
+    path('credits/', views.credits_report, name='credits_report'),
 ]

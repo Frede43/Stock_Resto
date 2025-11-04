@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useTables, useCreateSale, useProducts, useServers } from "@/hooks/use-api";
+import { useCreditAccounts } from "@/hooks/use-credits";
 import { PrintableInvoice } from "@/components/PrintableInvoice";
 import {
   ShoppingCart,
@@ -20,7 +21,9 @@ import {
   Clock,
   Trash2,
   User,
-  MapPin
+  MapPin,
+  CreditCard,
+  Wallet
 } from "lucide-react";
 
 // Configuration API dynamique
@@ -61,6 +64,8 @@ export default function Sales() {
   const [customerName, setCustomerName] = useState<string>('');
   const [selectedTable, setSelectedTable] = useState<string>('');
   const [selectedServer, setSelectedServer] = useState<string>('');
+  const [paymentMethod, setPaymentMethod] = useState<string>('cash');
+  const [selectedCreditAccount, setSelectedCreditAccount] = useState<string>('');
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState<any>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -74,6 +79,7 @@ export default function Sales() {
   const { data: tablesData, isLoading: tablesLoading } = useTables({ status: 'available' });
   const { data: productsData, isLoading: productsLoading, refetch: refetchProducts } = useProducts({});
   const { data: serversData, isLoading: serversLoading } = useServers({ is_active: true });
+  const { data: creditAccountsData } = useCreditAccounts({ status: 'active' });
   const createSaleMutation = useCreateSale();
 
   // Calculer le montant total du panier
@@ -367,6 +373,16 @@ export default function Sales() {
       return;
     }
 
+    // Validation du compte crédit si mode crédit
+    if (paymentMethod === 'credit' && !selectedCreditAccount) {
+      toast({
+        title: "Compte crédit requis",
+        description: "Veuillez sélectionner un compte crédit",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setProcessing(true);
 
     try {
@@ -385,18 +401,23 @@ export default function Sales() {
       }
 
       // Préparer les données de vente
-      const saleData = {
+      const saleData: any = {
         table: parseInt(selectedTable),
         customer_name: customerName.trim(),
         server: parseInt(selectedServer),
-        payment_method: 'cash' as const,
-        notes: `Vente directe - ${cart.length} articles - Serveur: ${serverName}`,
+        payment_method: paymentMethod as 'cash' | 'card' | 'mobile' | 'credit',
+        notes: `Vente directe - ${cart.length} articles - Serveur: ${serverName} - Paiement: ${paymentMethod}`,
         items: cart.map(item => ({
           product: item.menu_item_id,
           quantity: item.quantity,
           notes: `${item.name}`
         }))
       };
+
+      // Ajouter le compte crédit si mode crédit
+      if (paymentMethod === 'credit' && selectedCreditAccount) {
+        saleData.credit_account = parseInt(selectedCreditAccount);
+      }
 
       console.log('🔍 Données de vente à envoyer:', saleData);
 
@@ -471,6 +492,8 @@ export default function Sales() {
     setCustomerName('');
     setSelectedTable('');
     setSelectedServer('');
+    setPaymentMethod('cash');
+    setSelectedCreditAccount('');
     setProcessing(false);
     // Actualiser les produits pour mettre à jour les stocks (même en offline)
     refreshProducts();
@@ -803,6 +826,76 @@ export default function Sales() {
                               </SelectContent>
                             </Select>
                           </div>
+
+                          <div>
+                            <Label htmlFor="payment-method" className="flex items-center gap-2">
+                              <CreditCard className="h-4 w-4" />
+                              Mode de paiement *
+                            </Label>
+                            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="cash">
+                                  <div className="flex items-center gap-2">
+                                    <Wallet className="h-4 w-4" />
+                                    <span>Espèces</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="card">
+                                  <div className="flex items-center gap-2">
+                                    <CreditCard className="h-4 w-4" />
+                                    <span>Carte bancaire</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="mobile">
+                                  <div className="flex items-center gap-2">
+                                    <DollarSign className="h-4 w-4" />
+                                    <span>Mobile Money</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="credit">
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="h-4 w-4" />
+                                    <span>Crédit (à payer plus tard)</span>
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Sélecteur de compte crédit (visible uniquement si mode crédit) */}
+                          {paymentMethod === 'credit' && (
+                            <div>
+                              <Label htmlFor="credit-account" className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                Compte crédit *
+                              </Label>
+                              <Select value={selectedCreditAccount} onValueChange={setSelectedCreditAccount}>
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue placeholder="Sélectionner un compte" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {creditAccountsData?.results?.map((account: any) => (
+                                    <SelectItem key={account.id} value={account.id.toString()}>
+                                      <div className="flex flex-col">
+                                        <span className="font-medium">{account.customer_name}</span>
+                                        <span className="text-xs text-muted-foreground">
+                                          Disponible: {account.available_credit.toLocaleString()} FBu
+                                        </span>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {selectedCreditAccount && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  💡 La dette sera ajoutée automatiquement au compte
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex justify-between items-center">
@@ -862,6 +955,15 @@ export default function Sales() {
                   <span>Serveur:</span>
                   <span className="font-medium">
                     {serversData?.find((s: any) => s.id.toString() === selectedServer)?.first_name} {serversData?.find((s: any) => s.id.toString() === selectedServer)?.last_name}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Mode de paiement:</span>
+                  <span className="font-medium">
+                    {paymentMethod === 'cash' && '💵 Espèces'}
+                    {paymentMethod === 'card' && '💳 Carte bancaire'}
+                    {paymentMethod === 'mobile' && '📱 Mobile Money'}
+                    {paymentMethod === 'credit' && '⏰ Crédit'}
                   </span>
                 </div>
                 <div className="border-t pt-2">

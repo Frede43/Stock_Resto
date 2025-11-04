@@ -50,8 +50,18 @@ def generate_daily_report():
         # Ticket moyen
         average_sale = total_sales / total_sales_count if total_sales_count > 0 else Decimal('0.00')
         
-        # Dépenses du jour (module supprimé)
-        today_expenses = Decimal('0.00')
+        # Dépenses du jour (approuvées uniquement)
+        try:
+            from expenses.models import Expense
+            today_expenses = Expense.objects.filter(
+                expense_date=today,
+                status='approved'
+            ).aggregate(
+                total=Sum('amount')
+            )['total'] or Decimal('0.00')
+        except Exception:
+            # Si le module expenses n'est pas encore migré
+            today_expenses = Decimal('0.00')
         
         # Résultat net
         net_result = total_profit - today_expenses

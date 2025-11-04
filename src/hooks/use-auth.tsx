@@ -237,29 +237,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         variant: "default",
       });
 
-      // Redirection basée sur le rôle avec logs de debug
-      console.log('🔄 use-auth: Redirection pour rôle:', userData.role);
-
       // Désactiver le chargement
       setIsLoading(false);
-      
-      // CORRECTION CROSS-BROWSER: Attendre que le localStorage soit synchronisé
-      // Chrome nécessite plus de temps que Edge pour synchroniser le localStorage
-      setTimeout(() => {
-        // Vérifier multiple fois pour s'assurer de la synchronisation
-        const checkAndRedirect = () => {
-          const freshUserData = authStorage.getUser();
-          if (freshUserData && freshUserData.isLoggedIn) {
-            console.log('🔐 use-auth: Redirection avec données fraîches, rôle:', freshUserData.role);
-            console.log('🔄 use-auth: Redirection universelle vers / pour rôle:', freshUserData.role);
-            navigate('/', { replace: true });
-          } else {
-            // Retry après 100ms si les données ne sont pas encore disponibles
-            setTimeout(checkAndRedirect, 100);
-          }
-        };
-        checkAndRedirect();
-      }, 100); // Délai réduit mais avec retry logic
+
+      // CORRECTION: Redirection immédiate vers la page d'accueil
+      // Le composant Index.tsx se chargera d'afficher le bon dashboard selon le rôle
+      // Cela évite le flash de l'interface admin
+      navigate('/', { replace: true });
 
       return true;
 

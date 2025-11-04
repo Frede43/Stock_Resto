@@ -248,7 +248,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sale
         fields = [
-            'table', 'customer_name', 'server', 'payment_method', 'discount_amount', 'notes', 'items'
+            'table', 'customer_name', 'server', 'payment_method', 'credit_account', 'discount_amount', 'notes', 'items'
         ]
     
     def create(self, validated_data):
@@ -296,12 +296,24 @@ class SaleCreateSerializer(serializers.ModelSerializer):
                     last_name='Par défaut'
                 )
 
-        # Créer la vente
+        # ✅ PRÉ-CALCULER le total AVANT de créer la vente
+        total_amount = Decimal('0.00')
+        for item_data in items_data:
+            product = item_data['product']
+            quantity = item_data['quantity']
+            unit_price = item_data.get('unit_price', product.selling_price)
+            total_amount += quantity * unit_price
+        
+        # Ajouter le total_amount aux données validées
+        validated_data['subtotal'] = total_amount
+        validated_data['tax_amount'] = Decimal('0.00')
+        validated_data['total_amount'] = total_amount
+        validated_data['status'] = 'pending'
+        
+        # Créer la vente AVEC le total_amount
         sale = Sale.objects.create(**validated_data)
         
         # Créer les articles de vente
-        total_amount = Decimal('0.00')
-        
         for item_data in items_data:
             product = item_data['product']
             quantity = item_data['quantity']
@@ -355,18 +367,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             #             f"Erreur lors de la consommation des ingrédients: {str(e)}"
             #         )
 
-            # Ajouter au total
-            total_amount += sale_item.quantity * sale_item.unit_price
-        
-        # Calculer le montant final (sans TVA)
-        sale.subtotal = total_amount
-        sale.tax_amount = Decimal('0.00')  # Pas de TVA
-        sale.total_amount = total_amount  # Total = Sous-total (pas de TVA)
-        
-        # ✅ MODIFIÉ: Statut 'pending' par défaut pour permettre le flux de commandes
-        # Le statut sera changé en 'paid' lors de l'encaissement via mark-as-paid
-        sale.status = 'pending'  # Commande en attente
-        sale.save()
+            # Le total a déjà été calculé avant la création de la vente
         
         # ✅ MODIFIÉ: NE PAS mettre à jour le stock maintenant
         # Le stock sera mis à jour lors du paiement via mark-as-paid

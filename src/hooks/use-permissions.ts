@@ -92,6 +92,7 @@ export const MENU_PERMISSIONS = {
   users: ['users_manage', 'users_view'],
   suppliers: ['suppliers_view', 'suppliers_manage'],
   expenses: ['expenses_view', 'expenses_manage'],
+  credits: ['credits_view', 'credits_manage'], // Crédits clients
   
   // Système - permissions selon le backend (ADMIN SEULEMENT)
   settings: ['settings_manage'],
@@ -152,6 +153,45 @@ export function useAccessibleMenus() {
 }
 
 /**
+ * Hook principal pour gérer les permissions
+ * Retourne une fonction hasPermission pour vérifier les permissions
+ */
+export function usePermissions() {
+  const { data: permissions } = useUserPermissions();
+  
+  const hasPermission = (permissionCode: string): boolean => {
+    // Les admins ont toutes les permissions
+    if (permissions?.role === 'admin') {
+      return true;
+    }
+    
+    // Vérifier la permission spécifique
+    return permissions?.permissions?.[permissionCode] || false;
+  };
+  
+  const hasAnyPermission = (permissionCodes: string[]): boolean => {
+    // Les admins ont toutes les permissions
+    if (permissions?.role === 'admin') {
+      return true;
+    }
+    
+    // Vérifier si l'utilisateur a au moins une des permissions
+    return permissionCodes.some(code => permissions?.permissions?.[code]);
+  };
+  
+  return {
+    hasPermission,
+    hasAnyPermission,
+    permissions: permissions?.permissions || {},
+    role: permissions?.role,
+    isAdmin: permissions?.role === 'admin',
+    isManager: permissions?.role === 'manager',
+    isCashier: permissions?.role === 'cashier',
+    isServer: permissions?.role === 'server',
+  };
+}
+
+/**
  * Définition des rôles par défaut avec leurs permissions (selon le backend)
  */
 export const DEFAULT_ROLE_PERMISSIONS = {
@@ -166,6 +206,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     'reports_view', 'analytics_view',
     'suppliers_view', 'suppliers_manage',
     'expenses_view', 'expenses_manage',
+    'credits_view', 'credits_manage',
   ],
   server: [
     'sales_view', 'sales_create',
@@ -178,5 +219,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     'products_view',
     'tables_view', 'tables_manage',
     'orders_view', 'orders_create',
+    'expenses_view',
+    'credits_view', 'credits_manage', // Caissiers peuvent gérer les crédits clients
   ]
 } as const;

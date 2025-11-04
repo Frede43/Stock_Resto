@@ -135,6 +135,52 @@ def deduct_ingredients_on_payment(sender, instance, created, **kwargs):
                         print(f"⚠️ ALERTE: {ingredient.nom} stock faible ({ingredient.quantite_restante} {ingredient.unite})")
 
 
+@receiver(post_save, sender=Sale)
+def create_credit_transaction_on_credit_sale(sender, instance, created, **kwargs):
+    """
+    Crée automatiquement une transaction de crédit quand une vente est payée à crédit
+    """
+    # Ne traiter que les ventes avec paiement à crédit
+    if instance.payment_method != 'credit':
+        return
+    
+    # ❌ DÉSACTIVÉ : Ce signal est géré par credits/signals.py pour éviter la duplication
+    # Ne traiter que si la vente a un compte crédit associé
+    # if not instance.credit_account:
+    #     return
+    # 
+    # # Vérifier si c'est une nouvelle vente ou un changement de statut vers 'paid'
+    # if created or instance.status == 'paid':
+    #     try:
+    #         # Importer ici pour éviter les imports circulaires
+    #         from credits.models import CreditTransaction
+    #         
+    #         # Vérifier si une transaction n'existe pas déjà pour cette vente
+    #         existing_transaction = CreditTransaction.objects.filter(
+    #             sale=instance
+    #         ).first()
+    #         
+    #         if existing_transaction:
+    #             # Transaction déjà créée, ne rien faire
+    #             return
+    #         
+    #         # Créer la transaction de dette
+    #         CreditTransaction.objects.create(
+    #             credit_account=instance.credit_account,
+    #             transaction_type='debt',
+    #             amount=instance.total_amount,
+    #             sale=instance,
+    #             notes=f"Vente à crédit - {instance.reference}",
+    #             created_by=instance.created_by
+    #         )
+    #         
+    #         print(f"✅ Transaction de crédit créée pour la vente {instance.reference} - {instance.total_amount} FBu")
+    #         
+    #     except Exception as e:
+    #         print(f"❌ Erreur création transaction crédit: {e}")
+    pass  # Signal désactivé - géré par credits/signals.py
+
+
 def create_table_freed_notification(table, sale):
     """
     Crée une notification quand une table est libérée
