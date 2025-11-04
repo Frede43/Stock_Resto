@@ -78,8 +78,8 @@ export default function Sales() {
   // Récupérer les tables disponibles, les produits et les serveurs
   const { data: tablesData, isLoading: tablesLoading } = useTables({ status: 'available' });
   const { data: productsData, isLoading: productsLoading, refetch: refetchProducts } = useProducts({});
-  const { data: serversData, isLoading: serversLoading } = useServers({ is_active: true });
-  const { data: creditAccountsData } = useCreditAccounts({ status: 'active' });
+  const { data: serversData, isLoading: serversLoading } = useServers({ is_active: true }) as { data: any; isLoading: boolean };
+  const { data: creditAccountsData } = useCreditAccounts({ status: 'active' }) as { data: any };
   const createSaleMutation = useCreateSale();
 
   // Calculer le montant total du panier
@@ -387,7 +387,7 @@ export default function Sales() {
 
     try {
       // Récupérer les informations du serveur sélectionné
-      const selectedServerData = serversData?.find((server: any) => server.id.toString() === selectedServer);
+      const selectedServerData = serversData?.results?.find((server: any) => server.id.toString() === selectedServer) || serversData?.find((server: any) => server.id.toString() === selectedServer);
       const serverName = selectedServerData ? `${selectedServerData.first_name} ${selectedServerData.last_name}` : 'Serveur inconnu';
 
       // Validation des données avant envoi
@@ -817,7 +817,7 @@ export default function Sales() {
                                 {serversLoading ? (
                                   <SelectItem value="loading" disabled>Chargement...</SelectItem>
                                 ) : (
-                                  serversData?.map((server: any) => (
+                                  (serversData?.results || serversData)?.map((server: any) => (
                                     <SelectItem key={server.id} value={server.id.toString()}>
                                       {server.first_name} {server.last_name} ({server.username})
                                     </SelectItem>
@@ -954,7 +954,7 @@ export default function Sales() {
                 <div className="flex justify-between">
                   <span>Serveur:</span>
                   <span className="font-medium">
-                    {serversData?.find((s: any) => s.id.toString() === selectedServer)?.first_name} {serversData?.find((s: any) => s.id.toString() === selectedServer)?.last_name}
+                    {(serversData?.results || serversData)?.find((s: any) => s.id.toString() === selectedServer)?.first_name} {(serversData?.results || serversData)?.find((s: any) => s.id.toString() === selectedServer)?.last_name}
                   </span>
                 </div>
                 <div className="flex justify-between">
