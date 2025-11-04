@@ -20,7 +20,6 @@ from .pdf_generator import PDFReportGenerator
 from .excel_generator import ExcelReportGenerator
 from products.models import Product
 from sales.models import Sale, SaleItem
-from expenses.models import Expense
 from inventory.models import StockMovement
 from accounts.permissions import IsAdminOrGerant, IsAuthenticated
 

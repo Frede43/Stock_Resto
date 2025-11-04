@@ -20,8 +20,6 @@ import type {
   Category,
   Sale,
   Supplier,
-  Expense,
-  ExpenseCategory,
   Supply,
   Table,
   Order,
@@ -801,105 +799,6 @@ export function useAlerts(params?: {
   });
 }
 
-export function useApproveExpense() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: (expenseId: string | number) => 
-      apiService.post(`/expenses/expenses/${expenseId}/approve/`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['budget-settings'] });
-      toast({
-        title: "Dépense approuvée",
-        description: "La dépense a été approuvée avec succès."
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erreur",
-        description: error?.response?.data?.error || "Impossible d'approuver la dépense.",
-        variant: "destructive"
-      });
-    }
-  });
-}
-
-export function useRejectExpense() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: ({ expenseId, reason }: { expenseId: string | number; reason?: string }) => 
-      apiService.post(`/expenses/expenses/${expenseId}/reject/`, { reason }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      toast({
-        title: "Dépense rejetée",
-        description: "La dépense a été rejetée."
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erreur",
-        description: error?.response?.data?.error || "Impossible de rejeter la dépense.",
-        variant: "destructive"
-      });
-    }
-  });
-}
-
-export function useBudgetSettings(params?: any) {
-  return useQuery({
-    queryKey: ['budget-settings', params],
-    queryFn: () => apiService.get('/expenses/budgets/', { params }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-}
-
-export function useUpdateBudgetSetting() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string | number; data: any }) => 
-      apiService.patch(`/expenses/budgets/${id}/`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['budget-settings'] });
-      toast({
-        title: "Budget mis à jour",
-        description: "Le budget a été mis à jour avec succès."
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erreur",
-        description: error?.response?.data?.error || "Impossible de mettre à jour le budget.",
-        variant: "destructive"
-      });
-    }
-  });
-}
-
-export function useExpenseAnalytics() {
-  return useQuery({
-    queryKey: ['expense-analytics'],
-    queryFn: () => apiService.get('/expenses/analytics/'),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-  });
-}
-
-export function usePaymentMethods() {
-  return useQuery({
-    queryKey: ['payment-methods'],
-    queryFn: () => apiService.get('/expenses/payment-methods/'),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    retry: false, // Don't retry on 404
-    throwOnError: false, // Don't throw on error
-  });
-}
-
 export function useMenuItems(params?: {
   category?: number;
   is_available?: boolean;
@@ -1551,82 +1450,6 @@ export function useFinancialReport(params?: {
       return apiService.get(url);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-}
-
-// ==================== HOOKS DÉPENSES ====================
-
-export function useExpenses(params?: {
-  category?: number;
-  search?: string;
-  is_approved?: boolean;
-  start_date?: string;
-  end_date?: string;
-}) {
-  return useQuery<PaginatedResponse<Expense>, Error, PaginatedResponse<Expense>>({
-    queryKey: ['expenses', params],
-    queryFn: () => apiService.get('/expenses/expenses/', { params }),
-    staleTime: 1 * 60 * 1000, // 1 minute
-  });
-}
-
-export function useExpenseCategories(params?: { search?: string; is_active?: boolean }) {
-  return useQuery<PaginatedResponse<ExpenseCategory>, Error, PaginatedResponse<ExpenseCategory>>({
-    queryKey: ['expense-categories', params],
-    queryFn: () => apiService.get('/expenses/categories/', { params }),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
-}
-
-export function useCreateExpense() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: (data: any) =>
-      apiService.post('/expenses/expenses/', data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['budget-settings'] });
-      toast({
-        title: "Succès",
-        description: "Dépense créée avec succès",
-        variant: "default",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erreur",
-        description: error?.response?.data?.error || error.message || "Erreur lors de la création de la dépense",
-        variant: "destructive",
-      });
-    },
-  });
-}
-
-export function useUpdateExpense() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string | number; data: any }) =>
-      apiService.patch(`/expenses/expenses/${id}/`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['budget-settings'] });
-      toast({
-        title: "Succès",
-        description: "Dépense mise à jour avec succès",
-        variant: "default",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erreur",
-        description: error?.response?.data?.error || error.message || "Erreur lors de la mise à jour",
-        variant: "destructive",
-      });
-    },
   });
 }
 

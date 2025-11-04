@@ -15,7 +15,6 @@ from datetime import datetime, timedelta
 from accounts.models import User
 from products.models import Product
 from sales.models import Sale
-from expenses.models import Expense
 
 
 class BarStockWiseAdminSite(AdminSite):
@@ -47,16 +46,10 @@ class BarStockWiseAdminSite(AdminSite):
                 status='paid'
             ).count()
             
-            # Statistiques dépenses aujourd'hui
-            expenses_today = Expense.objects.filter(
-                date=today
-            ).aggregate(total=Sum('amount'))['total'] or 0
-            
             stats = {
                 'users_count': users_count,
                 'products_count': products_count,
                 'sales_today': sales_today,
-                'expenses_today': f"{expenses_today:.2f}€" if expenses_today else "0€",
             }
             
         except Exception as e:
@@ -65,7 +58,6 @@ class BarStockWiseAdminSite(AdminSite):
                 'users_count': 0,
                 'products_count': 0,
                 'sales_today': 0,
-                'expenses_today': "0€",
             }
             print(f"Erreur lors du calcul des statistiques admin: {e}")
         

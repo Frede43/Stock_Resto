@@ -5,7 +5,6 @@ from .notifications import NotificationService
 from .models import DailyReport, StockAlert
 from products.models import Product
 from sales.models import Sale, SaleItem
-from expenses.models import Expense
 from django.db.models import Sum, Count, Avg
 from decimal import Decimal
 
@@ -51,10 +50,8 @@ def generate_daily_report():
         # Ticket moyen
         average_sale = total_sales / total_sales_count if total_sales_count > 0 else Decimal('0.00')
         
-        # Dépenses du jour
-        today_expenses = Expense.objects.filter(expense_date=today).aggregate(
-            total=Sum('amount')
-        )['total'] or Decimal('0.00')
+        # Dépenses du jour (module supprimé)
+        today_expenses = Decimal('0.00')
         
         # Résultat net
         net_result = total_profit - today_expenses

@@ -30,13 +30,11 @@ class BarStockWiseAdminSite(AdminSite):
             User = apps.get_model('accounts', 'User')
             Product = apps.get_model('products', 'Product')
             Sale = apps.get_model('sales', 'Sale')
-            Expense = apps.get_model('expenses', 'Expense')
             
             stats = {
                 'users_count': User.objects.filter(is_active=True).count(),
                 'products_count': Product.objects.filter(is_active=True).count(),
                 'sales_today': Sale.objects.filter(created_at__date=timezone.now().date()).count(),
-                'expenses_today': Expense.objects.filter(expense_date=timezone.now().date()).count(),
             }
             
             extra_context['stats'] = stats

@@ -81,7 +81,6 @@ const menuCategories: MenuCategory[] = [
       { href: "/daily-report", icon: Calendar, label: "Rapport Quotidien", permissionKey: "daily-report" },
       { href: "/reports", icon: BarChart3, label: "Rapports", permissionKey: "reports" },
       { href: "/analytics", icon: PieChart, label: "Analyses", permissionKey: "analytics" },
-      { href: "/expenses", icon: Receipt, label: "Dépenses", permissionKey: "expenses" },
     ]
   },
   {

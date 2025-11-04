@@ -46,7 +46,6 @@ export function Header({ className }: HeaderProps = {}) {
       "/orders": "Commandes",
       "/users": "Utilisateurs",
       "/suppliers": "Fournisseurs",
-      "/expenses": "Dépenses",
       "/settings": "Paramètres",
       "/alerts": "Alertes",
       "/monitoring": "Monitoring",

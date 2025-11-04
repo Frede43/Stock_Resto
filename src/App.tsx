@@ -29,7 +29,6 @@ import TableDetails from "./pages/TableDetails";
 import Orders from "./pages/Orders";
 import Users from "./pages/Users";
 import Suppliers from "./pages/Suppliers";
-import Expenses from "./pages/Expenses";
 import Settings from "./pages/Settings";
 import Alerts from "./pages/Alerts";
 import Monitoring from "./pages/Monitoring";
@@ -183,7 +182,6 @@ const App = () => (
           {/* Administration */}
           <Route path="/users" element={<ProtectedRoute><Layout><Users /></Layout></ProtectedRoute>} />
           <Route path="/suppliers" element={<ProtectedRoute><Layout><Suppliers /></Layout></ProtectedRoute>} />
-          <Route path="/expenses" element={<ProtectedRoute><Layout><Expenses /></Layout></ProtectedRoute>} />
 
           {/* System & Support */}
           <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
