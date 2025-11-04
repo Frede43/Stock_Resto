@@ -197,6 +197,8 @@ class Expense(models.Model):
         'accounts.User',
         on_delete=models.PROTECT,
         related_name='expenses_created',
+        null=True,
+        blank=True,
         verbose_name='Créée par'
     )
     approved_by = models.ForeignKey(
