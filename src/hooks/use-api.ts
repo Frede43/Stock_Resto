@@ -1364,7 +1364,7 @@ export function useUpdatePreferences() {
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: (data: any) => apiService.patch('/settings/preferences/', data),
+    mutationFn: (data: any) => apiService.patch('/settings/user-preferences/', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['preferences'] });
       toast({
