@@ -76,7 +76,18 @@ git push origin main
 ## 🚨 En Cas de Problème
 
 ### "Token non trouvé"
-→ Connectez-vous d'abord sur l'application avec un compte admin
+
+**Cause** : L'application utilise `access_token` dans localStorage (pas `token`)
+
+**Solutions** :
+
+1. **Actualiser la page** : Les modifications ont été faites pour détecter automatiquement `access_token`
+2. **Vérifier le localStorage** : Ouvrez `https://barstock-web.onrender.com/debug-localstorage.html`
+3. **Se reconnecter** :
+   - Allez sur l'application principale
+   - Connectez-vous avec un compte admin
+   - Revenez sur l'outil de diagnostic
+   - Cliquez sur "📋 Charger depuis localStorage"
 
 ### "Accès refusé"
 → Utilisez un compte admin (pas caissier/serveur)

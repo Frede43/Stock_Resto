@@ -34,23 +34,16 @@ const Index = () => {
   const { user, isLoading } = useAuth();
   const [userRole, setUserRole] = useState<string | null>(null);
 
-  // DEBUG: Logs pour diagnostiquer le problème de rôle
-  console.log('🔍 DEBUG Index.tsx - User data:', user);
-  console.log('🔍 DEBUG Index.tsx - User role:', user?.role);
-  console.log('🔍 DEBUG Index.tsx - isLoading:', isLoading);
-  
   // Synchroniser le rôle utilisateur avec localStorage pour éviter les problèmes de timing
   useEffect(() => {
     const updateUserRole = () => {
       if (user?.role) {
         setUserRole(user.role);
-        console.log('🔄 Index.tsx - Rôle mis à jour depuis user:', user.role);
       } else {
         // Fallback: récupérer depuis localStorage si user n'est pas encore chargé
         const freshUserData = authStorage.getUser();
         if (freshUserData && freshUserData.role && freshUserData.isLoggedIn) {
           setUserRole(freshUserData.role);
-          console.log('🔄 Index.tsx - Rôle récupéré depuis authStorage:', freshUserData.role);
         }
       }
     };
@@ -61,15 +54,13 @@ const Index = () => {
     const cleanup = authStorage.onUserChange((userData) => {
       if (userData && userData.role && userData.isLoggedIn) {
         setUserRole(userData.role);
-        console.log('🔄 Index.tsx - Rôle mis à jour via authStorage listener:', userData.role);
       } else {
         setUserRole(null);
-        console.log('🔄 Index.tsx - Utilisateur déconnecté via authStorage listener');
       }
     });
     
     return cleanup;
-  }, [user]);
+  }, [user?.role]); // ✅ Dépendance spécifique sur user.role uniquement
 
   // Attendre que l'authentification soit terminée
   if (isLoading) {
@@ -87,18 +78,11 @@ const Index = () => {
   const effectiveRole = userRole || user?.role;
   
   if (effectiveRole === 'cashier') {
-    console.log('💰 DEBUG: Affichage CashierDashboard pour role:', effectiveRole);
     return <CashierDashboard />;
   }
 
   if (effectiveRole === 'admin') {
-    console.log('👑 DEBUG: Affichage AdminDashboard pour role:', effectiveRole);
     return <AdminDashboard />;
-  }
-
-  // Pour les autres rôles (manager, server), afficher l'interface par défaut
-  if (effectiveRole === 'manager' || effectiveRole === 'server') {
-    console.log('🎭 DEBUG: Interface par défaut pour role:', effectiveRole);
   }
 
   // Activer les notifications automatiques pour les autres rôles
