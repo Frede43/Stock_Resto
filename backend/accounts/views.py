@@ -547,3 +547,134 @@ def reset_password_view(request, pk):
         'format': 'Format simple: Mot + 4 chiffres (facile à retenir et communiquer oralement)'
     })
 
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def initialize_permissions_view(request):
+    """
+    Endpoint pour initialiser les permissions par défaut
+    ADMIN UNIQUEMENT - Alternative au shell pour le plan gratuit Render
+    """
+    # Vérifier que l'utilisateur est admin
+    if not request.user.is_admin:
+        return Response(
+            {'error': 'Seuls les administrateurs peuvent initialiser les permissions.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    try:
+        # Définition des permissions par rôle (identique à init_role_permissions.py)
+        ROLE_PERMISSIONS = {
+            'cashier': [
+                'sales_manage', 'sales_history_view', 'sales_view', 'sales_create',
+                'products_view',
+                'tables_view', 'tables_manage',
+                'orders_view', 'orders_create',
+                'expenses_view',
+                'credits_view', 'credits_manage',
+            ],
+            'server': [
+                'sales_view', 'sales_create',
+                'products_view',
+                'tables_view', 'tables_manage',
+                'orders_view', 'orders_create',
+            ],
+            'manager': [
+                'sales_manage', 'sales_history_view', 'sales_view', 'sales_create',
+                'products_view', 'products_manage',
+                'tables_view', 'tables_manage',
+                'orders_view', 'orders_create',
+                'stocks_view', 'inventory_manage',
+                'kitchen_view',
+                'reports_view', 'analytics_view',
+                'suppliers_view', 'suppliers_manage',
+                'expenses_view', 'expenses_manage',
+                'credits_view', 'credits_manage',
+            ],
+        }
+
+        permissions_created = 0
+        permissions_existing = 0
+
+        # Créer les permissions si elles n'existent pas
+        for role, permission_codes in ROLE_PERMISSIONS.items():
+            for code in permission_codes:
+                parts = code.split('_')
+                category = parts[0]
+                action = '_'.join(parts[1:])
+                
+                action_names = {
+                    'view': 'Voir',
+                    'create': 'Créer',
+                    'manage': 'Gérer',
+                    'edit': 'Modifier',
+                    'delete': 'Supprimer',
+                    'history_view': 'Voir l\'historique',
+                }
+                
+                action_name = action_names.get(action, action.replace('_', ' ').title())
+                name = f"{action_name} {category}"
+                
+                permission, created = Permission.objects.get_or_create(
+                    code=code,
+                    defaults={
+                        'name': name,
+                        'category': category,
+                        'description': f'Permission pour {action_name.lower()} dans {category}',
+                        'is_active': True,
+                    }
+                )
+                
+                if created:
+                    permissions_created += 1
+                else:
+                    permissions_existing += 1
+
+        # Assigner les permissions aux utilisateurs existants selon leur rôle
+        users_updated = 0
+        users_details = []
+        
+        for role in ['cashier', 'server', 'manager']:
+            users = User.objects.filter(role=role)
+            
+            for user in users:
+                # Supprimer les permissions existantes pour ce rôle
+                UserPermission.objects.filter(user=user).delete()
+                
+                # Assigner les nouvelles permissions
+                permission_codes = ROLE_PERMISSIONS.get(role, [])
+                permissions = Permission.objects.filter(code__in=permission_codes, is_active=True)
+                
+                for permission in permissions:
+                    UserPermission.objects.create(
+                        user=user,
+                        permission=permission,
+                        is_active=True
+                    )
+                
+                users_updated += 1
+                users_details.append({
+                    'username': user.username,
+                    'role': role,
+                    'permissions_count': permissions.count()
+                })
+
+        return Response({
+            'success': True,
+            'message': 'Permissions initialisées avec succès',
+            'stats': {
+                'permissions_created': permissions_created,
+                'permissions_existing': permissions_existing,
+                'permissions_total': permissions_created + permissions_existing,
+                'users_updated': users_updated,
+            },
+            'users': users_details,
+            'note': 'Les admins ont automatiquement toutes les permissions.'
+        })
+
+    except Exception as e:
+        return Response(
+            {'error': f'Erreur lors de l\'initialisation: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+

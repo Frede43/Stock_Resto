@@ -30,6 +30,7 @@ urlpatterns = [
 
     # Permissions
     path('permissions/list/', views.PermissionListView.as_view(), name='permissions_list'),
+    path('permissions/initialize/', views.initialize_permissions_view, name='initialize_permissions'),
     path('users/<int:user_id>/permissions/', views.user_permissions_view, name='user_permissions'),
     path('users/<int:user_id>/assign-permissions/', views.assign_permissions_view, name='assign_permissions'),
 ]
