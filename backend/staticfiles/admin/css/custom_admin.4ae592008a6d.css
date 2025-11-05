@@ -1,0 +1,524 @@
+/* ============================================
+   PERSONNALISATION ADMIN DJANGO - BARSTOCK
+   ============================================ */
+
+/* 1. MASQUER LA SIDEBAR CENTRALE (breadcrumbs) */
+#content-main {
+    margin-left: 0 !important;
+}
+
+.breadcrumbs {
+    display: none !important;
+}
+
+/* 2. AMÉLIORER LA SIDEBAR GAUCHE */
+#nav-sidebar {
+    background: linear-gradient(180deg, #1e3a5f 0%, #2c5282 100%) !important;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#nav-sidebar .module {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 10px;
+}
+
+#nav-sidebar .module caption {
+    color: #fff !important;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+#nav-sidebar a {
+    color: rgba(255, 255, 255, 0.9) !important;
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    display: block;
+    margin: 5px 0;
+}
+
+#nav-sidebar a:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    transform: translateX(5px);
+}
+
+#nav-sidebar .current-app,
+#nav-sidebar .current-model {
+    background: rgba(59, 130, 246, 0.3) !important;
+    border-left: 3px solid #3b82f6;
+}
+
+/* 3. AMÉLIORER LE HEADER */
+#header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px 20px;
+}
+
+#branding h1 {
+    color: #fff !important;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+#branding h1 a {
+    color: #fff !important;
+}
+
+#user-tools {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+#user-tools a {
+    color: #fff !important;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s ease;
+}
+
+#user-tools a:hover {
+    border-bottom-color: #fff;
+}
+
+/* 4. AMÉLIORER LE CONTENU PRINCIPAL */
+#content {
+    padding: 30px;
+    background: #f8fafc;
+}
+
+.module {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.module h2 {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #fff !important;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: -25px -25px 20px -25px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* 5. AMÉLIORER LES TABLEAUX */
+#result_list {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+#result_list thead th {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%) !important;
+    color: #fff !important;
+    padding: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+#result_list tbody tr {
+    transition: all 0.3s ease;
+}
+
+#result_list tbody tr:hover {
+    background: #f0f9ff !important;
+    transform: scale(1.01);
+}
+
+#result_list tbody td {
+    padding: 15px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* 6. AMÉLIORER LES BOUTONS */
+.button, input[type="submit"], input[type="button"], .submit-row input {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
+}
+
+.button:hover, input[type="submit"]:hover, input[type="button"]:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+}
+
+.button.default, input[type="submit"].default {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+
+.deletelink {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+}
+
+/* 7. AMÉLIORER LES FORMULAIRES */
+.form-row {
+    padding: 15px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.form-row:last-child {
+    border-bottom: none;
+}
+
+label {
+    font-weight: 600;
+    color: #1e3a5f;
+    margin-bottom: 8px;
+    display: block;
+}
+
+input[type="text"], input[type="password"], input[type="email"], 
+input[type="number"], input[type="url"], textarea, select {
+    border: 2px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    padding: 10px 15px !important;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
+    max-width: 600px !important;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, 
+input[type="email"]:focus, input[type="number"]:focus,
+input[type="url"]:focus, textarea:focus, select:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    outline: none !important;
+}
+
+/* 8. AMÉLIORER LES FIELDSETS */
+fieldset {
+    background: #f8fafc;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    margin-bottom: 25px !important;
+}
+
+fieldset h2 {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: #fff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    margin: -20px -20px 20px -20px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+}
+
+.collapse h2 {
+    cursor: pointer;
+}
+
+/* 9. AMÉLIORER LES MESSAGES */
+.messagelist {
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.messagelist li {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.messagelist .success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+}
+
+.messagelist .warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #fff;
+}
+
+.messagelist .error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #fff;
+}
+
+.messagelist .info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #fff;
+}
+
+/* 10. AMÉLIORER LA PAGE D'ACCUEIL */
+#content-main .module {
+    transition: all 0.3s ease;
+}
+
+#content-main .module:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+#content-main .module caption {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 8px 8px 0 0;
+    margin: -25px -25px 20px -25px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#content-main .module table {
+    width: 100%;
+}
+
+#content-main .module th {
+    text-align: left;
+    padding: 12px 15px;
+    font-weight: 600;
+    color: #1e3a5f;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+#content-main .module td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+#content-main .module tr:hover {
+    background: #f0f9ff;
+}
+
+/* 11. AMÉLIORER LES ACTIONS */
+.actions {
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.actions label {
+    font-weight: 600;
+    color: #1e3a5f;
+}
+
+.actions select {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.actions button {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.actions button:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-2px);
+}
+
+/* 12. AMÉLIORER LES FILTRES */
+#changelist-filter {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+#changelist-filter h2 {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+    color: #fff;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin: -20px -20px 15px -20px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+#changelist-filter h3 {
+    color: #1e3a5f;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#changelist-filter li {
+    padding: 8px 0;
+}
+
+#changelist-filter a {
+    color: #3b82f6;
+    transition: all 0.3s ease;
+}
+
+#changelist-filter a:hover {
+    color: #2563eb;
+    padding-left: 5px;
+}
+
+#changelist-filter .selected {
+    font-weight: 600;
+    color: #1e3a5f;
+}
+
+/* 13. RESPONSIVE */
+@media (max-width: 1024px) {
+    #nav-sidebar {
+        width: 200px;
+    }
+    
+    #content {
+        margin-left: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    #nav-sidebar {
+        position: fixed;
+        left: -250px;
+        transition: left 0.3s ease;
+        z-index: 1000;
+    }
+    
+    #nav-sidebar.show {
+        left: 0;
+    }
+    
+    #content {
+        margin-left: 0;
+    }
+}
+
+/* 14. AMÉLIORER LES ICÔNES */
+.addlink::before, .changelink::before, .deletelink::before {
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+/* 15. AMÉLIORER LA PAGINATION */
+.paginator {
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.paginator a {
+    background: #fff;
+    color: #3b82f6;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 0 3px;
+    transition: all 0.3s ease;
+    border: 2px solid #e5e7eb;
+}
+
+.paginator a:hover {
+    background: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+}
+
+.paginator .this-page {
+    background: #3b82f6;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 0 3px;
+    font-weight: 600;
+}
+
+/* 16. AMÉLIORER LE FOOTER */
+#footer {
+    background: #f8fafc;
+    padding: 20px;
+    text-align: center;
+    color: #64748b;
+    border-top: 2px solid #e5e7eb;
+    margin-top: 40px;
+}
+
+/* 17. ANIMATIONS */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.module, .messagelist li, fieldset {
+    animation: fadeIn 0.3s ease;
+}
+
+/* 18. AMÉLIORER LES HELP TEXT */
+.help {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* 19. AMÉLIORER LES ERREURS */
+.errorlist {
+    background: #fee2e2;
+    border-left: 4px solid #ef4444;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin: 10px 0;
+}
+
+.errorlist li {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+/* 20. AMÉLIORER LES CHECKBOXES ET RADIOS */
+input[type="checkbox"], input[type="radio"] {
+    width: 18px !important;
+    height: 18px !important;
+    cursor: pointer;
+}
+
+/* 21. SCROLLBAR PERSONNALISÉE */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+}

@@ -1,0 +1,536 @@
+/* ========================================
+   PERSONNALISATION ADMIN DJANGO - BARSTOCK
+   ======================================== */
+
+/* Variables de couleurs */
+:root {
+    --primary-color: #0ea5e9;
+    --primary-dark: #0284c7;
+    --sidebar-bg: #1e293b;
+    --sidebar-hover: #334155;
+    --content-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+}
+
+/* ========================================
+   MASQUER LA NAVIGATION SUPÉRIEURE
+   ======================================== */
+
+/* Masquer le breadcrumb en haut */
+#content-main > .breadcrumbs {
+    display: none !important;
+}
+
+/* Masquer la barre de navigation globale */
+#nav-global {
+    display: none !important;
+}
+
+/* ========================================
+   SIDEBAR UNIQUE ET MODERNE
+   ======================================== */
+
+/* Sidebar principale */
+#nav-sidebar {
+    background: var(--sidebar-bg) !important;
+    width: 280px !important;
+    position: fixed !important;
+    height: 100vh !important;
+    top: 0 !important;
+    left: 0 !important;
+    overflow-y: auto !important;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1) !important;
+    z-index: 1000 !important;
+    padding: 0 !important;
+}
+
+/* Logo/Header de la sidebar */
+#site-name {
+    background: var(--primary-color) !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    text-align: center !important;
+}
+
+#site-name a {
+    color: white !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+/* Sections de la sidebar */
+#nav-sidebar h2 {
+    color: var(--text-secondary) !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: 20px 20px 10px 20px !important;
+    margin: 0 !important;
+    font-weight: 600 !important;
+}
+
+/* Liens de la sidebar */
+#nav-sidebar a {
+    color: #cbd5e1 !important;
+    padding: 12px 20px !important;
+    display: block !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    border-left: 3px solid transparent !important;
+    font-size: 14px !important;
+}
+
+#nav-sidebar a:hover {
+    background: var(--sidebar-hover) !important;
+    color: white !important;
+    border-left-color: var(--primary-color) !important;
+    padding-left: 25px !important;
+}
+
+#nav-sidebar a.current-model {
+    background: var(--sidebar-hover) !important;
+    color: white !important;
+    border-left-color: var(--primary-color) !important;
+    font-weight: 600 !important;
+}
+
+/* Icônes dans la sidebar */
+#nav-sidebar a::before {
+    content: "▸ ";
+    margin-right: 8px;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* ========================================
+   CONTENU PRINCIPAL
+   ======================================== */
+
+/* Décaler le contenu pour la sidebar */
+#content {
+    margin-left: 280px !important;
+    background: var(--content-bg) !important;
+    min-height: 100vh !important;
+    padding: 30px !important;
+}
+
+/* Header du contenu */
+#content-main > h1 {
+    color: var(--text-primary) !important;
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    margin-bottom: 30px !important;
+    padding-bottom: 15px !important;
+    border-bottom: 3px solid var(--primary-color) !important;
+}
+
+/* ========================================
+   CARTES DE MODULES
+   ======================================== */
+
+/* Conteneur des modules */
+#content-main .module {
+    background: var(--card-bg) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    margin-bottom: 25px !important;
+    border: 1px solid var(--border-color) !important;
+    overflow: hidden !important;
+}
+
+/* Titre des modules */
+#content-main .module h2 {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+    color: white !important;
+    padding: 15px 20px !important;
+    margin: 0 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Liens dans les modules */
+#content-main .module table a {
+    color: var(--primary-color) !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+#content-main .module table a:hover {
+    color: var(--primary-dark) !important;
+    text-decoration: underline !important;
+}
+
+/* ========================================
+   BOUTONS D'ACTION
+   ======================================== */
+
+/* Boutons Ajouter */
+.addlink::before,
+a.addlink::before {
+    content: "+ ";
+    font-weight: bold;
+    color: var(--success-color);
+}
+
+.addlink,
+a.addlink {
+    background: var(--success-color) !important;
+    color: white !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+}
+
+.addlink:hover,
+a.addlink:hover {
+    background: #059669 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Boutons Modifier */
+.changelink::before,
+a.changelink::before {
+    content: "✎ ";
+    font-weight: bold;
+    color: var(--warning-color);
+}
+
+.changelink,
+a.changelink {
+    background: var(--warning-color) !important;
+    color: white !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+}
+
+.changelink:hover,
+a.changelink:hover {
+    background: #d97706 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Boutons Afficher */
+.viewlink::before,
+a.viewlink::before {
+    content: "👁 ";
+}
+
+/* ========================================
+   TABLEAUX
+   ======================================== */
+
+/* Tableaux de données */
+#content-main table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+#content-main thead th {
+    background: var(--primary-color) !important;
+    color: white !important;
+    padding: 12px 15px !important;
+    text-align: left !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+    letter-spacing: 0.5px !important;
+}
+
+#content-main tbody tr {
+    border-bottom: 1px solid var(--border-color) !important;
+    transition: all 0.2s ease !important;
+}
+
+#content-main tbody tr:hover {
+    background: #f1f5f9 !important;
+}
+
+#content-main tbody td {
+    padding: 15px !important;
+    color: var(--text-primary) !important;
+}
+
+/* ========================================
+   FORMULAIRES
+   ======================================== */
+
+/* Champs de formulaire */
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row input[type="email"],
+.form-row input[type="password"],
+.form-row select,
+.form-row textarea {
+    border: 2px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    padding: 10px 15px !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+    width: 100% !important;
+    max-width: 600px !important;
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+    border-color: var(--primary-color) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1) !important;
+}
+
+/* Labels */
+.form-row label {
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
+
+/* Boutons de soumission */
+.submit-row input[type="submit"],
+.submit-row button {
+    background: var(--primary-color) !important;
+    color: white !important;
+    padding: 12px 30px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.submit-row input[type="submit"]:hover,
+.submit-row button:hover {
+    background: var(--primary-dark) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
+}
+
+/* ========================================
+   MESSAGES ET ALERTES
+   ======================================== */
+
+/* Messages de succès */
+.messagelist .success {
+    background: var(--success-color) !important;
+    color: white !important;
+    padding: 15px 20px !important;
+    border-radius: 6px !important;
+    margin-bottom: 20px !important;
+    border-left: 4px solid #059669 !important;
+}
+
+/* Messages d'erreur */
+.messagelist .error {
+    background: var(--danger-color) !important;
+    color: white !important;
+    padding: 15px 20px !important;
+    border-radius: 6px !important;
+    margin-bottom: 20px !important;
+    border-left: 4px solid #dc2626 !important;
+}
+
+/* Messages d'avertissement */
+.messagelist .warning {
+    background: var(--warning-color) !important;
+    color: white !important;
+    padding: 15px 20px !important;
+    border-radius: 6px !important;
+    margin-bottom: 20px !important;
+    border-left: 4px solid #d97706 !important;
+}
+
+/* ========================================
+   HEADER UTILISATEUR
+   ======================================== */
+
+/* Header avec info utilisateur */
+#header {
+    background: white !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 15px 30px !important;
+    margin-left: 280px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 999 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+#header #user-tools {
+    float: right !important;
+    color: var(--text-secondary) !important;
+}
+
+#header #user-tools a {
+    color: var(--primary-color) !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    margin-left: 15px !important;
+}
+
+#header #user-tools a:hover {
+    color: var(--primary-dark) !important;
+    text-decoration: underline !important;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    #nav-sidebar {
+        width: 100% !important;
+        position: relative !important;
+        height: auto !important;
+    }
+    
+    #content {
+        margin-left: 0 !important;
+        padding: 15px !important;
+    }
+    
+    #header {
+        margin-left: 0 !important;
+    }
+}
+
+/* ========================================
+   AMÉLIORATIONS VISUELLES
+   ======================================== */
+
+/* Scrollbar personnalisée */
+#nav-sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+#nav-sidebar::-webkit-scrollbar-track {
+    background: var(--sidebar-bg);
+}
+
+#nav-sidebar::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+#nav-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#content-main .module {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Badges de comptage */
+.module caption {
+    background: var(--content-bg) !important;
+    color: var(--text-secondary) !important;
+    padding: 10px 20px !important;
+    text-align: left !important;
+    font-weight: 600 !important;
+}
+
+/* ========================================
+   DASHBOARD CARDS
+   ======================================== */
+
+/* Cartes du dashboard */
+#content-main > div {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+    gap: 25px !important;
+}
+
+/* Style des cartes individuelles */
+.module {
+    transition: all 0.3s ease !important;
+}
+
+.module:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ========================================
+   ICÔNES PERSONNALISÉES PAR MODULE
+   ======================================== */
+
+/* ACCOUNTS */
+#nav-sidebar a[href*="accounts"] h2::before,
+#content-main .module:has(a[href*="accounts"]) h2::before {
+    content: "👥 ";
+}
+
+/* INVENTORY */
+#nav-sidebar a[href*="inventory"] h2::before,
+#content-main .module:has(a[href*="inventory"]) h2::before {
+    content: "📦 ";
+}
+
+/* SETTINGS */
+#nav-sidebar a[href*="settings"] h2::before,
+#content-main .module:has(a[href*="settings"]) h2::before {
+    content: "⚙️ ";
+}
+
+/* PRODUCTS */
+#nav-sidebar a[href*="products"] h2::before,
+#content-main .module:has(a[href*="products"]) h2::before {
+    content: "🛍️ ";
+}
+
+/* SALES */
+#nav-sidebar a[href*="sales"] h2::before,
+#content-main .module:has(a[href*="sales"]) h2::before {
+    content: "💰 ";
+}
+
+/* KITCHEN */
+#nav-sidebar a[href*="kitchen"] h2::before,
+#content-main .module:has(a[href*="kitchen"]) h2::before {
+    content: "🍳 ";
+}
+
+/* CREDITS */
+#nav-sidebar a[href*="credits"] h2::before,
+#content-main .module:has(a[href*="credits"]) h2::before {
+    content: "💳 ";
+}
