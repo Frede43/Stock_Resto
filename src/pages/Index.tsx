@@ -62,8 +62,8 @@ const Index = () => {
     return cleanup;
   }, [user?.role]); // ✅ Dépendance spécifique sur user.role uniquement
 
-  // Attendre que l'authentification soit terminée
-  if (isLoading) {
+  // Attendre que l'authentification soit terminée ET que le rôle soit chargé
+  if (isLoading || (!userRole && user?.role)) {
     return (
       <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
         <div className="text-center">
@@ -76,6 +76,18 @@ const Index = () => {
 
   // REDIRECTION BASÉE SUR LES RÔLES - utiliser userRole pour plus de fiabilité
   const effectiveRole = userRole || user?.role;
+  
+  // Si aucun rôle n'est défini, attendre encore
+  if (!effectiveRole) {
+    return (
+      <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Chargement du profil...</p>
+        </div>
+      </div>
+    );
+  }
   
   if (effectiveRole === 'cashier') {
     return <CashierDashboard />;
