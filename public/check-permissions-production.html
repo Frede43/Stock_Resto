@@ -400,17 +400,19 @@ python manage.py shell
         }
 
         function loadTokenFromStorage() {
-            const token = localStorage.getItem('token');
+            // L'application utilise 'access_token' dans localStorage
+            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
             if (token) {
                 document.getElementById('token').value = token;
                 showResult('diagnosticResult', 
                     `<strong>✅ Token chargé depuis localStorage</strong><br>
+                    <small>Clé: ${localStorage.getItem('access_token') ? 'access_token' : 'token'}</small><br>
                     <small>Token: ${token.substring(0, 50)}...</small>`, 
                     'success'
                 );
             } else {
                 showResult('diagnosticResult', 
-                    '<strong>❌ Aucun token trouvé dans localStorage</strong><br>Connectez-vous d\'abord sur l\'application.', 
+                    '<strong>❌ Aucun token trouvé dans localStorage</strong><br>Connectez-vous d\'abord sur l\'application.<br><br><strong>Debug:</strong> Vérifiez que vous êtes connecté sur <a href="/" target="_blank">l\'application principale</a>', 
                     'error'
                 );
             }
@@ -833,7 +835,8 @@ python manage.py shell
 
         // Auto-load token on page load
         window.addEventListener('load', () => {
-            const token = localStorage.getItem('token');
+            // L'application utilise 'access_token' dans localStorage
+            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
             if (token) {
                 document.getElementById('token').value = token;
             }
