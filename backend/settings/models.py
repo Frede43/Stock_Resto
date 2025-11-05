@@ -43,7 +43,8 @@ class SystemSettings(models.Model):
     two_factor_auth = models.BooleanField(default=False)
     auto_logout = models.BooleanField(default=True)
     audit_logs = models.BooleanField(default=True)
-    session_timeout = models.IntegerField(default=30)  # en minutes
+    session_timeout = models.IntegerField(default=30)  # en minutes (déprécié, utiliser session_duration)
+    session_duration = models.IntegerField(default=1, help_text="Durée de la session en heures")  # en heures
     max_login_attempts = models.IntegerField(default=5)
     
     # Métadonnées
@@ -99,6 +100,7 @@ class SystemSettings(models.Model):
                 'auto_logout': self.auto_logout,
                 'audit_logs': self.audit_logs,
                 'session_timeout': self.session_timeout,
+                'session_duration': self.session_duration,
                 'max_login_attempts': self.max_login_attempts
             }
         }
@@ -141,6 +143,7 @@ class SystemSettings(models.Model):
             self.auto_logout = system.get('auto_logout', self.auto_logout)
             self.audit_logs = system.get('audit_logs', self.audit_logs)
             self.session_timeout = system.get('session_timeout', self.session_timeout)
+            self.session_duration = system.get('session_duration', self.session_duration)
             self.max_login_attempts = system.get('max_login_attempts', self.max_login_attempts)
 
 

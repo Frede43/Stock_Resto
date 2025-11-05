@@ -50,6 +50,17 @@ class SystemSettingsAdmin(admin.ModelAdmin):
                 'backup_frequency'
             )
         }),
+        ('Sécurité', {
+            'fields': (
+                'two_factor_auth',
+                'auto_logout',
+                'audit_logs',
+                'session_duration',
+                'session_timeout',
+                'max_login_attempts'
+            ),
+            'description': 'session_duration est en heures (recommandé: 1-8h), session_timeout est en minutes (déprécié)'
+        }),
     )
     
     readonly_fields = ['created_at', 'updated_at']
