@@ -126,7 +126,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const now = Date.now();
       const updatedUser = {
         ...user,
-        lastActivity: now
+        lastActivity: now,
+        sessionExpiry: now + SESSION_DURATION // ✅ Prolonger la session à chaque activité
       };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
