@@ -65,6 +65,7 @@ export default function Profile() {
   // État pour la gestion de la photo de profil
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
   // Hooks API
   const { data: userProfileData, isLoading: profileLoading } = useUserProfile();
@@ -202,32 +203,93 @@ export default function Profile() {
   };
 
   // Fonction pour uploader la photo de profil
-  const handleUploadAvatar = () => {
+  const handleUploadAvatar = async () => {
     if (!avatarFile) return;
 
+    setUploadingAvatar(true);
     const formData = new FormData();
     formData.append('avatar', avatarFile);
 
-    updateProfileMutation.mutate(formData, {
-      onSuccess: (updatedUser) => {
-        toast({
-          title: "Succès",
-          description: "Photo de profil mise à jour avec succès",
-          variant: "default"
-        });
-        setAvatarFile(null);
-        setAvatarPreview(null);
-        
-        // Pas besoin de recharger, les données sont déjà mises à jour
-      },
-      onError: (error: any) => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL 
+        ? `${import.meta.env.VITE_API_URL}/api`
+        : 'http://127.0.0.1:8000/api';
+
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
         toast({
           title: "Erreur",
-          description: error?.response?.data?.message || "Erreur lors de la mise à jour de la photo",
+          description: "Vous devez être connecté pour modifier votre photo",
           variant: "destructive"
         });
+        setUploadingAvatar(false);
+        return;
       }
-    });
+
+      console.log('📤 Upload avatar vers:', `${API_URL}/accounts/profile/`);
+
+      const response = await fetch(`${API_URL}/accounts/profile/`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // Ne pas définir Content-Type, le navigateur le fera automatiquement avec boundary
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Erreur serveur:', errorData);
+        throw new Error(errorData.message || errorData.error || 'Erreur lors de la mise à jour');
+      }
+
+      const updatedUser = await response.json();
+      console.log('✅ Avatar mis à jour:', updatedUser);
+      
+      // Mettre à jour le localStorage
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      if (currentUser && currentUser.isLoggedIn) {
+        const updatedUserData = {
+          ...currentUser,
+          ...updatedUser,
+          isLoggedIn: currentUser.isLoggedIn,
+          sessionExpiry: currentUser.sessionExpiry,
+          lastActivity: currentUser.lastActivity
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUserData));
+        
+        // Déclencher un événement pour notifier les autres composants
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'user',
+          newValue: JSON.stringify(updatedUserData),
+          oldValue: JSON.stringify(currentUser)
+        }));
+      }
+
+      toast({
+        title: "Succès",
+        description: "Photo de profil mise à jour avec succès",
+        variant: "default"
+      });
+      
+      setAvatarFile(null);
+      setAvatarPreview(null);
+      
+      // Recharger la page pour afficher la nouvelle photo
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+      
+    } catch (error: any) {
+      console.error('❌ Erreur upload avatar:', error);
+      toast({
+        title: "Erreur",
+        description: error?.message || "Erreur lors de la mise à jour de la photo",
+        variant: "destructive"
+      });
+      setUploadingAvatar(false);
+    }
   };
 
   // Fonction pour annuler la sélection d'avatar
@@ -283,9 +345,13 @@ export default function Profile() {
                     size="sm"
                     onClick={handleUploadAvatar}
                     className="h-8 w-8 rounded-full p-0"
-                    disabled={updateProfileMutation.isPending}
+                    disabled={uploadingAvatar}
                   >
-                    <Save className="h-4 w-4" />
+                    {uploadingAvatar ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               )}
