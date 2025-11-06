@@ -34,74 +34,12 @@ const Index = () => {
   const { user, isLoading } = useAuth();
   const [userRole, setUserRole] = useState<string | null>(null);
 
-  // Synchroniser le rôle utilisateur avec localStorage pour éviter les problèmes de timing
-  useEffect(() => {
-    const updateUserRole = () => {
-      if (user?.role) {
-        setUserRole(user.role);
-      } else {
-        // Fallback: récupérer depuis localStorage si user n'est pas encore chargé
-        const freshUserData = authStorage.getUser();
-        if (freshUserData && freshUserData.role && freshUserData.isLoggedIn) {
-          setUserRole(freshUserData.role);
-        }
-      }
-    };
-
-    updateUserRole();
-    
-    // Écouter les changements du localStorage pour la compatibilité cross-browser
-    const cleanup = authStorage.onUserChange((userData) => {
-      if (userData && userData.role && userData.isLoggedIn) {
-        setUserRole(userData.role);
-      } else {
-        setUserRole(null);
-      }
-    });
-    
-    return cleanup;
-  }, [user?.role]); // ✅ Dépendance spécifique sur user.role uniquement
-
-  // Attendre que l'authentification soit terminée ET que le rôle soit chargé
-  if (isLoading || (!userRole && user?.role)) {
-    return (
-      <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Chargement...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // REDIRECTION BASÉE SUR LES RÔLES - utiliser userRole pour plus de fiabilité
-  const effectiveRole = userRole || user?.role;
-  
-  // Si aucun rôle n'est défini, attendre encore
-  if (!effectiveRole) {
-    return (
-      <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Chargement du profil...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (effectiveRole === 'cashier') {
-    return <CashierDashboard />;
-  }
-
-  if (effectiveRole === 'admin') {
-    return <AdminDashboard />;
-  }
-
-  // Activer les notifications automatiques pour les autres rôles
+  // ⚠️ IMPORTANT: Tous les hooks doivent être appelés AVANT tout return conditionnel
+  // Activer les notifications automatiques (appelé pour tous les rôles)
   useStockNotifications();
   useOrderNotifications();
   
-  // Hooks pour récupérer les données depuis l'API
+  // Hooks pour récupérer les données depuis l'API (appelés pour tous les rôles)
   const {
     data: dashboardStats,
     isLoading: statsLoading,
@@ -191,6 +129,70 @@ const Index = () => {
     });
   };
 
+  // Synchroniser le rôle utilisateur avec localStorage pour éviter les problèmes de timing
+  useEffect(() => {
+    const updateUserRole = () => {
+      if (user?.role) {
+        setUserRole(user.role);
+      } else {
+        // Fallback: récupérer depuis localStorage si user n'est pas encore chargé
+        const freshUserData = authStorage.getUser();
+        if (freshUserData && freshUserData.role && freshUserData.isLoggedIn) {
+          setUserRole(freshUserData.role);
+        }
+      }
+    };
+
+    updateUserRole();
+    
+    // Écouter les changements du localStorage pour la compatibilité cross-browser
+    const cleanup = authStorage.onUserChange((userData) => {
+      if (userData && userData.role && userData.isLoggedIn) {
+        setUserRole(userData.role);
+      } else {
+        setUserRole(null);
+      }
+    });
+    
+    return cleanup;
+  }, [user?.role]);
+
+  // Attendre que l'authentification soit terminée ET que le rôle soit chargé
+  if (isLoading || (!userRole && user?.role)) {
+    return (
+      <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // REDIRECTION BASÉE SUR LES RÔLES - utiliser userRole pour plus de fiabilité
+  const effectiveRole = userRole || user?.role;
+  
+  // Si aucun rôle n'est défini, attendre encore
+  if (!effectiveRole) {
+    return (
+      <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Chargement du profil...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (effectiveRole === 'cashier') {
+    return <CashierDashboard />;
+  }
+
+  if (effectiveRole === 'admin') {
+    return <AdminDashboard />;
+  }
+
+  // Pour les autres rôles (manager, server), afficher le dashboard par défaut
   return (
     <div className="space-y-6">
           {/* Welcome Section */}

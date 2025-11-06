@@ -46,7 +46,16 @@ import ManagerDashboard from "./pages/ManagerDashboard";
 import ServerDashboard from "./pages/ServerDashboard";
 import NotFound from "./pages/NotFound";
 
-// Composant pour restreindre l'accès aux caissiers
+// Composant CacheInitializer désactivé
+// const CacheInitializer = ({ children }: { children: React.ReactNode }) => {
+//   useEffect(() => {
+//     const cleanup = startCacheRefresh(5);
+//     return cleanup;
+//   }, []);
+//   return <>{children}</>;
+// };
+
+// Composant pour restreindre l'accès aux caissiers - DOIT être utilisé à l'intérieur de AuthProvider
 const RestrictedForCashier = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   
@@ -88,15 +97,6 @@ const RestrictedForCashier = ({ children }: { children: React.ReactNode }) => {
   
   return <>{children}</>;
 };
-
-// Composant CacheInitializer désactivé
-// const CacheInitializer = ({ children }: { children: React.ReactNode }) => {
-//   useEffect(() => {
-//     const cleanup = startCacheRefresh(5);
-//     return cleanup;
-//   }, []);
-//   return <>{children}</>;
-// };
 
 const App = () => (
   <QueryProvider>
