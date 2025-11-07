@@ -466,9 +466,9 @@ export class SalesService {
     return this.api.post(`/sales/${id}/cancel/`, { reason });
   }
 
-  // Approuver une vente (changer le statut à completed)
+  // Approuver une vente à crédit (sans paiement)
   async approveSale(id: number) {
-    return this.api.patch(`/sales/${id}/`, { status: 'completed' });
+    return this.api.post(`/sales/${id}/approve-credit/`);
   }
 
   // Ajouter des articles à une vente existante

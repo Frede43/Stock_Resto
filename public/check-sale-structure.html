@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification Structure Vente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Vérification Structure de la Vente</h1>
+        
+        <div>
+            <label for="apiUrl">URL de l'API :</label>
+            <select id="apiUrl" style="padding: 8px; margin: 10px 0; width: 100%;">
+                <option value="http://127.0.0.1:8000/api">Local (http://127.0.0.1:8000/api)</option>
+                <option value="https://barstock-api.onrender.com/api">Production (Render)</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="token">Token JWT (requis) :</label>
+            <input type="text" id="token" placeholder="Collez votre token JWT ici" 
+                   style="width: 100%; padding: 8px; margin: 10px 0;">
+        </div>
+
+        <div>
+            <label for="date">Date (YYYY-MM-DD) :</label>
+            <input type="date" id="date" value="2025-11-06" 
+                   style="width: 100%; padding: 8px; margin: 10px 0;">
+        </div>
+
+        <button class="btn" onclick="checkSales()">📊 Vérifier les Ventes</button>
+        <button class="btn" onclick="loadToken()">🔑 Charger Token depuis localStorage</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function loadToken() {
+            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+            if (token) {
+                document.getElementById('token').value = token;
+                alert('✅ Token chargé depuis localStorage');
+            } else {
+                alert('❌ Aucun token trouvé dans localStorage');
+            }
+        }
+
+        async function checkSales() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const token = document.getElementById('token').value.trim();
+            const date = document.getElementById('date').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!token) {
+                resultDiv.innerHTML = '<div class="result error">❌ Token JWT requis</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="result">⏳ Chargement des ventes...</div>';
+
+            try {
+                const response = await fetch(`${apiUrl}/sales/?date_from=${date}&date_to=${date}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const sales = data.results || data;
+
+                if (sales.length === 0) {
+                    resultDiv.innerHTML = `
+<div class="result warning">
+⚠️ Aucune vente trouvée pour la date ${date}
+
+Essayez une autre date ou créez une vente de test.
+</div>
+                    `;
+                    return;
+                }
+
+                let resultHTML = `
+<div class="result success">
+✅ ${sales.length} vente(s) trouvée(s) pour le ${date}
+
+`;
+
+                sales.forEach((sale, index) => {
+                    resultHTML += `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 VENTE ${index + 1}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Référence       : ${sale.reference}
+Montant total   : ${sale.total_amount} FBu
+Mode paiement   : ${sale.payment_method}
+Statut          : ${sale.status}
+Nombre d'items  : ${sale.items?.length || 0}
+
+`;
+
+                    if (!sale.items || sale.items.length === 0) {
+                        resultHTML += `❌ PROBLÈME : Cette vente n'a pas d'items !\n\n`;
+                    } else {
+                        resultHTML += `ITEMS :\n`;
+                        sale.items.forEach((item, itemIndex) => {
+                            resultHTML += `
+  📌 Item ${itemIndex + 1} :
+     - product         : ${JSON.stringify(item.product, null, 2)}
+     - product_id      : ${item.product_id}
+     - quantity        : ${item.quantity}
+     - unit_price      : ${item.unit_price}
+     
+     ⚠️ DIAGNOSTIC :
+     - item.product?.id    : ${item.product?.id || 'undefined'}
+     - item.product_id     : ${item.product_id || 'undefined'}
+     - Mapping réussira ?  : ${(item.product?.id || item.product_id) ? '✅ OUI' : '❌ NON'}
+
+`;
+                        });
+                    }
+                });
+
+                resultHTML += `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 STRUCTURE COMPLÈTE (JSON) :
+
+${JSON.stringify(sales, null, 2)}
+
+</div>
+                `;
+
+                resultDiv.innerHTML = resultHTML;
+
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Erreur : ${error.message}</div>`;
+            }
+        }
+
+        // Auto-charger le token au démarrage
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+            if (token) {
+                document.getElementById('token').value = token;
+            }
+        });
+    </script>
+</body>
+</html>

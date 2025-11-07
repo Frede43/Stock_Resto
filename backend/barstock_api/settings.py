@@ -206,10 +206,10 @@ CORS_ALLOW_CREDENTIALS = True  # Permet l'envoi de cookies et credentials
 # En développement, autoriser toutes les origines
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
-    print("⚠️ CORS: Toutes les origines autorisées (DEBUG=True)")
+    print("WARNING: CORS: Toutes les origines autorisees (DEBUG=True)")
 else:
     CORS_ALLOW_ALL_ORIGINS = False
-    print("✅ CORS: Mode production activé")
+    print("OK: CORS: Mode production active")
 
 # Liste des origines autorisées (dev + production)
 CORS_ALLOWED_ORIGINS = [

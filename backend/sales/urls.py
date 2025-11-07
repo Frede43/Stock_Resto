@@ -36,6 +36,7 @@ urlpatterns = [
     path('<int:pk>/', views.SaleDetailView.as_view(), name='sale_detail'),
     path('<int:pk>/update-status/', views.update_sale_status, name='update_status'),
     path('<int:pk>/cancel/', views.cancel_sale, name='cancel_sale'),
+    path('<int:pk>/approve-credit/', views.approve_sale_credit, name='approve_sale_credit'),
     path('<int:sale_id>/add-items/', views.add_items_to_sale, name='add_items_to_sale'),
     path('<int:sale_id>/mark-paid/', views.mark_sale_as_paid, name='mark_sale_as_paid'),
     path('<int:pk>/invoice/', views.generate_invoice, name='generate_invoice'),

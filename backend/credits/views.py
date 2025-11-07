@@ -55,7 +55,17 @@ class CreditAccountViewSet(viewsets.ModelViewSet):
     def add_payment(self, request, pk=None):
         """
         Ajouter un paiement à un compte crédit
+        
+        Cette méthode :
+        1. Crée une transaction de paiement
+        2. Met à jour le solde du compte
+        3. ✅ NOUVEAU : Marque automatiquement les ventes associées comme payées
+        
+        Gère intelligemment les paiements partiels.
         """
+        from decimal import Decimal
+        from django.db import transaction as db_transaction
+        
         account = self.get_object()
         amount = request.data.get('amount')
         payment_method = request.data.get('payment_method', 'cash')
@@ -69,7 +79,6 @@ class CreditAccountViewSet(viewsets.ModelViewSet):
             )
         
         try:
-            from decimal import Decimal
             amount = Decimal(str(amount))
             if amount <= 0:
                 return Response(
@@ -89,24 +98,78 @@ class CreditAccountViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Créer la transaction de paiement
-        transaction = CreditTransaction.objects.create(
-            credit_account=account,
-            transaction_type='payment',
-            amount=amount,
-            payment_method=payment_method,
-            notes=notes,
-            created_by=request.user
-        )
+        # Utiliser une transaction atomique pour garantir la cohérence
+        with db_transaction.atomic():
+            # 1. Créer la transaction de paiement
+            payment_transaction = CreditTransaction.objects.create(
+                credit_account=account,
+                transaction_type='payment',
+                amount=amount,
+                payment_method=payment_method,
+                notes=notes,
+                created_by=request.user
+            )
+            
+            # 2. ✅ NOUVEAU : Marquer les ventes associées comme payées
+            # Importer le modèle Sale
+            from sales.models import Sale
+            
+            # Récupérer toutes les ventes non payées de ce compte, par ordre chronologique
+            unpaid_sales = Sale.objects.filter(
+                credit_account=account,
+                status='completed',  # Ventes non encore marquées comme payées
+                payment_method='credit'
+            ).order_by('created_at')
+            
+            remaining_amount = amount
+            sales_marked_paid = []
+            sales_partially_paid = []
+            
+            for sale in unpaid_sales:
+                if remaining_amount <= 0:
+                    break
+                
+                sale_amount = Decimal(str(sale.total_amount))
+                
+                if remaining_amount >= sale_amount:
+                    # Paiement complet de cette vente
+                    sale.status = 'paid'
+                    sale.save()
+                    sales_marked_paid.append({
+                        'id': sale.id,
+                        'reference': sale.reference or f'SALE-{sale.id}',
+                        'amount': float(sale_amount),
+                        'customer': sale.customer_name
+                    })
+                    remaining_amount -= sale_amount
+                else:
+                    # Paiement partiel (on ne marque pas comme payée)
+                    sales_partially_paid.append({
+                        'id': sale.id,
+                        'reference': sale.reference or f'SALE-{sale.id}',
+                        'amount_paid': float(remaining_amount),
+                        'amount_remaining': float(sale_amount - remaining_amount),
+                        'customer': sale.customer_name
+                    })
+                    remaining_amount = Decimal('0')
+            
+            # 3. Recharger le compte pour avoir le nouveau solde
+            account.refresh_from_db()
         
-        # Recharger le compte pour avoir le nouveau solde
-        account.refresh_from_db()
-        
+        # Préparer la réponse détaillée
         return Response({
+            'success': True,
             'message': 'Paiement enregistré avec succès',
-            'transaction': CreditTransactionSerializer(transaction).data,
-            'new_balance': float(account.current_balance),
-            'available_credit': float(account.available_credit)
+            'transaction': CreditTransactionSerializer(payment_transaction).data,
+            'account': {
+                'new_balance': float(account.current_balance),
+                'available_credit': float(account.available_credit)
+            },
+            'sales_updated': {
+                'marked_paid': sales_marked_paid,
+                'partially_paid': sales_partially_paid,
+                'total_marked_paid': len(sales_marked_paid)
+            }
         })
     
     @action(detail=True, methods=['post'])

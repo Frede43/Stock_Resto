@@ -74,6 +74,16 @@ export default function Credits() {
   
   const accounts = accountsData?.results || [];
   
+  // 🔍 DEBUG: Logs pour comprendre pourquoi les données ne s'affichent pas
+  console.log('🔍 Credits Page Debug:', {
+    accountsData,
+    accounts: accounts.length,
+    statistics,
+    isLoading,
+    statusFilter,
+    searchTerm
+  });
+  
   // Handlers
   const handleCreateAccount = () => {
     if (!newAccount.customer_name || !newAccount.credit_limit) {

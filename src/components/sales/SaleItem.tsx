@@ -58,6 +58,7 @@ const getPaymentMethodLabel = (method: string) => {
     case "cash": return "Espèces";
     case "card": return "Carte";
     case "mobile": return "Mobile Money";
+    case "credit": return "Crédit";
     default: return method;
   }
 };

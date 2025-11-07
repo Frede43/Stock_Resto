@@ -23,8 +23,18 @@ import {
   User,
   MapPin,
   CreditCard,
-  Wallet
+  Wallet,
+  Info,
+  ExternalLink
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Configuration API dynamique
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
@@ -71,12 +81,59 @@ export default function Sales() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showOccupiedTableDialog, setShowOccupiedTableDialog] = useState(false);
+  const [attemptedTable, setAttemptedTable] = useState<any>(null);
   const { toast } = useToast();
   // const { isOnline, addToQueue } = useOfflineSync(); // Système offline désactivé
   const isOnline = true; // Application en ligne uniquement
 
-  // Récupérer les tables disponibles, les produits et les serveurs
-  const { data: tablesData, isLoading: tablesLoading } = useTables({ status: 'available' });
+  // Fonction pour gérer la sélection d'une table
+  const handleTableSelection = (tableId: string) => {
+    const table = tablesData?.results?.find((t: any) => t.id.toString() === tableId);
+    
+    if (!table) {
+      setSelectedTable(tableId);
+      return;
+    }
+
+    // Vérifier si la table est occupée
+    if (table.status === 'occupied') {
+      setAttemptedTable(table);
+      setShowOccupiedTableDialog(true);
+      return;
+    }
+
+    // Si la table est disponible, la sélectionner normalement
+    setSelectedTable(tableId);
+    toast({
+      title: "Table sélectionnée",
+      description: `Table ${table.number} - ${table.status === 'available' ? 'Disponible' : table.status}`,
+      variant: "default",
+    });
+  };
+
+  // Fonction pour forcer la sélection d'une table occupée
+  const handleForceSelectOccupiedTable = () => {
+    if (attemptedTable) {
+      setSelectedTable(attemptedTable.id.toString());
+      setShowOccupiedTableDialog(false);
+      toast({
+        title: "⚠️ Attention",
+        description: `Table ${attemptedTable.number} sélectionnée malgré son occupation`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Fonction pour voir les détails de la table occupée
+  const handleViewTableDetails = () => {
+    if (attemptedTable) {
+      navigate(`/tables/${attemptedTable.id}`);
+    }
+  };
+
+  // Récupérer TOUTES les tables (pas seulement les disponibles) pour afficher leur statut
+  const { data: tablesData, isLoading: tablesLoading } = useTables({});
   const { data: productsData, isLoading: productsLoading, refetch: refetchProducts } = useProducts({});
   const { data: serversData, isLoading: serversLoading } = useServers({ is_active: true }) as { data: any; isLoading: boolean };
   const { data: creditAccountsData } = useCreditAccounts({ status: 'active' }) as { data: any };
@@ -776,7 +833,7 @@ export default function Sales() {
                               Table *
                             </Label>
                             <div className="flex gap-2 mt-1">
-                              <Select value={selectedTable} onValueChange={setSelectedTable}>
+                              <Select value={selectedTable} onValueChange={handleTableSelection}>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Sélectionner une table" />
                                 </SelectTrigger>
@@ -784,11 +841,24 @@ export default function Sales() {
                                   {tablesLoading ? (
                                     <SelectItem value="loading" disabled>Chargement...</SelectItem>
                                   ) : (
-                                    tablesData?.results?.map((table: any) => (
-                                      <SelectItem key={table.id} value={table.id.toString()}>
-                                        Table {table.number} ({table.capacity} places - {table.location})
-                                      </SelectItem>
-                                    )) || []
+                                    tablesData?.results?.map((table: any) => {
+                                      const isOccupied = table.status === 'occupied';
+                                      const isReserved = table.status === 'reserved';
+                                      const isCleaning = table.status === 'cleaning';
+                                      
+                                      return (
+                                        <SelectItem 
+                                          key={table.id} 
+                                          value={table.id.toString()}
+                                          className={isOccupied ? 'text-red-600' : isReserved ? 'text-orange-600' : ''}
+                                        >
+                                          Table {table.number} ({table.capacity} places - {table.location})
+                                          {isOccupied && ' 🔴 OCCUPÉE'}
+                                          {isReserved && ' 🟠 RÉSERVÉE'}
+                                          {isCleaning && ' 🟡 EN NETTOYAGE'}
+                                        </SelectItem>
+                                      );
+                                    }) || []
                                   )}
                                 </SelectContent>
                               </Select>
@@ -933,6 +1003,97 @@ export default function Sales() {
             });
           }}
         />
+
+        {/* Dialog d'avertissement pour table occupée */}
+        <Dialog open={showOccupiedTableDialog} onOpenChange={setShowOccupiedTableDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Table Occupée
+              </DialogTitle>
+              <DialogDescription>
+                La table que vous essayez de sélectionner est actuellement occupée.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              {attemptedTable && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Table:</span>
+                      <span className="text-red-700 font-bold">#{attemptedTable.number}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Capacité:</span>
+                      <span>{attemptedTable.capacity} places</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Emplacement:</span>
+                      <span>{attemptedTable.location}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Statut:</span>
+                      <Badge variant="destructive">🔴 OCCUPÉE</Badge>
+                    </div>
+                    {attemptedTable.customer && (
+                      <div className="flex justify-between">
+                        <span className="font-medium">Client:</span>
+                        <span>{attemptedTable.customer}</span>
+                      </div>
+                    )}
+                    {attemptedTable.server_name && (
+                      <div className="flex justify-between">
+                        <span className="font-medium">Serveur:</span>
+                        <span>{attemptedTable.server_name}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-2">
+                  <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium mb-1">Que souhaitez-vous faire ?</p>
+                    <ul className="list-disc list-inside space-y-1 text-xs">
+                      <li>Voir les détails de la table et les commandes en cours</li>
+                      <li>Choisir une autre table disponible</li>
+                      <li>Ajouter une commande à cette table (déconseillé)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowOccupiedTableDialog(false)}
+                className="w-full sm:w-auto"
+              >
+                Annuler
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={handleViewTableDetails}
+                className="w-full sm:w-auto gap-2"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Voir les détails
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleForceSelectOccupiedTable}
+                className="w-full sm:w-auto"
+              >
+                Sélectionner quand même
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Modal de confirmation de vente */}
         {showConfirmation && (

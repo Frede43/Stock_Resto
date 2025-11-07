@@ -83,7 +83,8 @@ export function useCreditAccounts(params?: {
       const response = await apiService.get('/credits/accounts/', { params });
       return response;
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 30 * 1000, // 30 secondes - Rafraîchissement fréquent
+    refetchOnWindowFocus: true, // Rafraîchir au retour sur la page
   });
 }
 
@@ -175,37 +176,59 @@ export function useAddPayment() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  return useMutation({
-    mutationFn: async ({ accountId, data }: {
-      accountId: number;
-      data: {
-        amount: number;
-        payment_method: 'cash' | 'card' | 'mobile' | 'bank_transfer';
-        notes?: string;
-      };
-    }) => {
+  return useMutation<
+    { new_balance: number; message?: string; data?: any },
+    any,
+    { accountId: number; data: { amount: number; payment_method: 'cash' | 'card' | 'mobile' | 'bank_transfer'; notes?: string } }
+  >({
+    mutationFn: async ({ accountId, data }) => {
+      console.log('🔵 Envoi du paiement:', { accountId, data });
       const response = await apiService.post(`/credits/accounts/${accountId}/add_payment/`, data);
-      return response;
+      console.log('✅ Réponse API paiement:', response);
+      return response as any;
     },
     onSuccess: (data, variables) => {
+      console.log('✅ onSuccess appelé avec data:', data);
+      
+      // ✅ SYNCHRONISATION AMÉLIORÉE: Invalider toutes les queries liées aux crédits
       queryClient.invalidateQueries({ queryKey: ['credit-accounts'] });
       queryClient.invalidateQueries({ queryKey: ['credit-account', variables.accountId] });
       queryClient.invalidateQueries({ queryKey: ['credit-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['credit-statistics'] });
+      queryClient.invalidateQueries({ queryKey: ['credit-reminders'] });
       
-      const isFullyPaid = data.new_balance === 0;
+      // Invalider aussi les ventes et rapports (car le paiement affecte les statistiques)
+      queryClient.invalidateQueries({ queryKey: ['sales'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      
+      // Vérifier si data contient new_balance
+      const newBalance = data?.new_balance ?? (data as any)?.data?.new_balance;
+      const isFullyPaid = newBalance === 0;
       
       toast({
-        title: isFullyPaid ? "🎉 Compte soldé !" : "Succès",
+        title: isFullyPaid ? "🎉 Compte soldé !" : "✅ Paiement enregistré",
         description: isFullyPaid 
           ? "Le compte n'a plus de dette" 
-          : `Paiement enregistré. Nouveau solde : ${data.new_balance.toLocaleString()} FBu`,
+          : newBalance !== undefined 
+            ? `Nouveau solde : ${newBalance.toLocaleString()} FBu`
+            : "Le paiement a été enregistré avec succès",
       });
     },
     onError: (error: any) => {
+      console.error('❌ onError appelé avec error:', error);
+      console.error('❌ error.response:', error.response);
+      console.error('❌ error.response?.data:', error.response?.data);
+      
+      const errorMessage = error.response?.data?.error 
+        || error.response?.data?.message 
+        || error.response?.data?.detail
+        || error.message
+        || "Erreur lors de l'enregistrement du paiement";
+      
       toast({
         title: "Erreur",
-        description: error.response?.data?.error || "Erreur lors de l'enregistrement du paiement",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -258,7 +281,8 @@ export function useCreditTransactions(params?: {
       const response = await apiService.get('/credits/transactions/', { params });
       return response;
     },
-    staleTime: 2 * 60 * 1000,
+    staleTime: 30 * 1000, // 30 secondes - Rafraîchissement fréquent
+    refetchOnWindowFocus: true, // Rafraîchir au retour sur la page
   });
 }
 
@@ -271,7 +295,8 @@ export function useCreditStatistics() {
       const response = await apiService.get('/credits/accounts/statistics/');
       return response as CreditStatistics;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute - Rafraîchissement fréquent
+    refetchOnWindowFocus: true, // Rafraîchir au retour sur la page
   });
 }
 

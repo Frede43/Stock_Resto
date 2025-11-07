@@ -101,9 +101,9 @@ export default function SalesHistory() {
         'pending': 'pending',     // 🟠 En attente
         'preparing': 'preparing', // 🔵 En préparation
         'ready': 'ready',         // 🟣 Prêt
-        'served': 'served',       // 🔷 Servi (pas encore payé)
-        'cancelled': 'cancelled', // 🔴 Annulée
-        'completed': 'completed'  // ✅ Terminée (legacy)
+        'completed': 'completed', // ✅ Terminée (vente à crédit approuvée)
+        'served': 'served',       // 🍽️ Servie
+        'cancelled': 'cancelled'  // ❌ Annulée
       };
       const mappedStatus = statusMapping[apiSale.status] || 'pending';
 
@@ -112,7 +112,8 @@ export default function SalesHistory() {
         'cash': 'cash',
         'card': 'card',
         'mobile': 'mobile',
-        'mobile_money': 'mobile'
+        'mobile_money': 'mobile',
+        'credit': 'credit'  
       };
       const paymentMethod = paymentMapping[apiSale.payment_method] || 'cash';
 

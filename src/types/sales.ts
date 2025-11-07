@@ -12,7 +12,7 @@ export type SaleStatus =
   | "served" 
   | "paid";
 
-export type PaymentMethod = "cash" | "card" | "mobile";
+export type PaymentMethod = "cash" | "card" | "mobile" | "credit";
 
 export interface SaleItem {
   name: string;

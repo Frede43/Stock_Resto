@@ -387,6 +387,120 @@ def cancel_sale(request, pk):
             {'error': 'Vente introuvable.'},
             status=status.HTTP_404_NOT_FOUND
         )
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])  # Temporairement public pour debug
+def approve_sale_credit(request, pk):
+    """
+    Vue pour approuver une vente à crédit (sans paiement)
+    - Change le statut à 'completed'
+    - Libère la table
+    - Garde le payment_method='credit' (non payé)
+    """
+    try:
+        sale = Sale.objects.get(pk=pk)
+        
+        # Vérifier que la vente peut être approuvée
+        if sale.status == 'paid':
+            return Response(
+                {'error': 'Cette vente est déjà payée.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if sale.status == 'cancelled':
+            return Response(
+                {'error': 'Impossible d\'approuver une vente annulée.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if sale.status == 'completed':
+            return Response(
+                {'error': 'Cette vente est déjà approuvée.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Vérifier que c'est bien une vente à crédit
+        if sale.payment_method != 'credit':
+            return Response(
+                {'error': 'Cette fonction est réservée aux ventes à crédit. Utilisez "Marquer comme payé" pour les autres modes de paiement.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # ✅ NOUVEAU : Vérifier le stock avant d'approuver
+        for item in sale.items.all():
+            if item.product.current_stock < item.quantity:
+                return Response(
+                    {'error': f'Stock insuffisant pour {item.product.name}. Stock disponible: {item.product.current_stock}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        # ✅ NOUVEAU : Déduire le stock lors de l'approbation
+        # Pour les ventes à crédit, le stock est déduit quand le caissier approuve (sans paiement)
+        for item in sale.items.all():
+            # Vérifier si le produit a une recette
+            if hasattr(item.product, 'recipe') and item.product.recipe:
+                # Pour les plats avec recette, décompter les ingrédients
+                try:
+                    item.product.recipe.consume_ingredients(
+                        quantity=item.quantity, 
+                        user=request.user if request.user.is_authenticated else None
+                    )
+                except Exception as e:
+                    return Response(
+                        {'error': f'Impossible de préparer {item.product.name}: {str(e)}'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                # Pour les produits simples, décompter le stock produit
+                item.product.current_stock -= item.quantity
+                item.product.save()
+            
+            # Créer un mouvement de stock pour tracer la sortie
+            try:
+                from inventory.models import StockMovement
+                stock_before = item.product.current_stock + item.quantity  # Stock avant la sortie
+                stock_after = item.product.current_stock  # Stock après la sortie
+                
+                StockMovement.objects.create(
+                    product=item.product,
+                    movement_type='out',
+                    reason='credit_sale',  # Raison spécifique pour vente à crédit
+                    quantity=item.quantity,
+                    stock_before=stock_before,
+                    stock_after=stock_after,
+                    unit_price=item.unit_price,
+                    reference=f"SALE-{sale.id}",
+                    notes=f"Vente à crédit approuvée #{sale.id} - {item.product.name}",
+                    user=request.user if request.user.is_authenticated else None
+                )
+            except Exception as e:
+                print(f"⚠️ Erreur création mouvement de stock: {e}")
+                # Ne pas bloquer l'approbation si le mouvement échoue
+        
+        # Changer le statut à completed (approuvé)
+        sale.status = 'completed'
+        sale.save()
+        
+        # Libérer la table si elle était occupée par cette vente
+        if sale.table:
+            if sale.table.current_sale == sale or sale.table.status == 'occupied':
+                sale.table.free(request.user if request.user.is_authenticated else None)
+        
+        return Response({
+            'success': True,
+            'message': 'Vente à crédit approuvée avec succès. La table a été libérée.',
+            'sale_id': sale.id,
+            'new_status': sale.status,
+            'payment_method': sale.payment_method,
+            'note': 'Le client devra payer ultérieurement via son compte crédit.'
+        })
+        
+    except Sale.DoesNotExist:
+        return Response(
+            {'error': 'Vente introuvable.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
     except Exception as e:
         return Response(
             {'error': f'Erreur lors de l\'annulation: {str(e)}'},

@@ -47,6 +47,7 @@ interface UseSalesParams {
   date_to?: string;
   server?: string;
   status?: string;
+  payment_method?: string;
   page?: number;
 }
 
@@ -90,8 +91,9 @@ export function useProducts(params?: UseProductsParams) {
   return useQuery<PaginatedResponse<Product>, Error, PaginatedResponse<Product>>({
     queryKey: ['products', params],
     queryFn: () => productService.getProducts(params) as Promise<PaginatedResponse<Product>>,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 secondes - Rafraîchissement fréquent
     gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: true, // Rafraîchir au retour sur la page
   });
 }
 
@@ -185,7 +187,8 @@ export function useSales(params?: UseSalesParams) {
   return useQuery<PaginatedResponse<Sale>, Error, PaginatedResponse<Sale>>({
     queryKey: ['sales', params],
     queryFn: () => apiService.get('/sales/', { params }) as Promise<PaginatedResponse<Sale>>,
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: 30 * 1000, // 30 secondes - Rafraîchissement fréquent
+    refetchOnWindowFocus: true, // Rafraîchir au retour sur la page
   });
 }
 
@@ -260,19 +263,21 @@ export function useApproveSale() {
 
   return useMutation({
     mutationFn: (id: number) => salesService.approveSale(id),
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       queryClient.invalidateQueries({ queryKey: ['sales'] });
       queryClient.invalidateQueries({ queryKey: ['reports'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['tables'] });
       toast({
-        title: "Succès",
-        description: "Vente approuvée avec succès"
+        title: "✅ Vente à crédit approuvée",
+        description: response.data?.message || "La vente a été approuvée et la table libérée. Le client paiera ultérieurement."
       });
     },
     onError: (error: any) => {
+      const errorMessage = error.response?.data?.error || error.message || "Erreur lors de l'approbation de la vente";
       toast({
         title: "Erreur",
-        description: error.message || "Erreur lors de l'approbation de la vente",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -1198,9 +1203,9 @@ export function useDashboardStats() {
   return useQuery<DashboardStats, Error, DashboardStats>({
     queryKey: ['dashboard', 'stats'],
     queryFn: () => reportsService.getDashboardStats() as Promise<DashboardStats>,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 10 * 60 * 1000, // Refetch toutes les 10 minutes
-    refetchOnWindowFocus: false, // Éviter les refetch lors du focus
+    staleTime: 1 * 60 * 1000, // 1 minute - Rafraîchissement fréquent
+    refetchInterval: 2 * 60 * 1000, // Refetch toutes les 2 minutes
+    refetchOnWindowFocus: true, // Rafraîchir au retour sur la page
   });
 }
 
