@@ -692,59 +692,77 @@ export default function Sales() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {items.map((item) => (
-                        <div
+                        <Card
                           key={item.id}
-                          className={`p-4 border rounded-lg transition-colors ${
+                          className={`group overflow-hidden transition-all duration-300 ${
                             item.isOutOfStock
-                              ? 'opacity-50 cursor-not-allowed border-red-200 bg-red-50'
-                              : item.isLowStock
-                              ? 'hover:bg-orange-50 cursor-pointer border-orange-200 bg-orange-25'
-                              : 'hover:bg-muted cursor-pointer'
+                              ? 'opacity-50 cursor-not-allowed'
+                              : 'hover:shadow-lg cursor-pointer'
                           }`}
                           onClick={() => !item.isOutOfStock && addToCart(item)}
                         >
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-semibold">{item.name}</h3>
-                            <Badge variant={
-                              item.isOutOfStock ? "destructive" :
-                              item.isLowStock ? "secondary" : "default"
-                            }>
-                              {item.isOutOfStock ? (
-                                <AlertTriangle className="h-3 w-3 mr-1" />
-                              ) : item.isLowStock ? (
-                                <Clock className="h-3 w-3 mr-1" />
-                              ) : (
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                              )}
-                              {item.isOutOfStock ? "Rupture" :
-                               item.isLowStock ? `${item.availability.available_quantity} (Faible)` :
-                               item.availability.available_quantity}
-                            </Badge>
-                          </div>
-                          
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {item.description}
-                          </p>
-                          
-                          <div className="flex justify-between items-center">
-                            <span className="text-lg font-bold">
-                              {item.price.toLocaleString()} BIF
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              Marge: {item.margin_percentage.toFixed(1)}%
-                            </span>
-                          </div>
-                          
-                          {item.availability.limiting_factors.length > 0 && (
-                            <div className="mt-2">
-                              <p className="text-xs text-destructive">
-                                {item.availability.limiting_factors.join(', ')}
-                              </p>
+                          {/* Image/Icône du produit */}
+                          <div className={`relative h-40 flex items-center justify-center overflow-hidden ${
+                            item.isOutOfStock
+                              ? 'bg-gradient-to-br from-red-100 to-red-50'
+                              : item.isLowStock
+                              ? 'bg-gradient-to-br from-orange-100 to-orange-50'
+                              : 'bg-gradient-to-br from-secondary/20 to-secondary/5'
+                          }`}>
+                            <div className="absolute top-2 right-2 z-10">
+                              <Badge variant={
+                                item.isOutOfStock ? "destructive" :
+                                item.isLowStock ? "secondary" : "default"
+                              }>
+                                {item.isOutOfStock ? (
+                                  <><AlertTriangle className="h-3 w-3 mr-1" />Rupture</>
+                                ) : item.isLowStock ? (
+                                  <><Clock className="h-3 w-3 mr-1" />{item.availability.available_quantity}</>
+                                ) : (
+                                  <><CheckCircle className="h-3 w-3 mr-1" />{item.availability.available_quantity}</>
+                                )}
+                              </Badge>
                             </div>
-                          )}
-                        </div>
+                            <div className="text-6xl group-hover:scale-110 transition-transform duration-300">
+                              {category.includes('Boisson') ? '🍺' : 
+                               category.includes('Plat') ? '🍽️' : 
+                               category.includes('Snack') ? '🍿' : '🍴'}
+                            </div>
+                          </div>
+
+                          {/* Contenu de la carte */}
+                          <CardContent className="p-4 space-y-2">
+                            <div>
+                              <h3 className="font-semibold text-lg truncate group-hover:text-primary transition-colors">
+                                {item.name}
+                              </h3>
+                              {item.description && (
+                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                  {item.description}
+                                </p>
+                              )}
+                            </div>
+                            
+                            <div className="flex justify-between items-center pt-2 border-t">
+                              <span className="text-xl font-bold text-primary">
+                                {item.price.toLocaleString()} FBu
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                Marge: {item.margin_percentage.toFixed(1)}%
+                              </span>
+                            </div>
+                            
+                            {item.availability.limiting_factors.length > 0 && (
+                              <div className="pt-2">
+                                <p className="text-xs text-destructive">
+                                  {item.availability.limiting_factors.join(', ')}
+                                </p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   </CardContent>

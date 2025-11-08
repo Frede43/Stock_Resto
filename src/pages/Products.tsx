@@ -639,95 +639,100 @@ export default function Products() {
               )}
 
               {!isLoading && !error && (
-                <div className="space-y-4">
+                <div>
                   {filteredProducts.length === 0 ? (
                     <div className="text-center py-8">
                       <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                       <p className="text-muted-foreground">Aucun produit trouvé</p>
                     </div>
                   ) : (
-                    filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="flex flex-col md:flex-row md:items-center md:justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-4"
-                  >
-                    {/* Section gauche : Icône et infos produit */}
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="h-12 w-12 flex-shrink-0 bg-gradient-to-br from-secondary to-secondary/80 rounded-lg flex items-center justify-center">
-                        <span className="text-2xl">{getProductIcon(product.categoryType)}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground truncate">{product.name}</h3>
-                        <p className="text-sm text-muted-foreground">{product.category}</p>
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <Badge variant={getStatusVariant(product.status)} className="text-xs">
-                            {getStatusLabel(product.status)}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {formatStockDisplay(product)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Section droite : Prix et actions */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4">
-                      {/* Prix */}
-                      <div className="flex flex-col gap-1">
-                        {product.categoryType === 'boissons' ? (
-                          // Pour les boissons, afficher prix d'achat, vente et marge
-                          <>
-                            <div className="text-sm flex justify-between sm:justify-start gap-2">
-                              <span className="text-muted-foreground">Achat:</span>
-                              <span className="font-medium">{product.buyPrice ? product.buyPrice.toLocaleString() : '0'} FBu</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {filteredProducts.map((product) => (
+                        <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+                          {/* Image/Icône du produit */}
+                          <div className="relative h-48 bg-gradient-to-br from-secondary/20 to-secondary/5 flex items-center justify-center overflow-hidden">
+                            <div className="absolute top-2 right-2 z-10">
+                              <Badge variant={getStatusVariant(product.status)} className="text-xs">
+                                {getStatusLabel(product.status)}
+                              </Badge>
                             </div>
-                            <div className="text-sm flex justify-between sm:justify-start gap-2">
-                              <span className="text-muted-foreground">Vente:</span>
-                              <span className="font-medium">{product.sellPrice ? product.sellPrice.toLocaleString() : '0'} FBu</span>
+                            <div className="text-7xl group-hover:scale-110 transition-transform duration-300">
+                              {getProductIcon(product.categoryType)}
                             </div>
-                            <div className="text-sm flex justify-between sm:justify-start gap-2">
-                              <span className="text-muted-foreground">Marge:</span>
-                              <span className="font-medium text-success">
-                                {product.buyPrice && product.sellPrice ? calculateMargin(product.buyPrice, product.sellPrice) : 0}%
-                              </span>
-                            </div>
-                          </>
-                        ) : (
-                          // Pour les plats, afficher seulement le prix de vente
-                          <div className="text-sm flex justify-between sm:justify-start gap-2">
-                            <span className="text-muted-foreground">Prix:</span>
-                            <span className="font-medium text-lg">{product.sellPrice ? product.sellPrice.toLocaleString() : '0'} FBu</span>
                           </div>
-                        )}
-                      </div>
-                      
-                      {/* Actions */}
-                      {(canEditProducts || canManageProducts || canDeleteProducts) && (
-                        <div className="flex gap-2 justify-end sm:justify-start">
-                          {(canEditProducts || canManageProducts) && (
-                            <Button 
-                              variant="outline" 
-                              size="icon"
-                              onClick={() => handleEditProduct(product)}
-                              title="Modifier le produit"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {(canDeleteProducts || canManageProducts) && (
-                            <Button 
-                              variant="outline" 
-                              size="icon"
-                              title="Supprimer le produit"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      )}
+
+                          {/* Contenu de la carte */}
+                          <CardContent className="p-4 space-y-3">
+                            {/* Nom et catégorie */}
+                            <div>
+                              <h3 className="font-semibold text-lg truncate group-hover:text-primary transition-colors">
+                                {product.name}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">{product.category}</p>
+                            </div>
+
+                            {/* Stock */}
+                            <div className="text-xs text-muted-foreground">
+                              {formatStockDisplay(product)}
+                            </div>
+
+                            {/* Prix */}
+                            <div className="space-y-1 pt-2 border-t">
+                              {product.categoryType === 'boissons' ? (
+                                <>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Achat:</span>
+                                    <span className="font-medium">{product.buyPrice ? product.buyPrice.toLocaleString() : '0'} FBu</span>
+                                  </div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Vente:</span>
+                                    <span className="font-semibold text-primary">{product.sellPrice ? product.sellPrice.toLocaleString() : '0'} FBu</span>
+                                  </div>
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Marge:</span>
+                                    <span className="font-medium text-success">
+                                      {product.buyPrice && product.sellPrice ? calculateMargin(product.buyPrice, product.sellPrice) : 0}%
+                                    </span>
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Prix:</span>
+                                  <span className="font-bold text-lg text-primary">{product.sellPrice ? product.sellPrice.toLocaleString() : '0'} FBu</span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Actions */}
+                            {(canEditProducts || canManageProducts || canDeleteProducts) && (
+                              <div className="flex gap-2 pt-3 border-t">
+                                {(canEditProducts || canManageProducts) && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="flex-1"
+                                    onClick={() => handleEditProduct(product)}
+                                  >
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Modifier
+                                  </Button>
+                                )}
+                                {(canDeleteProducts || canManageProducts) && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="flex-1"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Supprimer
+                                  </Button>
+                                )}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                  </div>
-                    ))
                   )}
                 </div>
               )}

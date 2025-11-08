@@ -12,53 +12,67 @@ from .models import Sale, Table
 @receiver(pre_save, sender=Sale)
 def update_table_status_on_sale_change(sender, instance, **kwargs):
     """
-    Met à jour le statut de la table quand une vente change de statut
+    ❌ DÉSACTIVÉ : La table reste toujours disponible
+    
+    Raison : Plusieurs clients différents peuvent être servis à la même table.
+    La table ne doit jamais changer de statut automatiquement.
     """
-    # Si c'est une nouvelle vente (pas d'ID encore)
-    if not instance.pk:
-        return
+    # ❌ Signal désactivé - Les tables restent toujours disponibles
+    pass
     
-    # Récupérer l'ancienne instance pour comparer
-    try:
-        old_instance = Sale.objects.get(pk=instance.pk)
-    except Sale.DoesNotExist:
-        return
-    
-    # Si le statut a changé et qu'il y a une table associée
-    if old_instance.status != instance.status and instance.table:
-        table = instance.table
-        
-        # Si la vente passe à "paid" ou "cancelled", libérer la table
-        if instance.status in ['paid', 'cancelled']:
-            table.status = 'available'
-            table.occupied_since = None
-            table.customer = None
-            table.server = None
-            table.save()
-            
-            # Créer une notification de libération
-            create_table_freed_notification(table, instance)
+    # Ancien code (désactivé) :
+    # # Si c'est une nouvelle vente (pas d'ID encore)
+    # if not instance.pk:
+    #     return
+    # 
+    # # Récupérer l'ancienne instance pour comparer
+    # try:
+    #     old_instance = Sale.objects.get(pk=instance.pk)
+    # except Sale.DoesNotExist:
+    #     return
+    # 
+    # # Si le statut a changé et qu'il y a une table associée
+    # if old_instance.status != instance.status and instance.table:
+    #     table = instance.table
+    #     
+    #     # Si la vente passe à "paid" ou "cancelled", libérer la table
+    #     if instance.status in ['paid', 'cancelled']:
+    #         table.status = 'available'
+    #         table.occupied_since = None
+    #         table.customer = None
+    #         table.server = None
+    #         table.save()
+    #         
+    #         # Créer une notification de libération
+    #         create_table_freed_notification(table, instance)
 
 
 @receiver(post_save, sender=Sale)
 def occupy_table_on_sale_creation(sender, instance, created, **kwargs):
     """
-    Occupe automatiquement la table quand une vente est créée
+    ❌ DÉSACTIVÉ : La table reste toujours disponible
+    
+    Raison : Plusieurs clients différents peuvent être servis à la même table.
+    La table ne doit jamais être marquée comme "occupée" automatiquement.
     """
-    if created and instance.table and instance.status == 'pending':
-        table = instance.table
-        
-        # Marquer la table comme occupée
-        table.status = 'occupied'
-        table.occupied_since = timezone.now()
-        table.customer = instance.customer_name
-        
-        # Récupérer le nom du serveur si disponible
-        if instance.server:
-            server_name = f"{instance.server.first_name} {instance.server.last_name}"
-            table.server = server_name
-        
-        table.save()
+    # ❌ Signal désactivé - Les tables restent toujours disponibles
+    pass
+    
+    # Ancien code (désactivé) :
+    # if created and instance.table and instance.status == 'pending':
+    #     table = instance.table
+    #     
+    #     # Marquer la table comme occupée
+    #     table.status = 'occupied'
+    #     table.occupied_since = timezone.now()
+    #     table.customer = instance.customer_name
+    #     
+    #     # Récupérer le nom du serveur si disponible
+    #     if instance.server:
+    #         server_name = f"{instance.server.first_name} {instance.server.last_name}"
+    #         table.server = server_name
+    #     
+    #     table.save()
 
 
 @receiver(post_save, sender=Sale)
